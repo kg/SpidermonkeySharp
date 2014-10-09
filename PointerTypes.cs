@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Spidermonkey {
-    public struct JSRootedObject {
+    public struct JSRootedObject : IDisposable {
         [StructLayout(LayoutKind.Sequential)]
         public unsafe class _State {
             public readonly IntPtr Pointer;
@@ -26,8 +26,16 @@ namespace Spidermonkey {
                 throw new Exception("Failed to add root");
         }
 
+        public void Dispose () {
+            Pin.Free();
+        }
+
         public static implicit operator JSHandleObject (JSRootedObject rooted) {
             return (JSHandleObject)rooted.State.Pointer;
+        }
+
+        public static explicit operator IntPtr (JSRootedObject rooted) {
+            return rooted.State.Pointer;
         }
     }
 }

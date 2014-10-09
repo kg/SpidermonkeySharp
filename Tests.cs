@@ -19,11 +19,11 @@ namespace Tests {
         public void CanInitContext () {
             // Assert.IsTrue(JSAPI.Init());
 
-            var runtime = JSAPI.NewRuntime(1024 * 1024);
-            Assert.AreNotEqual(IntPtr.Zero, runtime);
+            var runtime = JSAPI.NewRuntime(1024 * 1024 * 4);
+            Assert.AreNotEqual(IntPtr.Zero, (IntPtr)runtime);
 
             var context = JSAPI.NewContext(runtime, 8192);
-            Assert.AreNotEqual(IntPtr.Zero, context);
+            Assert.AreNotEqual(IntPtr.Zero, (IntPtr)context);
 
             JSErrorReporter errorReporter = ErrorReporter;
 
@@ -38,7 +38,7 @@ namespace Tests {
                 JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
                 ref JSCompartmentOptions.Default
             ));
-            Assert.AreNotEqual(IntPtr.Zero, global);
+            Assert.AreNotEqual(IntPtr.Zero, (IntPtr)global);
 
             JSAPI.InitStandardClasses(context, global);
         }

@@ -15,6 +15,7 @@ namespace Spidermonkey {
 <#+
     public void DefineHandleType (string name) {
         #>
+        [StructLayout(LayoutKind.Sequential)]
         public struct <#= name #> {
             public IntPtr Pointer;
 

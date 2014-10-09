@@ -6,22 +6,12 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Spidermonkey {
+    [StructLayout(LayoutKind.Sequential)]
     public struct JSErrorReport {
         // FIXME
     }
 
-    public struct JSObject {
-        // FIXME
-    }
-
-    public struct jsid {
-        // FIXME
-    }
-
-    public struct Value {
-        // FIXME
-    }
-
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct JSClass {
         public static /* readonly */ JSClass DefaultGlobalObjectClass;
 
@@ -48,95 +38,61 @@ namespace Spidermonkey {
         JSTraceOp           trace;
         */
 
-        fixed byte reserved[64];
+        fixed byte reserved[1024];
 
         static JSClass () {
             DefaultGlobalObjectClass = new JSClass {
                 name = "global",
                 flags = JSClassFlags.NEW_RESOLVE | JSClassFlags.IS_GLOBAL,
-                addProperty = PropertyStub,
-                delProperty = DeletePropertyStub,
-                getProperty = PropertyStub,
-                setProperty = StrictPropertyStub,
-                enumerate   = EnumerateStub,
-                resolve     = ResolveStub,
-                convert     = ConvertStub,
+                addProperty = JSAPI.PropertyStub,
+                delProperty = JSAPI.DeletePropertyStub,
+                getProperty = JSAPI.PropertyStub,
+                setProperty = JSAPI.StrictPropertyStub,
+                enumerate   = JSAPI.EnumerateStub,
+                resolve     = JSAPI.ResolveStub,
+                convert     = JSAPI.ConvertStub,
                 /*
                 null, null, null, null,
                 JS_GlobalObjectTraceHook
                  */
             };
         }
-
-        public static bool PropertyStub(
-            JSHandleContext cx, 
-            JSHandleObject obj,
-            JSHandleId id,
-            JSMutableHandleValue vp
-        ) {
-            return true;
-        }
-
-        public static bool StrictPropertyStub(
-            JSHandleContext cx,
-            JSHandleObject obj,
-            JSHandleId id, 
-            bool strict,
-            JSMutableHandleValue vp
-        ) {
-            return true;
-        }
-
-        public static bool DeletePropertyStub(
-            JSHandleContext cx,
-            JSHandleObject obj,
-            JSHandleId id, 
-            ref bool succeeded
-        ) {
-            succeeded = true;
-            return true;
-        }
-
-        public static bool EnumerateStub(
-            JSHandleContext cx,
-            JSHandleObject obj
-        ) {
-            return true;
-        }
-
-        public static bool ResolveStub (
-            JSHandleContext cx,
-            JSHandleObject obj,
-            JSHandleId id
-        ) {
-            return true;
-        }
-
-        public static bool ConvertStub (
-            JSHandleContext cx,
-            JSHandleObject obj, 
-            JSType type, 
-            JSMutableHandleValue vp
-        ) {
-            // FIXME
-            /*
-            MOZ_ASSERT(type != JSTYPE_OBJECT && type != JSTYPE_FUNCTION);
-            MOZ_ASSERT(obj);
-            return DefaultValue(cx, obj, type, vp);
-             */
-            Debugger.Break();
-            throw new Exception();
-        }    
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public class JSPrincipals {
     }
 
-    public struct JSCompartmentOptions {
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe struct JSCompartmentOptions {
         public static /* readonly */ JSCompartmentOptions Default;
+
+        JSVersion version;
+        bool invisibleToDebugger;
+        bool mergeable;
+        bool discardSource;
+        bool cloneSingletons;
+        JSOverrideMode extraWarningsOverride;
+        IntPtr zone;
+        /* JSTraceOp */ IntPtr traceGlobal;
+
+        // To XDR singletons, we need to ensure that all singletons are all used as
+        // templates, by making JSOP_OBJECT return a clone of the JSScript
+        // singleton, instead of returning the value which is baked in the JSScript.
+        bool singletonsAsTemplates;
+
+        IntPtr addonId;
+        bool preserveJitCode;
 
         static JSCompartmentOptions () {
             Default = new JSCompartmentOptions {
+                version = JSVersion.JSVERSION_LATEST,
+                invisibleToDebugger = false,
+                mergeable = false,
+                discardSource = false,
+                cloneSingletons = false,
+                singletonsAsTemplates = true,
+                preserveJitCode = false
             };
         }
     }

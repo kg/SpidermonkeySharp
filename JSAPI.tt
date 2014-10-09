@@ -71,7 +71,41 @@ namespace Spidermonkey {
         <# ImportFunction("?AddObjectRoot@JS@@YA_NPAUJSContext@@PAV?$Heap@PAVJSObject@@@1@@Z"); #>
         public static extern bool AddObjectRoot(JSHandleContext cx, IntPtr opp);
 
+        <# ImportFunction("?JS_DefaultValue@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@W4JSType@@V?$MutableHandle@VValue@JS@@@3@@Z"); #>
+        public static extern bool 
+        DefaultValue(JSHandleContext cx, JSHandleObject obj, JSType hint,
+                        JSMutableHandleValue vp);
+
+        <# ImportFunction("?JS_PropertyStub@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$Handle@Ujsid@@@3@V?$MutableHandle@VValue@JS@@@3@@Z"); #>
+        public static extern bool 
+        PropertyStub(JSHandleContext cx, JSHandleObject obj, JSHandleId id,
+                        JSMutableHandleValue vp);
+
+        <# ImportFunction("?JS_StrictPropertyStub@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$Handle@Ujsid@@@3@_NV?$MutableHandle@VValue@JS@@@3@@Z"); #>
+        public static extern bool 
+        StrictPropertyStub(JSHandleContext cx, JSHandleObject obj, JSHandleId id, bool strict,
+                              JSMutableHandleValue vp);
+
+        <# ImportFunction("?JS_DeletePropertyStub@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$Handle@Ujsid@@@3@PA_N@Z"); #>
+        public static extern bool 
+        DeletePropertyStub(JSHandleContext cx, JSHandleObject obj, JSHandleId id,
+                              ref bool succeeded);
+
+        <# ImportFunction("?JS_EnumerateStub@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@@Z"); #>
+        public static extern bool 
+        EnumerateStub(JSHandleContext cx, JSHandleObject obj);
+
+        <# ImportFunction("?JS_ResolveStub@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$Handle@Ujsid@@@3@@Z"); #>
+        public static extern bool 
+        ResolveStub(JSHandleContext cx, JSHandleObject obj, JSHandleId id);
+
+        <# ImportFunction("?JS_ConvertStub@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@W4JSType@@V?$MutableHandle@VValue@JS@@@3@@Z"); #>
+        public static extern bool 
+        ConvertStub(JSHandleContext cx, JSHandleObject obj, JSType type,
+                       JSMutableHandleValue vp);
+
         // TODO: Expose teardown/free APIs
+
     }
 }
 <#+

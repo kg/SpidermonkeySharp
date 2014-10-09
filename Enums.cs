@@ -50,4 +50,21 @@ namespace Spidermonkey {
         JSTYPE_SYMBOL,              /* symbol */
         JSTYPE_LIMIT
     };
+
+    public enum JSVersion : int {
+        JSVERSION_ECMA_3 = 148,
+        JSVERSION_1_6 = 160,
+        JSVERSION_1_7 = 170,
+        JSVERSION_1_8 = 180,
+        JSVERSION_ECMA_5 = 185,
+        JSVERSION_DEFAULT = 0,
+        JSVERSION_UNKNOWN = -1,
+        JSVERSION_LATEST = JSVERSION_ECMA_5
+    };
+
+    enum JSOverrideMode {
+        Default,
+        ForceTrue,
+        ForceFalse
+    };
 }
