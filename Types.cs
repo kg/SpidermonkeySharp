@@ -69,7 +69,7 @@ namespace Spidermonkey {
         }
 
         public static bool PropertyStub(
-            JSContextPtr cx, 
+            JSHandleContext cx, 
             JSHandleObject obj,
             JSHandleId id,
             JSMutableHandleValue vp
@@ -78,7 +78,7 @@ namespace Spidermonkey {
         }
 
         public static bool StrictPropertyStub(
-            JSContextPtr cx,
+            JSHandleContext cx,
             JSHandleObject obj,
             JSHandleId id, 
             bool strict,
@@ -88,7 +88,7 @@ namespace Spidermonkey {
         }
 
         public static bool DeletePropertyStub(
-            JSContextPtr cx,
+            JSHandleContext cx,
             JSHandleObject obj,
             JSHandleId id, 
             ref bool succeeded
@@ -98,14 +98,14 @@ namespace Spidermonkey {
         }
 
         public static bool EnumerateStub(
-            JSContextPtr cx,
+            JSHandleContext cx,
             JSHandleObject obj
         ) {
             return true;
         }
 
         public static bool ResolveStub (
-            JSContextPtr cx,
+            JSHandleContext cx,
             JSHandleObject obj,
             JSHandleId id
         ) {
@@ -113,11 +113,12 @@ namespace Spidermonkey {
         }
 
         public static bool ConvertStub (
-            JSContextPtr cx,
+            JSHandleContext cx,
             JSHandleObject obj, 
             JSType type, 
             JSMutableHandleValue vp
         ) {
+            // FIXME
             /*
             MOZ_ASSERT(type != JSTYPE_OBJECT && type != JSTYPE_FUNCTION);
             MOZ_ASSERT(obj);

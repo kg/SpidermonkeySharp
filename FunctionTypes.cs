@@ -6,21 +6,21 @@ using System.Text;
 
 namespace Spidermonkey {
     public delegate void JSErrorReporter (
-        JSContextPtr cx,
+        JSHandleContext cx,
         [MarshalAs(UnmanagedType.LPStr)]
         string message,
         ref JSErrorReport report
     );
 
     public delegate bool JSPropertyOp(
-        JSContextPtr cx,
+        JSHandleContext cx,
         JSHandleObject obj,
         JSHandleId id,
         JSMutableHandleValue vp
     );
 
     public delegate bool JSStrictPropertyOp(
-        JSContextPtr cx,
+        JSHandleContext cx,
         JSHandleObject obj,
         JSHandleId id, 
         bool strict,
@@ -28,25 +28,25 @@ namespace Spidermonkey {
     );
 
     public delegate bool JSDeletePropertyOp(
-        JSContextPtr cx,
+        JSHandleContext cx,
         JSHandleObject obj,
         JSHandleId id, 
         ref bool succeeded
     );
 
     public delegate bool JSEnumerateOp(
-        JSContextPtr cx,
+        JSHandleContext cx,
         JSHandleObject obj
     );
 
     public delegate bool JSResolveOp (
-        JSContextPtr cx,
+        JSHandleContext cx,
         JSHandleObject obj,
         JSHandleId id
     );
 
     public delegate bool JSConvertOp (
-        JSContextPtr cx,
+        JSHandleContext cx,
         JSHandleObject obj, 
         JSType type, 
         JSMutableHandleValue vp

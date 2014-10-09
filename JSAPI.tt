@@ -26,10 +26,10 @@ namespace Spidermonkey {
         /// On success, JS_NewRuntime returns a pointer to the newly created runtime, which the caller must later destroy using JS_DestroyRuntime. Otherwise it returns NULL.
         /// </summary>
         <# ImportFunction("?JS_NewRuntime@@YAPAUJSRuntime@@IIPAU1@@Z"); #>
-        public static extern JSRuntimePtr NewRuntime (
+        public static extern JSHandleRuntime NewRuntime (
             UInt32 maxBytes,
             UInt32 maxNurseryBytes = DefaultNurseryBytes,
-            JSRuntimePtr parentRuntime = default(JSRuntimePtr)
+            JSHandleRuntime parentRuntime = default(JSHandleRuntime)
         );
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Spidermonkey {
         /// In a JS_THREADSAFE build, the new JSContext is initially associated with the calling thread. As long as it stays associated with that thread, no other thread may use it or destroy it. A JSContext may be transferred from one thread to another using JS_ClearContextThread and JS_SetContextThread. 
         /// </summary>
         <# ImportFunction("?JS_NewContext@@YAPAUJSContext@@PAUJSRuntime@@I@Z"); #>
-        public static extern JSContextPtr NewContext(JSRuntimePtr rt, UInt32 stackchunksize);
+        public static extern JSHandleContext NewContext(JSHandleRuntime rt, UInt32 stackchunksize);
 
         /// <summary>
         /// JS_SetErrorReporter enables you to define and use your own error reporting mechanism in your applications. The reporter you define is automatically passed a JSErrorReport structure when an error occurs and has been parsed by JS_ReportError. JS_SetErrorReporter returns the previous error reporting function of the context, or NULL if no such function had been set.
@@ -48,7 +48,7 @@ namespace Spidermonkey {
         /// The error reporter callback must not reenter the JSAPI. Like all other SpiderMonkey callbacks, the error reporter callback must not throw a C++ exception.
         /// </summary>
         <# ImportFunction("?JS_SetErrorReporter@@YAP6AXPAUJSContext@@PBDPAUJSErrorReport@@@Z0P6AX012@Z@Z"); #>
-        public static extern JSErrorReporter SetErrorReporter(JSContextPtr cx, JSErrorReporter er);
+        public static extern JSErrorReporter SetErrorReporter(JSHandleContext cx, JSErrorReporter er);
 
         /// <summary>
         /// JS_NewGlobalObject creates a new global object based on the specified class.
@@ -57,13 +57,19 @@ namespace Spidermonkey {
         /// On success, JS_NewGlobalObject returns a pointer to the new object. Otherwise it returns NULL.
         /// </summary>
         <# ImportFunction("?JS_NewGlobalObject@@YAPAVJSObject@@PAUJSContext@@PBUJSClass@@PAUJSPrincipals@@W4OnNewGlobalHookOption@JS@@ABVCompartmentOptions@6@@Z"); #>
-        public static extern IntPtr NewGlobalObject(
-            JSContextPtr cx, 
+        public static extern JSHandleObject NewGlobalObject(
+            JSHandleContext cx, 
             ref JSClass clasp, 
             JSPrincipals principals,
             JSOnNewGlobalHookOption hookOption,
             ref JSCompartmentOptions options
         );
+
+        <# ImportFunction("?JS_InitStandardClasses@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@@Z"); #>
+        public static extern bool InitStandardClasses(JSHandleContext cx, JSHandleObject obj);
+
+        <# ImportFunction("?AddObjectRoot@JS@@YA_NPAUJSContext@@PAV?$Heap@PAVJSObject@@@1@@Z"); #>
+        public static extern bool AddObjectRoot(JSHandleContext cx, IntPtr opp);
 
         // TODO: Expose teardown/free APIs
     }

@@ -11,7 +11,7 @@ namespace Tests {
         public static /* readonly */ JSClass SandboxClass = new JSClass {
         };
 
-        public static void ErrorReporter (JSContextPtr context, string message, ref JSErrorReport report) {
+        public static void ErrorReporter (JSHandleContext context, string message, ref JSErrorReport report) {
             throw new Exception();
         }
 
@@ -39,6 +39,8 @@ namespace Tests {
                 ref JSCompartmentOptions.Default
             );
             Assert.AreNotEqual(IntPtr.Zero, global);
+
+            JSAPI.InitStandardClasses(context, global);
         }
     }
 }

@@ -1,5 +1,5 @@
 *.suo
 *.user
-*.cs.generated
+*.generated.cs
 /bin
 /obj
