@@ -43,6 +43,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="FunctionTypes.cs" />
+    <Compile Include="JSAPI.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>JSAPI.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PointerTypes.cs" />
     <Compile Include="Types.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -61,15 +69,10 @@
     <CopyToBin Include="Upstream\nss3.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="JSAPI.cs.generated">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>JSAPI.tt</DependentUpon>
-    </Compile>
     <None Include="JSAPI.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <CustomToolNamespace>Spidermonkey</CustomToolNamespace>
-      <LastGenOutput>JSAPI.cs.generated</LastGenOutput>
+      <LastGenOutput>JSAPI.generated.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

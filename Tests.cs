@@ -8,7 +8,10 @@ using Spidermonkey;
 namespace Tests {
     [TestFixture]
     public class Tests {
-        public static void ErrorReporter (JSContextPtr context, JSCharPtr message, JSErrorReportPtr report) {
+        public static /* readonly */ JSClass SandboxClass = new JSClass {
+        };
+
+        public static void ErrorReporter (JSContextPtr context, string message, ref JSErrorReport report) {
             throw new Exception();
         }
 
@@ -27,6 +30,15 @@ namespace Tests {
             // SetErrorReporter returns previously-active reporter
             Assert.AreEqual(null, JSAPI.SetErrorReporter(context, errorReporter));
             Assert.AreEqual(errorReporter, JSAPI.SetErrorReporter(context, errorReporter));
+
+            var global = JSAPI.NewGlobalObject(
+                context, 
+                ref JSClass.DefaultGlobalObjectClass, 
+                null,
+                JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
+                ref JSCompartmentOptions.Default
+            );
+            Assert.AreNotEqual(IntPtr.Zero, global);
         }
     }
 }
