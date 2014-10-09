@@ -1,0 +1,33 @@
+﻿<#@ template debug="true" language="C#" #>
+<#@ output extension=".generated.cs" #>
+using System;
+using System.Runtime.InteropServices;
+
+namespace Spidermonkey {
+    <# DefineHandleType("JSHandleObject"); #>
+    <# DefineHandleType("JSHandleId"); #>
+    <# DefineHandleType("JSHandleRuntime"); #>
+    <# DefineHandleType("JSHandleContext"); #>
+
+    <# DefineHandleType("JSMutableHandleValue"); #>
+}
+
+<#+
+    public void DefineHandleType (string name) {
+        #>
+        public struct <#= name #> {
+            public IntPtr Pointer;
+
+            public static implicit operator IntPtr (<#= name #> self) {
+                return self.Pointer;
+            }
+
+            public static explicit operator <#= name #> (IntPtr ptr) {
+                return new <#= name #> {
+                    Pointer = ptr
+                };
+            }
+        }
+        <#+
+    }
+#>

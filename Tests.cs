@@ -31,13 +31,13 @@ namespace Tests {
             Assert.AreEqual(null, JSAPI.SetErrorReporter(context, errorReporter));
             Assert.AreEqual(errorReporter, JSAPI.SetErrorReporter(context, errorReporter));
 
-            var global = JSAPI.NewGlobalObject(
+            var global = new JSRootedObject(context, JSAPI.NewGlobalObject(
                 context, 
                 ref JSClass.DefaultGlobalObjectClass, 
                 null,
                 JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
                 ref JSCompartmentOptions.Default
-            );
+            ));
             Assert.AreNotEqual(IntPtr.Zero, global);
 
             JSAPI.InitStandardClasses(context, global);
