@@ -11,7 +11,7 @@ namespace Spidermonkey {
     {
         [StructLayout(LayoutKind.Sequential)]
         public unsafe class _State {
-            public readonly T Value;
+            public T Value;
 
             public _State (T value) {
                 Value = value;

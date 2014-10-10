@@ -67,11 +67,7 @@ namespace Test {
             var resultType = resultRoot.Value.ValueType;
             Assert.AreEqual(JSValueType.STRING, resultType);
 
-            var resultJsString = JSAPI.ToString(context, resultRoot);
-            Assert.IsTrue(resultJsString.IsNonzero);             
-            var resultString = resultJsString.ToManagedString(context);
-
-            Assert.AreEqual("hello world", resultString);
+            Assert.AreEqual("hello world", resultRoot.Value.ToManagedString(context));
 
             JSAPI.LeaveCompartment(context, oldCompartment);
         }

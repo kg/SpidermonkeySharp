@@ -76,8 +76,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>JSAPI.tt</DependentUpon>
     </Compile>
-    <Compile Include="PointerTypes.cs" />
+    <Compile Include="Rooted.cs" />
     <Compile Include="Types.cs" />
+    <Compile Include="Value.cs" />
   </ItemGroup>
   <ItemGroup>
     <AvailableItemName Include="CopyToBin">
