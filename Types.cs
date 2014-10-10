@@ -36,43 +36,33 @@ namespace Spidermonkey {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct JSClass {
         // char *
-        public IntPtr name;
-        public JSClassFlags flags;               
-                                                 
+        [MarshalAs(UnmanagedType.LPStr)]
+        public string name;
+        public JSClassFlags flags;
+
+        // FIXME: These delegates will point to stubs for the
+        //  actual functions, which means if you do:
+        // addProperty = JSAPI.PropertyStub
+        // It will point to a forwarder and not the actual function.
+        // In practice this should be OK, but it might be a problem...
+
         // Mandatory function pointer members.
-        public IntPtr addProperty;
-        public IntPtr delProperty;
-        public IntPtr getProperty;         
-        public IntPtr setProperty;         
-        public IntPtr enumerate;           
-        public IntPtr resolve;             
-        public IntPtr convert;
+        public JSPropertyOp addProperty;
+        public JSDeletePropertyOp delProperty;
+        public JSPropertyOp getProperty;         
+        public JSStrictPropertyOp setProperty;         
+        public JSEnumerateOp enumerate;           
+        public JSResolveOp resolve;             
+        public JSConvertOp convert;             
 
         // Optional members (may be null).
-        public IntPtr finalize;            
+        public JSFinalizeOp finalize;            
         public IntPtr call;                
-        public IntPtr hasInstance;         
+        public JSHasInstanceOp hasInstance;         
         public IntPtr construct;
-        public IntPtr trace;
+        public JSTraceOp trace;
 
         fixed byte reserved[10240];
-
-        // FIXME: Can we get rid of this?
-        [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
-        static extern IntPtr LoadLibrary (string lpFileName);
-        [DllImport("kernel32", CharSet = CharSet.Ansi, SetLastError = true)]
-        static extern IntPtr GetProcAddress (IntPtr hModule, string procName);
-
-        public static IntPtr GetRawFunctionPointer (string methodName) {
-            var t = typeof(JSAPI);
-            var m = t.GetMethod(methodName);
-            var a = (from attr in m.GetCustomAttributes(false) where attr.GetType().Name.Contains("DllImport") select attr).First();
-            var entryPoint = ((DllImportAttribute)a).EntryPoint;
-            var dllPath = Environment.CurrentDirectory + "\\mozjs.dll";
-            IntPtr hModule = LoadLibrary(dllPath);
-            IntPtr pFunction = GetProcAddress(hModule, entryPoint);
-            return pFunction;
-        }
     }
 
     [StructLayout(LayoutKind.Sequential)]

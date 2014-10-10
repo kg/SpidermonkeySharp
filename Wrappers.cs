@@ -123,27 +123,36 @@ namespace Spidermonkey {
 
     public class JSGlobalObject {
         private static /* readonly */ JSClass DefaultClass;
+        private static GCHandle ClassPin;
+        private static IntPtr   ClassBuffer;
 
         public readonly JSContextPtr Context;
         public readonly Rooted<JSObjectPtr> Root;
 
         static JSGlobalObject () {
             DefaultClass = new JSClass {
-                name = Marshal.StringToHGlobalAnsi("global"),
+                name = "global",
                 flags = JSClassFlags.GLOBAL_FLAGS,
-                addProperty = JSClass.GetRawFunctionPointer("PropertyStub"),
-                delProperty = JSClass.GetRawFunctionPointer("DeletePropertyStub"),
-                getProperty = JSClass.GetRawFunctionPointer("PropertyStub"),
-                setProperty = JSClass.GetRawFunctionPointer("StrictPropertyStub"),
-                enumerate = JSClass.GetRawFunctionPointer("EnumerateStub"),
-                resolve = JSClass.GetRawFunctionPointer("ResolveStub"),
-                convert = JSClass.GetRawFunctionPointer("ConvertStub"),
-                finalize = IntPtr.Zero,
+                addProperty = JSAPI.PropertyStub,
+                delProperty = JSAPI.DeletePropertyStub,
+                getProperty = JSAPI.PropertyStub,
+                setProperty = JSAPI.StrictPropertyStub,
+                enumerate = JSAPI.EnumerateStub,
+                resolve = JSAPI.ResolveStub,
+                convert = JSAPI.ConvertStub,
+                finalize = null,
                 call = IntPtr.Zero,
-                hasInstance = IntPtr.Zero,
+                hasInstance = null,
                 construct = IntPtr.Zero,
-                trace = JSClass.GetRawFunctionPointer("GlobalObjectTraceHook")
+                trace = JSAPI.GlobalObjectTraceHook
             };
+
+            // We have to pin our JSClass (so everything it points to is retained)
+            //  and marshal it into a manually-allocated buffer that doesn't expire.
+            // JSClass buffer needs to live as long as the global object, or longer.
+            ClassPin = GCHandle.Alloc(DefaultClass);
+            ClassBuffer = Marshal.AllocHGlobal(Marshal.SizeOf(DefaultClass));
+            Marshal.StructureToPtr(DefaultClass, ClassBuffer, false);
         }
 
         public JSGlobalObject (JSContextPtr context) {
@@ -152,7 +161,7 @@ namespace Spidermonkey {
 
             Root.Value = JSAPI.NewGlobalObject(
                 Context,
-                ref DefaultClass, null,
+                ClassBuffer, null,
                 JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
                 ref JSCompartmentOptions.Default
             );

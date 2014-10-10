@@ -58,4 +58,20 @@ namespace Spidermonkey {
         JSType type, 
         JSMutableHandleValue vp
     );
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate bool JSFinalizeOp (
+        IntPtr fop, JSObjectPtr obj
+    );
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate bool JSHasInstanceOp (
+        JSContextPtr cx, JSHandleObject obj, JSMutableHandleValue vp, ref bool bp
+    );
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate void JSTraceOp (
+        IntPtr trc,
+        JSObjectPtr obj
+    );
 }
