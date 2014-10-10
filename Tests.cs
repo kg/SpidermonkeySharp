@@ -197,5 +197,30 @@ namespace Test {
                 Assert.AreEqual(32, evalResult.Value.ToManagedValue(context));
             }
         }
+
+        public static int TestManaged (int i) {
+            return i * 2;
+        }
+
+        [TestCase]
+        public void DefineMarshalledFunctionTest () {
+            JSContext context;
+            JSGlobalObject globalObject;
+            DefaultInit(out context, out globalObject);
+
+            using (context.Request())
+            using (context.EnterCompartment(globalObject)) {
+                var managed = (Func<int, int>)TestManaged;
+                globalObject.Pointer.DefineFunction(
+                    context, "test", managed
+                );
+
+                var evalResult = context.Evaluate(
+                    globalObject,
+                    @"test(16)"
+                );
+                Assert.AreEqual(32, evalResult.Value.ToManagedValue(context));
+            }
+        }
     }
 }

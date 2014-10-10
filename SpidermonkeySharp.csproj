@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="CallArgs.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="NativeGenerator.cs" />
     <Compile Include="ValueArray.cs" />
     <Compile Include="HandleTypes.generated.cs">
       <DependentUpon>HandleTypes.tt</DependentUpon>
