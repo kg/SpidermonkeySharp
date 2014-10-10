@@ -79,6 +79,7 @@
     <Compile Include="Rooted.cs" />
     <Compile Include="Types.cs" />
     <Compile Include="Value.cs" />
+    <Compile Include="Wrappers.cs" />
   </ItemGroup>
   <ItemGroup>
     <AvailableItemName Include="CopyToBin">

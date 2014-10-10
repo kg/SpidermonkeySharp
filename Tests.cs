@@ -14,63 +14,50 @@ namespace Test {
         }
 
         [TestCase]
-        public unsafe static void BasicTest () {
+        public unsafe void BasicTest () {
             Assert.IsTrue(JSAPI.Init());
 
-            var runtime = JSAPI.NewRuntime(1024 * 1024 * 4);
-            Assert.IsTrue(runtime.IsNonzero);
+            var runtime = new JSRuntime();
+            var context = new JSContext(runtime);
 
-            var context = JSAPI.NewContext(runtime, 8192);
-            Assert.IsTrue(context.IsNonzero);
+            using (context.Request()) {
+                JSErrorReporter errorReporter = ErrorReporter;
+                Assert.AreEqual(null, JSAPI.SetErrorReporter(context, errorReporter));
 
-            JSAPI.BeginRequest(context);
+                var globalObject = JSAPI.NewGlobalObject(
+                    context,
+                    ref JSClass.DefaultGlobalObjectClass,
+                    null,
+                    JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
+                    ref JSCompartmentOptions.Default
+                );
+                Assert.IsTrue(globalObject.IsNonzero);
 
-            JSErrorReporter errorReporter = ErrorReporter;
+                using (context.EnterCompartment(globalObject)) {
+                    var globalRoot = new Rooted<JSObjectPtr>(context, globalObject);
+                    Assert.IsTrue(JSAPI.InitStandardClasses(context, globalRoot));
 
-            // SetErrorReporter returns previously-active reporter
-            Assert.AreEqual(null, JSAPI.SetErrorReporter(context, errorReporter));
-            Assert.AreEqual(errorReporter, JSAPI.SetErrorReporter(context, errorReporter));
+                    string testScript =
+                        @"'hello world'";
+                    string filename =
+                        @"test.js";
 
-            var globalObject = JSAPI.NewGlobalObject(
-                context, 
-                ref JSClass.DefaultGlobalObjectClass,
-                null,
-                JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
-                ref JSCompartmentOptions.Default
-            );
-            Assert.IsTrue(globalObject.IsNonzero);
+                    var resultRoot = new Rooted<JS.Value>(context);
 
-            var oldCompartment = JSAPI.EnterCompartment(context, globalObject);
-            Assert.IsTrue(oldCompartment.IsZero);
+                    var evalSuccess = JSAPI.EvaluateScript(
+                        context, globalRoot,
+                        testScript, filename, 0,
+                        resultRoot
+                    );
 
-            var globalRoot = new Rooted<JSObjectPtr>(context, globalObject);
-            Assert.IsTrue(JSAPI.InitStandardClasses(context, globalRoot));
+                    Assert.IsTrue(evalSuccess);
 
-            string testScript =
-                @"'hello world'";
-            string filename =
-                @"test.js";
+                    var resultType = resultRoot.Value.ValueType;
+                    Assert.AreEqual(JSValueType.STRING, resultType);
 
-            IntPtr ptrTestScript = Marshal.StringToHGlobalUni(testScript);
-            IntPtr ptrFilename = Marshal.StringToHGlobalAnsi(filename);
-
-            var resultRoot = new Rooted<JS.Value>(context);
-
-            var evalSuccess = JSAPI.EvaluateUCScript(
-                context, globalRoot,
-                ptrTestScript, testScript.Length,
-                ptrFilename, 0,
-                resultRoot
-            );
-
-            Assert.IsTrue(evalSuccess);
-
-            var resultType = resultRoot.Value.ValueType;
-            Assert.AreEqual(JSValueType.STRING, resultType);
-
-            Assert.AreEqual("hello world", resultRoot.Value.ToManagedString(context));
-
-            JSAPI.LeaveCompartment(context, oldCompartment);
+                    Assert.AreEqual("hello world", resultRoot.Value.ToManagedString(context));
+                }
+            }
         }
     }
 }
