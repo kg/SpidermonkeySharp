@@ -32,7 +32,10 @@ namespace Test {
             using (context.Request())
             using (context.EnterCompartment(globalObject)) {
                 var evalResult = context.Evaluate(
-                    globalObject, "var a = 'hello '; var b = 'world'; a + b"
+                    globalObject, 
+                    @"var a = 'hello '; 
+                      var b = 'world'; 
+                      a + b"
                 );
 
                 var resultType = evalResult.Value.ValueType;
@@ -55,7 +58,12 @@ namespace Test {
             using (context.Request())
             using (context.EnterCompartment(globalObject)) {
                 var evalResult = context.Evaluate(
-                    globalObject, "function fn() { throw new Error('test'); }; fn()", "eval"
+                    globalObject, 
+                    @"function fn() { 
+                        throw new Error('test'); 
+                      }; 
+                      fn()
+                    "
                 );
                 Assert.AreEqual(JS.Value.Undefined, evalResult.Value);
 
@@ -77,7 +85,13 @@ namespace Test {
             using (context.Request())
             using (context.EnterCompartment(globalObject)) {
                 var evalResult = context.Evaluate(
-                    globalObject, "var o = { 'a': 1, 'b': 'hello', 'c': 3.5 }; o"
+                    globalObject, 
+                    @"var o = { 
+                        'a': 1, 
+                        'b': 'hello', 
+                        'c': 3.5 
+                      };
+                      o"
                 );
 
                 Assert.AreEqual(JSValueType.OBJECT, evalResult.Value.ValueType);
@@ -131,7 +145,9 @@ namespace Test {
             using (context.Request())
             using (context.EnterCompartment(globalObject)) {
                 context.Evaluate(
-                    globalObject, "function fortyTwo () { return 42; }; function double (i) { return i * 2; };"
+                    globalObject, 
+                    @"function fortyTwo () { return 42; }; 
+                      function double (i) { return i * 2; };"
                 );
 
                 {
