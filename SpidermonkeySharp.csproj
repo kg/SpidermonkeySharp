@@ -87,14 +87,14 @@
     </AvailableItemName>
   </ItemGroup>
   <ItemGroup>
-    <CopyToBin Include="Upstream\icudt52.dll" />
-    <CopyToBin Include="Upstream\icuin52.dll" />
-    <CopyToBin Include="Upstream\icuuc52.dll" />
-    <CopyToBin Include="Upstream\mozglue.dll" />
-    <CopyToBin Include="Upstream\mozjs.dll" />
-    <CopyToBin Include="Upstream\msvcp100.dll" />
-    <CopyToBin Include="Upstream\msvcr100.dll" />
-    <CopyToBin Include="Upstream\nss3.dll" />
+    <CopyToBin Include="Spidermonkey\icudt52.dll" />
+    <CopyToBin Include="Spidermonkey\icuin52.dll" />
+    <CopyToBin Include="Spidermonkey\icuuc52.dll" />
+    <CopyToBin Include="Spidermonkey\mozglue.dll" />
+    <CopyToBin Include="Spidermonkey\mozjs.dll" />
+    <CopyToBin Include="Spidermonkey\msvcp100.dll" />
+    <CopyToBin Include="Spidermonkey\msvcr100.dll" />
+    <CopyToBin Include="Spidermonkey\nss3.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HandleTypes.tt">

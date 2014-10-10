@@ -3,3 +3,4 @@
 *.generated.cs
 /bin
 /obj
+/Spidermonkey/*.dll
