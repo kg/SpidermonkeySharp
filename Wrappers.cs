@@ -193,6 +193,19 @@ namespace Spidermonkey {
     }
 
     public partial struct JSObjectPtr {
+        public unsafe Rooted<JS.Value> GetProperty (JSContextPtr context, string name) {
+            var result = new Rooted<JS.Value>(context);
+
+            fixed (JSObjectPtr * pThis = &this) {
+                JSHandleObject handle = new JSHandleObject((IntPtr)pThis);
+                if (JSAPI.GetProperty(context, handle, name, result))
+                    return result;
+
+                result.Dispose();
+                return null;
+            }
+        }
+
         bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {
             return JSAPI.AddObjectRoot(context, root);
         }

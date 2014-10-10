@@ -69,7 +69,7 @@ namespace Test {
         }
 
         [TestCase]
-        public unsafe void PropertyTest () {
+        public unsafe void GetPropertyTest () {
             JSContext context;
             JSGlobalObject globalObject;
             DefaultInit(out context, out globalObject);
@@ -81,7 +81,7 @@ namespace Test {
             using (context.Request())
             using (context.EnterCompartment(globalObject)) {
                 var evalResult = context.Evaluate(
-                    globalObject, "var o = { 'a': 1, 'b': 'hello' }; o"
+                    globalObject, "var o = { 'a': 1, 'b': 'hello', 'c': 3.5 }; o"
                 );
 
                 Assert.AreEqual(JSValueType.OBJECT, evalResult.Value.ValueType);
@@ -89,14 +89,20 @@ namespace Test {
 
                 var propRoot = new Rooted<JS.Value>(context);
 
-                Assert.IsTrue(JSAPI.GetProperty(context, objRoot, "a", propRoot));
-                Assert.AreEqual(JSValueType.INT32, propRoot.Value.ValueType);
-                Assert.AreEqual(1, propRoot.Value.ToManagedValue(context));
-                Assert.IsTrue(JSAPI.GetProperty(context, objRoot, "b", propRoot));
-                Assert.AreEqual(JSValueType.STRING, propRoot.Value.ValueType);
-                Assert.AreEqual("hello", propRoot.Value.ToManagedValue(context));
-                Assert.IsTrue(JSAPI.GetProperty(context, objRoot, "c", propRoot));
-                Assert.AreEqual(JSValueType.UNDEFINED, propRoot.Value.ValueType);
+                var a = objRoot.Value.GetProperty(context, "a");
+                Assert.AreEqual(JSValueType.INT32, a.Value.ValueType);
+                Assert.AreEqual(1, (int)a.Value);
+
+                var b = objRoot.Value.GetProperty(context, "b");
+                Assert.AreEqual(JSValueType.STRING, b.Value.ValueType);
+                Assert.AreEqual("hello", b.Value.ToManagedValue(context));
+
+                var c = objRoot.Value.GetProperty(context, "c");
+                Assert.AreEqual(JSValueType.DOUBLE, c.Value.ValueType);
+                Assert.AreEqual(3.5, (double)c.Value);
+
+                var d = objRoot.Value.GetProperty(context, "d");
+                Assert.IsTrue(d.Value.IsNullOrUndefined);
             }
         }
     }

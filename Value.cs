@@ -47,6 +47,13 @@ namespace JS {
     void *asPtr;
          */
 
+        public bool IsNullOrUndefined {
+            get {
+                return (ValueType == JSValueType.NULL) ||
+                    (ValueType == JSValueType.UNDEFINED);
+            }
+        }
+
         public JSValueType ValueType {
             get {
                 var result = (JSValueType)
@@ -102,6 +109,39 @@ namespace JS {
                 default:
                     throw new NotImplementedException("Value type '" + ValueType + "' not convertible");
             }
+        }
+
+        public static explicit operator double (Value value) {
+            switch (value.ValueType) {
+                case JSValueType.DOUBLE:
+                    return value.asDouble;
+
+                case JSValueType.INT32:
+                case JSValueType.BOOLEAN:
+                    return value.i32;
+
+                default:
+                    throw new InvalidOperationException("Value is not numeric");
+            }
+        }
+
+        public static explicit operator Int32 (Value value) {
+            switch (value.ValueType) {
+                case JSValueType.INT32:
+                case JSValueType.BOOLEAN:
+                    return value.i32;
+
+                default:
+                    throw new InvalidOperationException("Value is not integral");
+            }
+        }
+
+        public static explicit operator JSObjectPtr (Value value) {
+            return value.AsObject;
+        }
+
+        public static explicit operator JSStringPtr (Value value) {
+            return value.AsString;
         }
 
         bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {
