@@ -26,6 +26,23 @@ namespace JS {
     [StructLayout(LayoutKind.Sequential)]
     public struct Value {
         UInt64 asBits;
+
+        public unsafe Spidermonkey.JSValueType ValueType {
+            get {
+                fixed (UInt64* pBits = &asBits) {
+                    UInt32* pWords = (UInt32 *)pBits;
+                    var tag = (Spidermonkey.JSValueTag)pWords[1];
+
+                    if ((tag & Spidermonkey.JSValueTag.CLEAR) != Spidermonkey.JSValueTag.CLEAR) {
+                        throw new ArgumentException("Invalid tag");
+                    }
+
+                    var result = (Spidermonkey.JSValueType)
+                        (tag & ~Spidermonkey.JSValueTag.CLEAR);
+                    return result;
+                }
+            }
+        }
     }
 }
 

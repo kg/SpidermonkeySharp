@@ -70,4 +70,32 @@ namespace Spidermonkey {
         ForceTrue,
         ForceFalse
     };
+
+    public enum JSValueType : byte {
+        DOUBLE = 0x00,
+        INT32 = 0x01,
+        UNDEFINED = 0x02,
+        BOOLEAN = 0x03,
+        MAGIC = 0x04,
+        STRING = 0x05,
+        SYMBOL = 0x06,
+        NULL = 0x07,
+        OBJECT = 0x08,
+
+        /* These never appear in a jsval; they are only provided as an out-of-band value. */
+        UNKNOWN = 0x20,
+        MISSING = 0x21
+    }
+
+    public enum JSValueTag : uint {
+        CLEAR                = 0xFFFFFF80,
+        INT32                = CLEAR | JSValueType.INT32,
+        UNDEFINED            = CLEAR | JSValueType.UNDEFINED,
+        STRING               = CLEAR | JSValueType.STRING,
+        SYMBOL               = CLEAR | JSValueType.SYMBOL,
+        BOOLEAN              = CLEAR | JSValueType.BOOLEAN,
+        MAGIC                = CLEAR | JSValueType.MAGIC,
+        NULL                 = CLEAR | JSValueType.NULL,
+        OBJECT               = CLEAR | JSValueType.OBJECT    
+    }
 }
