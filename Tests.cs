@@ -65,11 +65,38 @@ namespace Test {
 
                 Assert.AreEqual(JSValueType.OBJECT, exc.Value.ValueType);
                 Assert.AreEqual("Error: test", exc.Value.ToManagedString(context));
+            }
+        }
 
-                var objRoot = new Rooted<JSObjectPtr>(context, exc.Value.AsObject);
-                var stackRoot = new Rooted<JS.Value>(context);
-                Assert.IsTrue(JSAPI.GetProperty(context, objRoot, "stack", stackRoot));
-                Console.WriteLine(stackRoot.Value.ToManagedString(context));
+        [TestCase]
+        public unsafe void PropertyTest () {
+            JSContext context;
+            JSGlobalObject globalObject;
+            DefaultInit(out context, out globalObject);
+
+            // Suppress reporting of uncaught exceptions from Evaluate
+            var options = JSAPI.ContextOptionsRef(context);
+            options->Options = JSContextOptionFlags.DontReportUncaught;
+
+            using (context.Request())
+            using (context.EnterCompartment(globalObject)) {
+                var evalResult = context.Evaluate(
+                    globalObject, "var o = { 'a': 1, 'b': 'hello' }; o"
+                );
+
+                Assert.AreEqual(JSValueType.OBJECT, evalResult.Value.ValueType);
+                var objRoot = new Rooted<JSObjectPtr>(context, evalResult.Value.AsObject);
+
+                var propRoot = new Rooted<JS.Value>(context);
+
+                Assert.IsTrue(JSAPI.GetProperty(context, objRoot, "a", propRoot));
+                Assert.AreEqual(JSValueType.INT32, propRoot.Value.ValueType);
+                Assert.AreEqual(1, propRoot.Value.ToManagedValue(context));
+                Assert.IsTrue(JSAPI.GetProperty(context, objRoot, "b", propRoot));
+                Assert.AreEqual(JSValueType.STRING, propRoot.Value.ValueType);
+                Assert.AreEqual("hello", propRoot.Value.ToManagedValue(context));
+                Assert.IsTrue(JSAPI.GetProperty(context, objRoot, "c", propRoot));
+                Assert.AreEqual(JSValueType.UNDEFINED, propRoot.Value.ValueType);
             }
         }
     }
