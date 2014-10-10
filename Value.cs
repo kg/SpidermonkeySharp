@@ -9,6 +9,13 @@ namespace JS {
     // HACK: This layout is *only valid* in 32-bit mode
     [StructLayout(LayoutKind.Explicit, Size=8)]
     public struct Value : IRootable {
+        public static readonly Value Null = new Value {
+            tag = JSValueTag.NULL
+        };
+        public static readonly Value Undefined = new Value {
+            tag = JSValueTag.UNDEFINED
+        };
+
         [FieldOffset(0)]
         UInt64 asBits;
 
@@ -42,13 +49,9 @@ namespace JS {
 
         public JSValueType ValueType {
             get {
-                var _tag = (JSValueTag)tag;
-                if ((_tag & JSValueTag.CLEAR) != JSValueTag.CLEAR) {
-                    throw new ArgumentException("Invalid tag");
-                }
-
                 var result = (JSValueType)
-                    (_tag & ~JSValueTag.CLEAR);
+                    (tag & ~JSValueTag.CLEAR);
+
                 return result;
             }
         }

@@ -38,26 +38,14 @@ namespace Test {
 
                 using (context.EnterCompartment(globalRoot)) {
                     Assert.IsTrue(JSAPI.InitStandardClasses(context, globalRoot));
-
-                    string testScript =
-                        @"'hello world'";
-                    string filename =
-                        @"test.js";
-
-                    var resultRoot = new Rooted<JS.Value>(context);
-
-                    var evalSuccess = JSAPI.EvaluateScript(
-                        context, globalRoot,
-                        testScript, filename, 0,
-                        resultRoot
+                    var evalResult = context.Evaluate(
+                        globalRoot, "'hello world'"
                     );
 
-                    Assert.IsTrue(evalSuccess);
-
-                    var resultType = resultRoot.Value.ValueType;
+                    var resultType = evalResult.Value.ValueType;
                     Assert.AreEqual(JSValueType.STRING, resultType);
 
-                    Assert.AreEqual("hello world", resultRoot.Value.ToManagedString(context));
+                    Assert.AreEqual("hello world", evalResult.Value.ToManagedString(context));
                 }
             }
         }

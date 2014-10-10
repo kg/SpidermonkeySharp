@@ -15,12 +15,17 @@ namespace Spidermonkey {
         ) {
             fixed (char* pChars = chars)
             fixed (char* pFilename = filename) {
-                byte* pFilenameBytes = stackalloc byte[filename.Length + 1];
+                byte * pFilenameBytes = null;
 
-                Encoding.ASCII.GetBytes(
-                    pFilename, filename.Length,
-                    pFilenameBytes, filename.Length
-                );
+                if (filename != null) {
+                    byte * temp = stackalloc byte[filename.Length + 1];
+                    pFilenameBytes = temp;
+
+                    Encoding.ASCII.GetBytes(
+                        pFilename, filename.Length,
+                        pFilenameBytes, filename.Length
+                    );
+                }
 
                 return EvaluateUCScript(
                     cx, scope,
@@ -65,6 +70,19 @@ namespace Spidermonkey {
 
         public static implicit operator JSContextPtr (JSContext obj) {
             return obj.Pointer;
+        }
+
+        public Rooted<JS.Value> Evaluate (JSHandleObject scope, string scriptSource, string filename = null, uint lineNumber = 0) {
+            var resultRoot = new Rooted<JS.Value>(this, JS.Value.Undefined);
+
+            if (JSAPI.EvaluateScript(
+                this, scope,
+                scriptSource, filename, lineNumber,
+                resultRoot
+            ))
+                return resultRoot;
+            else
+                return null;
         }
     }
 
