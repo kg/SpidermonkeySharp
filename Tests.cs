@@ -9,37 +9,20 @@ using Spidermonkey;
 namespace Test {
     [TestFixture]
     public class Tests {
-        public static void ErrorReporter (JSContextPtr context, string message, ref JSErrorReport report) {
-            throw new Exception();
-        }
-
         [TestCase]
-        public unsafe void BasicTest () {
-            Assert.IsTrue(JSAPI.Init());
+        public void BasicTest () {
+            Assert.IsTrue(JSAPI.IsInitialized);
 
-            var runtime = new JSRuntime();
-            var context = new JSContext(runtime);
+            var context = new JSContext(new JSRuntime());
 
             using (context.Request()) {
-                JSErrorReporter errorReporter = ErrorReporter;
-                Assert.AreEqual(null, JSAPI.SetErrorReporter(context, errorReporter));
+                var globalObject = new JSGlobalObject(context);
 
-                var globalRoot = new Rooted<JSObjectPtr>(
-                    context,
-                    JSAPI.NewGlobalObject(
-                        context,
-                        ref JSClass.DefaultGlobalObjectClass,
-                        null,
-                        JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
-                        ref JSCompartmentOptions.Default
-                    )
-                );
-                Assert.IsTrue(globalRoot.Value.IsNonzero);
+                using (context.EnterCompartment(globalObject)) {
+                    Assert.IsTrue(JSAPI.InitStandardClasses(context, globalObject));
 
-                using (context.EnterCompartment(globalRoot)) {
-                    Assert.IsTrue(JSAPI.InitStandardClasses(context, globalRoot));
                     var evalResult = context.Evaluate(
-                        globalRoot, "'hello world'"
+                        globalObject, "var a = 'hello '; var b = 'world'; a + b"
                     );
 
                     var resultType = evalResult.Value.ValueType;

@@ -1,10 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Spidermonkey {
     public static partial class JSAPI {
+        public static readonly bool IsInitialized;
+
+        static JSAPI () {
+            IsInitialized = Init();
+        }
+
         public static unsafe bool EvaluateScript (
             JSContextPtr cx,
             JSHandleObject scope,
@@ -111,6 +118,52 @@ namespace Spidermonkey {
 
         public void Dispose () {
             JSAPI.LeaveCompartment(Context, OldCompartment);
+        }
+    }
+
+    public class JSGlobalObject {
+        private static /* readonly */ JSClass DefaultClass;
+
+        public readonly JSContextPtr Context;
+        public readonly Rooted<JSObjectPtr> Root;
+
+        static JSGlobalObject () {
+            DefaultClass = new JSClass {
+                name = Marshal.StringToHGlobalAnsi("global"),
+                flags = JSClassFlags.GLOBAL_FLAGS,
+                addProperty = JSClass.GetRawFunctionPointer("PropertyStub"),
+                delProperty = JSClass.GetRawFunctionPointer("DeletePropertyStub"),
+                getProperty = JSClass.GetRawFunctionPointer("PropertyStub"),
+                setProperty = JSClass.GetRawFunctionPointer("StrictPropertyStub"),
+                enumerate = JSClass.GetRawFunctionPointer("EnumerateStub"),
+                resolve = JSClass.GetRawFunctionPointer("ResolveStub"),
+                convert = JSClass.GetRawFunctionPointer("ConvertStub"),
+                finalize = IntPtr.Zero,
+                call = IntPtr.Zero,
+                hasInstance = IntPtr.Zero,
+                construct = IntPtr.Zero,
+                trace = JSClass.GetRawFunctionPointer("GlobalObjectTraceHook")
+            };
+        }
+
+        public JSGlobalObject (JSContextPtr context) {
+            Context = context;
+            Root = new Rooted<JSObjectPtr>(Context);
+
+            Root.Value = JSAPI.NewGlobalObject(
+                Context,
+                ref DefaultClass, null,
+                JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
+                ref JSCompartmentOptions.Default
+            );
+        }
+
+        public static implicit operator JSObjectPtr (JSGlobalObject self) {
+            return self.Root.Value;
+        }
+
+        public static implicit operator JSHandleObject (JSGlobalObject self) {
+            return self.Root;
         }
     }
 }

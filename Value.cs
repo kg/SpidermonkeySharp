@@ -77,6 +77,24 @@ namespace JS {
             }
         }
 
+        public object ToManagedValue (JSContextPtr context) {
+            switch (ValueType) {
+                case JSValueType.DOUBLE:
+                    return asDouble;
+                case JSValueType.INT32:
+                    return i32;
+                case JSValueType.STRING:
+                    return ToManagedString(context);
+                case JSValueType.NULL:
+                    return null;
+                case JSValueType.BOOLEAN:
+                    return (i32 != 0);
+
+                default:
+                    throw new NotImplementedException("Value type '" + ValueType + "' not convertible");
+            }
+        }
+
         bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {
             return JSAPI.AddValueRoot(context, root);
         }

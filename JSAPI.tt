@@ -12,7 +12,7 @@ namespace Spidermonkey {
         /// In the past JS_Init once had the signature JSRuntime * JS_Init(uint32_t maxbytes) and was used to create new JSRuntime instances.  This meaning has been removed; use JS_NewRuntime instead.
         /// </summary>
         <# ImportFunction("?JS_Init@@YA_NXZ"); #>
-        public static extern bool Init ();
+        private static extern bool Init ();
 
         /// <summary>
         /// JS_NewRuntime initializes the JavaScript runtime environment. Call JS_NewRuntime before making any other API calls. JS_NewRuntime allocates memory for the JSRuntime and initializes certain internal runtime structures. maxbytes specifies the number of allocated bytes after which garbage collection is run.

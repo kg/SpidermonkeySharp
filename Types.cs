@@ -35,36 +35,35 @@ namespace Spidermonkey {
 
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct JSClass {
+        // char *
+        public IntPtr name;
+        public JSClassFlags flags;               
+                                                 
+        // Mandatory function pointer members.
+        public IntPtr addProperty;
+        public IntPtr delProperty;
+        public IntPtr getProperty;         
+        public IntPtr setProperty;         
+        public IntPtr enumerate;           
+        public IntPtr resolve;             
+        public IntPtr convert;
+
+        // Optional members (may be null).
+        public IntPtr finalize;            
+        public IntPtr call;                
+        public IntPtr hasInstance;         
+        public IntPtr construct;
+        public IntPtr trace;
+
+        fixed byte reserved[10240];
+
+        // FIXME: Can we get rid of this?
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
         static extern IntPtr LoadLibrary (string lpFileName);
         [DllImport("kernel32", CharSet = CharSet.Ansi, SetLastError = true)]
         static extern IntPtr GetProcAddress (IntPtr hModule, string procName);
 
-        public static /* readonly */ JSClass DefaultGlobalObjectClass;
-
-        // char *
-        IntPtr              name;               
-        JSClassFlags        flags;               
-                                                 
-        // Mandatory function pointer members.
-        IntPtr              addProperty;         
-        IntPtr              delProperty;         
-        IntPtr              getProperty;         
-        IntPtr              setProperty;         
-        IntPtr              enumerate;           
-        IntPtr              resolve;             
-        IntPtr              convert;
-
-        // Optional members (may be null).
-        IntPtr              finalize;            
-        IntPtr              call;                
-        IntPtr              hasInstance;         
-        IntPtr              construct;
-        IntPtr              trace;
-
-        fixed byte reserved[10240];
-
-        static IntPtr GetRawFunctionPointer(string methodName) {
+        public static IntPtr GetRawFunctionPointer (string methodName) {
             var t = typeof(JSAPI);
             var m = t.GetMethod(methodName);
             var a = (from attr in m.GetCustomAttributes(false) where attr.GetType().Name.Contains("DllImport") select attr).First();
@@ -73,25 +72,6 @@ namespace Spidermonkey {
             IntPtr hModule = LoadLibrary(dllPath);
             IntPtr pFunction = GetProcAddress(hModule, entryPoint);
             return pFunction;
-        }
-
-        static JSClass () {
-            DefaultGlobalObjectClass = new JSClass {
-                name = Marshal.StringToHGlobalAnsi("global"),
-                flags = JSClassFlags.GLOBAL_FLAGS,
-                addProperty = GetRawFunctionPointer("PropertyStub"),
-                delProperty = GetRawFunctionPointer("DeletePropertyStub"),
-                getProperty = GetRawFunctionPointer("PropertyStub"),
-                setProperty = GetRawFunctionPointer("StrictPropertyStub"),
-                enumerate   = GetRawFunctionPointer("EnumerateStub"),
-                resolve     = GetRawFunctionPointer("ResolveStub"),
-                convert     = GetRawFunctionPointer("ConvertStub"),
-                finalize    = IntPtr.Zero,
-                call        = IntPtr.Zero,
-                hasInstance = IntPtr.Zero,
-                construct   = IntPtr.Zero,
-                trace       = GetRawFunctionPointer("GlobalObjectTraceHook")
-            };
         }
     }
 
