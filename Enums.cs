@@ -98,4 +98,10 @@ namespace Spidermonkey {
         NULL                 = CLEAR | JSValueType.NULL,
         OBJECT               = CLEAR | JSValueType.OBJECT    
     }
+
+    [Flags]
+    public enum JSContextOptionFlags : byte {
+        PrivateNSISupports = 0x01,
+        DontReportUncaught = 0x02
+    }
 }

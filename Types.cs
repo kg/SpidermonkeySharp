@@ -104,4 +104,8 @@ namespace Spidermonkey {
             };
         }
     }
+
+    public struct JSContextOptions {
+        public JSContextOptionFlags Options;
+    }
 }

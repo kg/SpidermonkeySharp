@@ -198,6 +198,11 @@ namespace Spidermonkey {
             JSHandleValue vp
         );
 
+        <# ImportFunction("?ContextOptionsRef@JS@@YAAAVContextOptions@1@PAUJSContext@@@Z"); #>
+        public static extern unsafe JSContextOptions * ContextOptionsRef(
+            JSContextPtr cx
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(
