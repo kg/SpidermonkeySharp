@@ -59,10 +59,9 @@ namespace Test {
                 );
                 Assert.AreEqual(JS.Value.Undefined, evalResult.Value);
 
-                Assert.IsTrue(JSAPI.IsExceptionPending(context));
-                var exc = new Rooted<JS.Value>(context);
-                Assert.IsTrue(JSAPI.GetPendingException(context, exc));
-                JSAPI.ClearPendingException(context);
+                Assert.IsTrue(context.Exception.IsPending);
+                var exc = context.Exception.Get();
+                context.Exception.Clear();
 
                 Assert.AreEqual(JSValueType.OBJECT, exc.Value.ValueType);
                 Assert.AreEqual("Error: test", exc.Value.ToManagedString(context));

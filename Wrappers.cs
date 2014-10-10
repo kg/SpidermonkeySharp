@@ -60,11 +60,14 @@ namespace Spidermonkey {
 
     public class JSContext {
         public readonly JSContextPtr Pointer;
+        public readonly JSContextExceptionStatus Exception;
 
         public JSContext (JSRuntimePtr runtime) {
             Pointer = JSAPI.NewContext(runtime, 8192);
             if (Pointer.IsZero)
                 throw new Exception();
+
+            Exception = new JSContextExceptionStatus(Pointer);
         }
 
         public JSRequest Request () {
@@ -88,8 +91,9 @@ namespace Spidermonkey {
                 resultRoot
             ))
                 return resultRoot;
-            else
-                return null;
+
+            resultRoot.Dispose();
+            return null;
         }
     }
 
@@ -121,7 +125,7 @@ namespace Spidermonkey {
         }
     }
 
-    public class JSGlobalObject {
+    public class JSGlobalObject : IDisposable {
         private static /* readonly */ JSClass DefaultClassDefinition;
         private static JSClassPtr DefaultClass;
         private static GCHandle DefaultClassHandle;
@@ -163,6 +167,10 @@ namespace Spidermonkey {
                 JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
                 ref JSCompartmentOptions.Default
             );
+        }
+
+        public void Dispose () {
+            Root.Dispose();
         }
 
         public static implicit operator JSObjectPtr (JSGlobalObject self) {
@@ -222,6 +230,33 @@ namespace Spidermonkey {
 
         public JSClass Unpack () {
             return (JSClass)Marshal.PtrToStructure(Pointer, typeof(JSClass));
+        }
+    }
+
+    public class JSContextExceptionStatus {
+        public readonly JSContextPtr Context;
+
+        public JSContextExceptionStatus (JSContextPtr context) {
+            Context = context;
+        }
+
+        public bool IsPending {
+            get {
+                return JSAPI.IsExceptionPending(Context);
+            }
+        }
+
+        public Rooted<JS.Value> Get () {
+            var root = new Rooted<JS.Value>(Context);
+            if (JSAPI.GetPendingException(Context, root))
+                return root;
+
+            root.Dispose();
+            return null;
+        }
+
+        public void Clear () {
+            JSAPI.ClearPendingException(Context);
         }
     }
 }
