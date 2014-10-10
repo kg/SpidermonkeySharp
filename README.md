@@ -11,8 +11,8 @@ This library is still early in development, so many feature additions & performa
 
 Features
 ========
-Read and write object properties
-Invoke JS functions
-Expose native & managed functions to JS
-Automatic mapping of managed delegates to SpiderMonkey JSNative functions
-Rooting API for precise & correct interaction with JS garbage collector
+* Read and write object properties
+* Invoke JS functions
+* Expose native & managed functions to JS
+* Automatic mapping of managed delegates to SpiderMonkey JSNative functions
+* Rooting API for precise & correct interaction with JS garbage collector
