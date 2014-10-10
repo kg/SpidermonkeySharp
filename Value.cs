@@ -56,12 +56,21 @@ namespace JS {
             }
         }
 
-        public JSStringPtr? AsString {
+        public JSStringPtr AsString {
             get {
                 if (ValueType != JSValueType.STRING)
-                    return null;
+                    throw new InvalidOperationException();
 
                 return str;
+            }
+        }
+
+        public JSObjectPtr AsObject {
+            get {
+                if (ValueType != JSValueType.OBJECT)
+                    throw new InvalidOperationException();
+
+                return obj;
             }
         }
 

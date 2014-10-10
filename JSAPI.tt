@@ -203,6 +203,14 @@ namespace Spidermonkey {
             JSContextPtr cx
         );
 
+        <# ImportFunction("?JS_GetUCProperty@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@PB_WIV?$MutableHandle@VValue@JS@@@3@@Z"); #>
+        public static extern bool GetUCProperty(
+            JSContextPtr cx,
+            JSHandleObject obj,
+            IntPtr name, uint namelen,
+            JSMutableHandleValue vp
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

@@ -12,7 +12,7 @@ namespace Spidermonkey {
             IsInitialized = Init();
         }
 
-        public static unsafe bool EvaluateScript (
+        public static unsafe bool EvaluateScript(
             JSContextPtr cx,
             JSHandleObject scope,
             string chars,
@@ -41,6 +41,16 @@ namespace Spidermonkey {
                     rval
                 );
             }
+        }
+
+        public static unsafe bool GetProperty (
+            JSContextPtr cx,
+            JSHandleObject obj,
+            string name,
+            JSMutableHandleValue vp
+        ) {
+            fixed (char* pName = name)
+                return GetUCProperty(cx, obj, (IntPtr)pName, (uint)name.Length, vp);
         }
     }
 

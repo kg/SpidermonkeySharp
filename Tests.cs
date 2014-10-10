@@ -55,7 +55,7 @@ namespace Test {
             using (context.Request())
             using (context.EnterCompartment(globalObject)) {
                 var evalResult = context.Evaluate(
-                    globalObject, "function fn() { throw new Error('test'); }; fn()"
+                    globalObject, "function fn() { throw new Error('test'); }; fn()", "eval"
                 );
                 Assert.AreEqual(JS.Value.Undefined, evalResult.Value);
 
@@ -65,6 +65,11 @@ namespace Test {
 
                 Assert.AreEqual(JSValueType.OBJECT, exc.Value.ValueType);
                 Assert.AreEqual("Error: test", exc.Value.ToManagedString(context));
+
+                var objRoot = new Rooted<JSObjectPtr>(context, exc.Value.AsObject);
+                var stackRoot = new Rooted<JS.Value>(context);
+                Assert.IsTrue(JSAPI.GetProperty(context, objRoot, "stack", stackRoot));
+                Console.WriteLine(stackRoot.Value.ToManagedString(context));
             }
         }
     }
