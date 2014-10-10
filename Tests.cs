@@ -17,10 +17,10 @@ namespace Test {
             Assert.IsTrue(JSAPI.Init());
 
             var runtime = JSAPI.NewRuntime(1024 * 1024 * 4);
-            Assert.AreNotEqual(IntPtr.Zero, (IntPtr)runtime);
+            Assert.IsTrue(runtime.IsNonzero);
 
             var context = JSAPI.NewContext(runtime, 8192);
-            Assert.AreNotEqual(IntPtr.Zero, (IntPtr)context);
+            Assert.IsTrue(context.IsNonzero);
 
             JSAPI.BeginRequest(context);
 
@@ -37,10 +37,10 @@ namespace Test {
                 JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
                 ref JSCompartmentOptions.Default
             );
-            Assert.AreNotEqual(IntPtr.Zero, globalObject);
+            Assert.IsTrue(globalObject.IsNonzero);
 
             var oldCompartment = JSAPI.EnterCompartment(context, globalObject);
-            Assert.AreEqual(IntPtr.Zero, (IntPtr)oldCompartment);
+            Assert.IsTrue(oldCompartment.IsZero);
 
             var globalRoot = new Rooted<JSObjectPtr>(context, globalObject);
             Assert.IsTrue(JSAPI.InitStandardClasses(context, globalRoot));
@@ -65,7 +65,7 @@ namespace Test {
             Assert.IsTrue(evalSuccess);
 
             var resultJsString = JSAPI.ToString(context, resultRoot);
-            Assert.AreNotEqual(IntPtr.Zero, (IntPtr)resultJsString);
+            Assert.IsTrue(resultJsString.IsNonzero);
             var resultString = resultJsString.ToManagedString(context);
 
             Assert.AreEqual("hello world", resultString);

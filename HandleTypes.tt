@@ -64,6 +64,18 @@ namespace Spidermonkey {
                     Pointer = ptr
                 };
             }
+
+            public bool IsZero {
+                get {
+                    return (Pointer == IntPtr.Zero);
+                }
+            }
+
+            public bool IsNonzero {
+                get {
+                    return (Pointer != IntPtr.Zero);
+                }
+            }
         <#+
     }
 
