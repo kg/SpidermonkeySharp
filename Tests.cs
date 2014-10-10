@@ -168,8 +168,13 @@ namespace Test {
             }
         }
 
-        public bool TestNative (JSContextPtr cx, uint argc, ref JS.Value vp) {
-            return false;
+        public static bool TestNative (JSContextPtr cx, uint argc, JSCallArgs vp) {
+            if (argc < 1)
+                return false;
+
+            var n = vp[0];
+            vp.Result = new JS.Value((int)n * 2);
+            return true;
         }
 
         [TestCase]
@@ -180,14 +185,16 @@ namespace Test {
 
             using (context.Request())
             using (context.EnterCompartment(globalObject)) {
+                var native = (JSNative)TestNative;
                 globalObject.Pointer.DefineFunction(
-                    context, "test", TestNative
+                    context, "test", native, 1
                 );
 
-                context.Evaluate(
+                var evalResult = context.Evaluate(
                     globalObject,
-                    @"test()"
+                    @"test(16)"
                 );
+                Assert.AreEqual(32, evalResult.Value.ToManagedValue(context));
             }
         }
     }

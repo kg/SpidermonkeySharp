@@ -63,6 +63,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CallArgs.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="ValueArray.cs" />
     <Compile Include="HandleTypes.generated.cs">

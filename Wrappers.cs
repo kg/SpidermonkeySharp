@@ -250,12 +250,15 @@ namespace Spidermonkey {
             return SetProperty(context, name, handle);
         }
 
-        public unsafe JSFunctionPtr DefineFunction (JSContextPtr context, string name, JSNative call) {
+        public unsafe JSFunctionPtr DefineFunction (
+            JSContextPtr context, string name, JSNative call,
+            uint nargs = 0, uint attrs = 0
+        ) {
             fixed (JSObjectPtr* pThis = &this) {
                 JSHandleObject handle = new JSHandleObject((IntPtr)pThis);
 
                 return JSAPI.DefineFunction(
-                    context, handle, name, call, 0, 0
+                    context, handle, name, call, nargs, attrs
                 );
             }
         }
