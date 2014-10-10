@@ -4,20 +4,30 @@ using System;
 using System.Runtime.InteropServices;
 
 namespace Spidermonkey {
-    <# DefineHandleType("JSHandleObject"); #>
-    <# DefineHandleType("JSHandleId"); #>
-    <# DefineHandleType("JSHandleRuntime"); #>
-    <# DefineHandleType("JSHandleContext"); #>
+    <# DefinePointerType("JSObjectPtr"); #>
+    <# DefinePointerType("JSRuntimePtr"); #>
+    <# DefinePointerType("JSContextPtr"); #>
+    <# DefinePointerType("JSCompartmentPtr"); #>
 
-    <# DefineHandleType("JSMutableHandleValue"); #>
+    <# DefinePointerType("JSRootPtr"); #>
+
+    <# DefineHandleType("JSHandleObject", "JSObjectPtr"); #>
+    <# DefineHandleType("JSHandleValue", "JS.Value"); #>
+    <# DefineHandleType("JSHandleId", "jsid"); #>
+
+    <# DefineHandleType("JSMutableHandleValue", "JS.Value"); #>
 }
 
 <#+
-    public void DefineHandleType (string name) {
+    public void DefinePointerType (string name) {
         #>
         [StructLayout(LayoutKind.Sequential)]
         public struct <#= name #> {
             public IntPtr Pointer;
+
+            public <#= name #> (IntPtr pointer) {
+                Pointer = pointer;
+            }
 
             public static implicit operator IntPtr (<#= name #> self) {
                 return self.Pointer;
@@ -27,6 +37,29 @@ namespace Spidermonkey {
                 return new <#= name #> {
                     Pointer = ptr
                 };
+            }
+        }
+        <#+
+    }
+
+    public void DefineHandleType (string name, string valueName) {
+        #>
+        [StructLayout(LayoutKind.Sequential)]
+        public struct <#= name #> {
+            public IntPtr AddressOfTarget;
+
+            public <#= name #> (IntPtr addressOfTarget) {
+                AddressOfTarget = addressOfTarget;
+            }
+
+            public unsafe <#= valueName #> Get () {
+                <#= valueName #> * pTarget = (<#= valueName #> *)AddressOfTarget;
+                return *pTarget;
+            }
+
+            public static implicit operator <#= name #> (Rooted< <#= valueName #> > root) {
+                JSRootPtr pRoot = root;
+                return new <#= name #>(pRoot.Pointer);
             }
         }
         <#+

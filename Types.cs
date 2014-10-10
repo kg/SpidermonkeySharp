@@ -5,7 +5,19 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
+namespace Spidermonkey.JS {
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Value {
+        UInt64 asBits;
+    }
+}
+
 namespace Spidermonkey {
+    [StructLayout(LayoutKind.Sequential)]
+    public struct jsid {
+        UInt32 asBits;
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct JSErrorReport {
         // FIXME
@@ -13,48 +25,62 @@ namespace Spidermonkey {
 
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct JSClass {
+        [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
+        static extern IntPtr LoadLibrary (string lpFileName);
+        [DllImport("kernel32", CharSet = CharSet.Ansi, SetLastError = true)]
+        static extern IntPtr GetProcAddress (IntPtr hModule, string procName);
+
         public static /* readonly */ JSClass DefaultGlobalObjectClass;
 
-        [MarshalAs(UnmanagedType.LPStr)]
-        string              name;               
+        // char *
+        IntPtr              name;               
         JSClassFlags        flags;               
                                                  
         // Mandatory function pointer members.
-        JSPropertyOp        addProperty;         
-        JSDeletePropertyOp  delProperty;         
-        JSPropertyOp        getProperty;         
-        JSStrictPropertyOp  setProperty;         
-        JSEnumerateOp       enumerate;           
-        JSResolveOp         resolve;             
-        JSConvertOp         convert;
+        IntPtr              addProperty;         
+        IntPtr              delProperty;         
+        IntPtr              getProperty;         
+        IntPtr              setProperty;         
+        IntPtr              enumerate;           
+        IntPtr              resolve;             
+        IntPtr              convert;
 
-        // FIXME
-        /*
         // Optional members (may be null).
-        JSFinalizeOp        finalize;            
-        JSNative            call;                
-        JSHasInstanceOp     hasInstance;         
-        JSNative            construct;
-        JSTraceOp           trace;
-        */
+        IntPtr              finalize;            
+        IntPtr              call;                
+        IntPtr              hasInstance;         
+        IntPtr              construct;
+        IntPtr              trace;
 
-        fixed byte reserved[1024];
+        fixed byte reserved[10240];
+
+        static IntPtr GetRawFunctionPointer(string methodName) {
+            var t = typeof(JSAPI);
+            var m = t.GetMethod(methodName);
+            var a = (from attr in m.GetCustomAttributes(false) where attr.GetType().Name.Contains("DllImport") select attr).First();
+            var entryPoint = ((DllImportAttribute)a).EntryPoint;
+            var dllPath = Environment.CurrentDirectory + "\\mozjs.dll";
+            IntPtr hModule = LoadLibrary(dllPath);
+            IntPtr pFunction = GetProcAddress(hModule, entryPoint);
+            return pFunction;
+        }
 
         static JSClass () {
             DefaultGlobalObjectClass = new JSClass {
-                name = "global",
-                flags = JSClassFlags.NEW_RESOLVE | JSClassFlags.IS_GLOBAL,
-                addProperty = JSAPI.PropertyStub,
-                delProperty = JSAPI.DeletePropertyStub,
-                getProperty = JSAPI.PropertyStub,
-                setProperty = JSAPI.StrictPropertyStub,
-                enumerate   = JSAPI.EnumerateStub,
-                resolve     = JSAPI.ResolveStub,
-                convert     = JSAPI.ConvertStub,
-                /*
-                null, null, null, null,
-                JS_GlobalObjectTraceHook
-                 */
+                name = Marshal.StringToHGlobalAnsi("global"),
+                flags = JSClassFlags.GLOBAL_FLAGS,
+                addProperty = GetRawFunctionPointer("PropertyStub"),
+                delProperty = GetRawFunctionPointer("DeletePropertyStub"),
+                getProperty = GetRawFunctionPointer("PropertyStub"),
+                setProperty = GetRawFunctionPointer("StrictPropertyStub"),
+                enumerate   = GetRawFunctionPointer("EnumerateStub"),
+                resolve     = GetRawFunctionPointer("ResolveStub"),
+                convert     = GetRawFunctionPointer("ConvertStub"),
+                finalize    = IntPtr.Zero,
+                call        = IntPtr.Zero,
+                hasInstance = IntPtr.Zero,
+                construct   = IntPtr.Zero,
+                trace       = GetRawFunctionPointer("GlobalObjectTraceHook")
             };
         }
     }
@@ -83,6 +109,8 @@ namespace Spidermonkey {
 
         IntPtr addonId;
         bool preserveJitCode;
+
+        fixed byte reserved[10240];
 
         static JSCompartmentOptions () {
             Default = new JSCompartmentOptions {

@@ -5,24 +5,30 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Spidermonkey {
-    public struct JSRootedObject : IDisposable {
+    // FIXME: Make this a class to disable default constructor?
+    public struct Rooted<T> : IDisposable 
+        where T : struct
+    {
         [StructLayout(LayoutKind.Sequential)]
         public unsafe class _State {
-            public readonly IntPtr Pointer;
+            public readonly T Value;
 
-            public _State (IntPtr pointer) {
-                Pointer = pointer;
+            public _State (T value) {
+                Value = value;
             }
         }
 
         public readonly GCHandle Pin;
         public readonly _State State;
 
-        public JSRootedObject (JSHandleContext context, IntPtr pointer) {
-            State = new _State(pointer);
+        public Rooted (
+            JSContextPtr context, 
+            T value = default(T)
+        ) {
+            State = new _State(value);
             Pin = GCHandle.Alloc(State, GCHandleType.Pinned);
 
-            if (!JSAPI.AddObjectRoot(context, Pin.AddrOfPinnedObject()))
+            if (!JSAPI.AddObjectRoot(context, this))
                 throw new Exception("Failed to add root");
         }
 
@@ -30,12 +36,20 @@ namespace Spidermonkey {
             Pin.Free();
         }
 
-        public static implicit operator JSHandleObject (JSRootedObject rooted) {
-            return (JSHandleObject)rooted.State.Pointer;
+        public T Value {
+            get {
+                return State.Value;
+            }
         }
 
-        public static explicit operator IntPtr (JSRootedObject rooted) {
-            return rooted.State.Pointer;
+        public static implicit operator T (Rooted<T> rooted) {
+            return rooted.State.Value;
+        }
+
+        // Treats the address of our pinned object pointer as a Handle<JSObject *>.
+        // Make sure the root doesn't die while this handle value is alive!
+        public static unsafe implicit operator JSRootPtr (Rooted<T> rooted) {
+            return new JSRootPtr(rooted.Pin.AddrOfPinnedObject());
         }
     }
 }

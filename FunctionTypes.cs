@@ -5,48 +5,55 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Spidermonkey {
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void JSErrorReporter (
-        JSHandleContext cx,
+        JSContextPtr cx,
         [MarshalAs(UnmanagedType.LPStr)]
         string message,
         ref JSErrorReport report
     );
 
-    public delegate bool JSPropertyOp(
-        JSHandleContext cx,
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate bool JSPropertyOp (
+        JSContextPtr cx,
         JSHandleObject obj,
         JSHandleId id,
         JSMutableHandleValue vp
     );
 
-    public delegate bool JSStrictPropertyOp(
-        JSHandleContext cx,
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate bool JSStrictPropertyOp (
+        JSContextPtr cx,
         JSHandleObject obj,
         JSHandleId id, 
         bool strict,
         JSMutableHandleValue vp
     );
 
-    public delegate bool JSDeletePropertyOp(
-        JSHandleContext cx,
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate bool JSDeletePropertyOp (
+        JSContextPtr cx,
         JSHandleObject obj,
         JSHandleId id, 
         ref bool succeeded
     );
 
-    public delegate bool JSEnumerateOp(
-        JSHandleContext cx,
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate bool JSEnumerateOp (
+        JSContextPtr cx,
         JSHandleObject obj
     );
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate bool JSResolveOp (
-        JSHandleContext cx,
+        JSContextPtr cx,
         JSHandleObject obj,
         JSHandleId id
     );
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate bool JSConvertOp (
-        JSHandleContext cx,
+        JSContextPtr cx,
         JSHandleObject obj, 
         JSType type, 
         JSMutableHandleValue vp

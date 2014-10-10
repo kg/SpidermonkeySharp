@@ -36,7 +36,10 @@ namespace Spidermonkey {
         USERBIT2                = (1<<(16+6)),
         USERBIT3                = (1<<(16+7)),
 
-        BACKGROUND_FINALIZE     = (1<<(16+8))
+        BACKGROUND_FINALIZE     = (1<<(16+8)),
+
+        // HACK: !$#%(@!%)J)@!5()j2152j15
+        GLOBAL_FLAGS = 0x2c000U
     }
 
     public enum JSType {
