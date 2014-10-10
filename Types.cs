@@ -5,7 +5,24 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Spidermonkey.JS {
+namespace mozilla {
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Range {
+        readonly IntPtr mStart, mEnd;
+
+        public Range (IntPtr start, IntPtr end) {
+            mStart = start;
+            mEnd = end;
+        }
+
+        public Range (IntPtr start, uint length) {
+            mStart = start;
+            mEnd = new IntPtr(start.ToInt64() + length);
+        }
+    }
+}
+
+namespace JS {
     [StructLayout(LayoutKind.Sequential)]
     public struct Value {
         UInt64 asBits;

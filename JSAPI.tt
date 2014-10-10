@@ -134,6 +134,23 @@ namespace Spidermonkey {
             JSMutableHandleValue rval
         );
 
+        <# ImportFunction("?ToStringSlow@js@@YAPAVJSString@@PAUJSContext@@V?$Handle@VValue@JS@@@JS@@@Z"); #>
+        public static extern JSStringPtr ToString(
+            JSContextPtr cx, JSHandleValue v
+        );
+
+        <# ImportFunction("?JS_GetStringLength@@YAIPAVJSString@@@Z"); #>
+        public static extern uint GetStringLength(
+            JSStringPtr s
+        );
+
+        <# ImportFunction("?JS_CopyStringChars@@YA_NPAUJSContext@@V?$Range@_W@mozilla@@PAVJSString@@@Z"); #>
+        public static extern bool CopyStringChars(
+            JSContextPtr cx, 
+            mozilla.Range dest,
+            JSStringPtr str
+        );
+
         // TODO: Expose teardown/free APIs
 
     }

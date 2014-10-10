@@ -9,6 +9,32 @@ namespace Spidermonkey {
     <# DefinePointerType("JSContextPtr"); #>
     <# DefinePointerType("JSCompartmentPtr"); #>
 
+    <# BeginPointerType("JSStringPtr"); #>
+
+        // Creates a copy
+        public unsafe string ToManagedString (JSContextPtr context) {
+            var length = JSAPI.GetStringLength(this);
+
+            uint numBytes = length * 2;
+            var buffer = Marshal.AllocHGlobal((int)numBytes);
+
+            try {
+                if (!JSAPI.CopyStringChars(
+                    context, 
+                    new mozilla.Range(buffer, numBytes),
+                    this
+                ))
+                    throw new Exception("String copy failed");
+
+                var result = new String((char *)buffer, 0, (int)length);
+                return result;
+            } finally {
+                Marshal.FreeHGlobal(buffer);
+            }
+        }
+
+    }
+
     <# DefinePointerType("JSRootPtr"); #>
 
     <# DefineHandleType("JSHandleObject", "JSObjectPtr"); #>
@@ -19,7 +45,7 @@ namespace Spidermonkey {
 }
 
 <#+
-    public void DefinePointerType (string name) {
+    public void BeginPointerType (string name) {
         #>
         [StructLayout(LayoutKind.Sequential)]
         public struct <#= name #> {
@@ -38,6 +64,12 @@ namespace Spidermonkey {
                     Pointer = ptr
                 };
             }
+        <#+
+    }
+
+    public void DefinePointerType (string name) {
+        BeginPointerType(name);
+        #>
         }
         <#+
     }

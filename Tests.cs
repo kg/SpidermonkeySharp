@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using NUnit.Framework;
 using Spidermonkey;
-using Spidermonkey.JS;
 
 namespace Test {
     public static class Program {
@@ -54,14 +53,22 @@ namespace Test {
             IntPtr ptrTestScript = Marshal.StringToHGlobalUni(testScript);
             IntPtr ptrFilename = Marshal.StringToHGlobalAnsi(filename);
 
-            var resultRoot = new Rooted<Value>(context);
+            var resultRoot = new Rooted<JS.Value>(context);
 
-            var evalResult = JSAPI.EvaluateUCScript(
+            var evalSuccess = JSAPI.EvaluateUCScript(
                 context, globalRoot,
                 ptrTestScript, testScript.Length,
                 ptrFilename, 0,
                 resultRoot
             );
+
+            Assert.IsTrue(evalSuccess);
+
+            var resultJsString = JSAPI.ToString(context, resultRoot);
+            Assert.AreNotEqual(IntPtr.Zero, (IntPtr)resultJsString);
+            var resultString = resultJsString.ToManagedString(context);
+
+            Assert.AreEqual("hello world", resultString);
 
             JSAPI.LeaveCompartment(context, oldCompartment);
         }
