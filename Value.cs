@@ -168,12 +168,12 @@ namespace JS {
 
         public unsafe Rooted<Value> InvokeFunction (
             JSContextPtr context,
-            JSHandleObject thisReference
+            JSHandleObject thisReference,
+            params Value[] arguments
         ) {
-            var args = new ValueArray(0);
-            var argsPtr = (ValueArrayPtr)args;
-
-            fixed (Value * pThis = &this) {
+            fixed (Value * pThis = &this)
+            fixed (Value * pArgs = arguments) {
+                var argsPtr = new ValueArrayPtr((uint)arguments.Length, (IntPtr)pArgs);
                 var resultRoot = new Rooted<Value>(context);
                 var thisVal = new JSHandleValue((IntPtr)pThis);
 

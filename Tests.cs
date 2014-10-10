@@ -131,14 +131,24 @@ namespace Test {
             using (context.Request())
             using (context.EnterCompartment(globalObject)) {
                 context.Evaluate(
-                    globalObject, "function f () { return 42; };"
+                    globalObject, "function fortyTwo () { return 42; }; function double (i) { return i * 2; };"
                 );
 
-                var fn = globalObject.Pointer.GetProperty(context, "f");
-                Assert.AreEqual(JSType.JSTYPE_FUNCTION, fn.Value.GetJSType(context));
+                {
+                    var fn = globalObject.Pointer.GetProperty(context, "fortyTwo");
+                    Assert.AreEqual(JSType.JSTYPE_FUNCTION, fn.Value.GetJSType(context));
 
-                var result = fn.Value.InvokeFunction(context, globalObject);
-                Assert.AreEqual(42, result.Value.ToManagedValue(context));
+                    var result = fn.Value.InvokeFunction(context, globalObject);
+                    Assert.AreEqual(42, result.Value.ToManagedValue(context));
+                }
+
+                {
+                    var fn = globalObject.Pointer.GetProperty(context, "double");
+                    Assert.AreEqual(JSType.JSTYPE_FUNCTION, fn.Value.GetJSType(context));
+
+                    var result = fn.Value.InvokeFunction(context, globalObject, new JS.Value(16));
+                    Assert.AreEqual(32, result.Value.ToManagedValue(context));
+                }
             }
         }
     }
