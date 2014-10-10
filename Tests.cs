@@ -69,14 +69,10 @@ namespace Test {
         }
 
         [TestCase]
-        public unsafe void GetPropertyTest () {
+        public void GetPropertyTest () {
             JSContext context;
             JSGlobalObject globalObject;
             DefaultInit(out context, out globalObject);
-
-            // Suppress reporting of uncaught exceptions from Evaluate
-            var options = JSAPI.ContextOptionsRef(context);
-            options->Options = JSContextOptionFlags.DontReportUncaught;
 
             using (context.Request())
             using (context.EnterCompartment(globalObject)) {
@@ -86,8 +82,6 @@ namespace Test {
 
                 Assert.AreEqual(JSValueType.OBJECT, evalResult.Value.ValueType);
                 var objRoot = new Rooted<JSObjectPtr>(context, evalResult.Value.AsObject);
-
-                var propRoot = new Rooted<JS.Value>(context);
 
                 var a = objRoot.Value.GetProperty(context, "a");
                 Assert.AreEqual(JSValueType.INT32, a.Value.ValueType);
@@ -107,22 +101,18 @@ namespace Test {
         }
 
         [TestCase]
-        public unsafe void SetPropertyTest () {
+        public void SetPropertyTest () {
             JSContext context;
             JSGlobalObject globalObject;
             DefaultInit(out context, out globalObject);
 
-            // Suppress reporting of uncaught exceptions from Evaluate
-            var options = JSAPI.ContextOptionsRef(context);
-            options->Options = JSContextOptionFlags.DontReportUncaught;
-
             using (context.Request())
             using (context.EnterCompartment(globalObject)) {
-                JS.Value a = new JS.Value(37);
-                JS.Value b = JS.Value.Null;
+                var a = new JS.Value(37);
+                var b = JS.Value.Null;
 
-                globalObject.Root.Value.SetProperty(context, "a", a);
-                globalObject.Root.Value.SetProperty(context, "b", b);
+                globalObject.Pointer.SetProperty(context, "a", a);
+                globalObject.Pointer.SetProperty(context, "b", b);
 
                 var evalResult = context.Evaluate(
                     globalObject, "'a=' + a + ', b=' + b"

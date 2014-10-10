@@ -189,6 +189,12 @@ namespace Spidermonkey {
             );
         }
 
+        public JSObjectPtr Pointer {
+            get {
+                return Root.Value;
+            }
+        }
+
         public void Dispose () {
             Root.Dispose();
         }
