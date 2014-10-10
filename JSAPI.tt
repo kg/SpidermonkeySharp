@@ -53,7 +53,7 @@ namespace Spidermonkey {
         <# ImportFunction("?JS_NewGlobalObject@@YAPAVJSObject@@PAUJSContext@@PBUJSClass@@PAUJSPrincipals@@W4OnNewGlobalHookOption@JS@@ABVCompartmentOptions@6@@Z"); #>
         public static extern JSObjectPtr NewGlobalObject(
             JSContextPtr cx, 
-            ref JSClass clasp, 
+            JSClassPtr clasp,
             JSPrincipals principals,
             JSOnNewGlobalHookOption hookOption,
             ref JSCompartmentOptions options
@@ -175,6 +175,34 @@ namespace Spidermonkey {
             mozilla.Range dest,
             JSStringPtr str
         );
+
+        <# ImportFunction("?JS_IsExceptionPending@@YA_NPAUJSContext@@@Z"); #>
+        public static extern bool IsExceptionPending(
+            JSContextPtr cx
+        );
+
+        <# ImportFunction("?JS_GetPendingException@@YA_NPAUJSContext@@V?$MutableHandle@VValue@JS@@@JS@@@Z"); #>
+        public static extern bool GetPendingException(
+            JSContextPtr cx,
+            JSMutableHandleValue vp
+        );
+
+        <# ImportFunction("?JS_ClearPendingException@@YAXPAUJSContext@@@Z"); #>
+        public static extern void ClearPendingException(
+            JSContextPtr cx
+        );
+
+        <# ImportFunction("?JS_SetPendingException@@YAXPAUJSContext@@V?$Handle@VValue@JS@@@JS@@@Z"); #>
+        public static extern void SetPendingException(
+            JSContextPtr cx,
+            JSHandleValue vp
+        );
+
+        /*
+        <# ImportFunction(""); #>
+        public static extern void X(
+        );
+        */
 
         // TODO: Expose teardown/free APIs
 

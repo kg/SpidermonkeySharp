@@ -122,15 +122,15 @@ namespace Spidermonkey {
     }
 
     public class JSGlobalObject {
-        private static /* readonly */ JSClass DefaultClass;
-        private static GCHandle ClassPin;
-        private static IntPtr   ClassBuffer;
+        private static /* readonly */ JSClass DefaultClassDefinition;
+        private static JSClassPtr DefaultClass;
+        private static GCHandle DefaultClassHandle;
 
         public readonly JSContextPtr Context;
         public readonly Rooted<JSObjectPtr> Root;
 
         static JSGlobalObject () {
-            DefaultClass = new JSClass {
+            DefaultClassDefinition = new JSClass {
                 name = "global",
                 flags = JSClassFlags.GLOBAL_FLAGS,
                 addProperty = JSAPI.PropertyStub,
@@ -150,9 +150,7 @@ namespace Spidermonkey {
             // We have to pin our JSClass (so everything it points to is retained)
             //  and marshal it into a manually-allocated buffer that doesn't expire.
             // JSClass buffer needs to live as long as the global object, or longer.
-            ClassPin = GCHandle.Alloc(DefaultClass);
-            ClassBuffer = Marshal.AllocHGlobal(Marshal.SizeOf(DefaultClass));
-            Marshal.StructureToPtr(DefaultClass, ClassBuffer, false);
+            DefaultClass = new JSClassPtr(ref DefaultClassDefinition, out DefaultClassHandle);
         }
 
         public JSGlobalObject (JSContextPtr context) {
@@ -161,7 +159,7 @@ namespace Spidermonkey {
 
             Root.Value = JSAPI.NewGlobalObject(
                 Context,
-                ClassBuffer, null,
+                DefaultClass, null,
                 JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
                 ref JSCompartmentOptions.Default
             );
@@ -173,6 +171,57 @@ namespace Spidermonkey {
 
         public static implicit operator JSHandleObject (JSGlobalObject self) {
             return self.Root;
+        }
+    }
+
+    public partial struct JSObjectPtr {
+        bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {
+            return JSAPI.AddObjectRoot(context, root);
+        }
+
+        void IRootable.RemoveRoot (JSContextPtr context, JSRootPtr root) {
+            JSAPI.RemoveObjectRoot(context, root);
+        }
+    }
+
+    public partial struct JSStringPtr {
+        // Creates a copy
+        public unsafe string ToManagedString (JSContextPtr context) {
+            var length = JSAPI.GetStringLength(this);
+
+            uint numBytes = length * 2;
+            var buffer = Marshal.AllocHGlobal((int)numBytes);
+
+            try {
+                if (!JSAPI.CopyStringChars(
+                    context,
+                    new mozilla.Range(buffer, numBytes),
+                    this
+                ))
+                    throw new Exception("String copy failed");
+
+                var result = new String((char*)buffer, 0, (int)length);
+                return result;
+            } finally {
+                Marshal.FreeHGlobal(buffer);
+            }
+        }
+    }
+
+    public partial struct JSClassPtr {
+        public JSClassPtr (ref JSClass value, out GCHandle handle) {
+            handle = GCHandle.Alloc(value);
+            Pointer = Marshal.AllocHGlobal(Marshal.SizeOf(value));
+            Pack(ref value);
+        }
+
+        public void Pack (ref JSClass newValue) {
+            // FIXME: DeleteOld?
+            Marshal.StructureToPtr(newValue, Pointer, false);
+        }
+
+        public JSClass Unpack () {
+            return (JSClass)Marshal.PtrToStructure(Pointer, typeof(JSClass));
         }
     }
 }

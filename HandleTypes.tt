@@ -4,48 +4,13 @@ using System;
 using System.Runtime.InteropServices;
 
 namespace Spidermonkey {
-    <# BeginPointerType("JSObjectPtr", "IRootable"); #>
-
-        bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {
-            return JSAPI.AddObjectRoot(context, root);
-        }
-
-        void IRootable.RemoveRoot (JSContextPtr context, JSRootPtr root) {
-            JSAPI.RemoveObjectRoot(context, root);
-        }
-    }
-
+    <# DefinePointerType("JSObjectPtr", "IRootable"); #>
     <# DefinePointerType("JSRuntimePtr"); #>
     <# DefinePointerType("JSContextPtr"); #>
     <# DefinePointerType("JSCompartmentPtr"); #>
-
-    <# BeginPointerType("JSStringPtr"); #>
-
-        // Creates a copy
-        public unsafe string ToManagedString (JSContextPtr context) {
-            var length = JSAPI.GetStringLength(this);
-
-            uint numBytes = length * 2;
-            var buffer = Marshal.AllocHGlobal((int)numBytes);
-
-            try {
-                if (!JSAPI.CopyStringChars(
-                    context, 
-                    new mozilla.Range(buffer, numBytes),
-                    this
-                ))
-                    throw new Exception("String copy failed");
-
-                var result = new String((char *)buffer, 0, (int)length);
-                return result;
-            } finally {
-                Marshal.FreeHGlobal(buffer);
-            }
-        }
-
-    }
-
+    <# DefinePointerType("JSStringPtr"); #>
     <# DefinePointerType("JSRootPtr"); #>
+    <# DefinePointerType("JSClassPtr"); #>
 
     <# DefineHandleType("JSHandleObject", "JSObjectPtr", rootable: true); #>
     <# DefineHandleType("JSHandleValue", "JS.Value", rootable: true); #>
@@ -55,10 +20,10 @@ namespace Spidermonkey {
 }
 
 <#+
-    public void BeginPointerType (string name, params string[] interfaces) {
+    public void DefinePointerType (string name, params string[] interfaces) {
         #>
         [StructLayout(LayoutKind.Sequential)]
-        public struct <#= name #> 
+        public partial struct <#= name #> 
         <#+
             if (interfaces.Length > 0) {
                 #> : <#= String.Join(", ", interfaces) #> <#+
@@ -91,12 +56,6 @@ namespace Spidermonkey {
                     return (Pointer != IntPtr.Zero);
                 }
             }
-        <#+
-    }
-
-    public void DefinePointerType (string name) {
-        BeginPointerType(name);
-        #>
         }
         <#+
     }
@@ -104,7 +63,7 @@ namespace Spidermonkey {
     public void DefineHandleType (string name, string valueName, bool rootable = false) {
         #>
         [StructLayout(LayoutKind.Sequential)]
-        public struct <#= name #> {
+        public partial struct <#= name #> {
             public IntPtr AddressOfTarget;
 
             public <#= name #> (IntPtr addressOfTarget) {
