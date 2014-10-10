@@ -106,6 +106,11 @@ namespace JS {
             }
         }
 
+        public unsafe JSType GetJSType (JSContextPtr context) {
+            fixed (Value * pThis = &this)
+                return JSAPI.TypeOfValue(context, new JSHandleValue((IntPtr)pThis));
+        }
+
         public unsafe string ToManagedString (JSContextPtr context) {
             fixed (Value * pThis = &this) {
                 var handleThis = new JSHandleValue((IntPtr)pThis);
@@ -158,6 +163,30 @@ namespace JS {
 
                 default:
                     throw new InvalidOperationException("Value is not integral");
+            }
+        }
+
+        public unsafe Rooted<Value> InvokeFunction (
+            JSContextPtr context,
+            JSHandleObject thisReference
+        ) {
+            var args = new ValueArray(0);
+            var argsPtr = (ValueArrayPtr)args;
+
+            fixed (Value * pThis = &this) {
+                var resultRoot = new Rooted<Value>(context);
+                var thisVal = new JSHandleValue((IntPtr)pThis);
+
+                if (JSAPI.CallFunctionValue(
+                    context, thisReference,
+                    thisVal,
+                    ref argsPtr,
+                    resultRoot
+                ))
+                    return resultRoot;
+
+                resultRoot.Dispose();
+                return null;
             }
         }
 

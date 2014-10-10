@@ -219,6 +219,21 @@ namespace Spidermonkey {
             JSHandleValue vp
         );
 
+        <# ImportFunction("?JS_TypeOfValue@@YA?AW4JSType@@PAUJSContext@@V?$Handle@VValue@JS@@@JS@@@Z"); #>
+        public static extern JSType TypeOfValue(
+            JSContextPtr cx,
+            JSHandleValue vp
+        );
+        
+        <# ImportFunction("?JS_CallFunctionValue@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$Handle@VValue@JS@@@3@ABVHandleValueArray@3@V?$MutableHandle@VValue@JS@@@3@@Z"); #>
+        public static extern bool CallFunctionValue(
+            JSContextPtr cx, 
+            JSHandleObject obj, 
+            JSHandleValue fval,
+            ref JS.ValueArrayPtr args,
+            JSMutableHandleValue rval
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

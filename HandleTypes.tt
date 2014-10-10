@@ -29,6 +29,8 @@ namespace Spidermonkey {
                 #> : <#= String.Join(", ", interfaces) #> <#+
             }
         #> {
+            public static readonly <#= name #> Zero = new <#= name #>(IntPtr.Zero);
+
             public IntPtr Pointer;
 
             public <#= name #> (IntPtr pointer) {
@@ -67,6 +69,9 @@ namespace Spidermonkey {
             public IntPtr AddressOfTarget;
 
             public <#= name #> (IntPtr addressOfTarget) {
+                if (addressOfTarget == IntPtr.Zero)
+                    throw new ArgumentNullException("addressOfTarget");
+
                 AddressOfTarget = addressOfTarget;
             }
 

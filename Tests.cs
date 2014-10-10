@@ -121,5 +121,25 @@ namespace Test {
                 Assert.AreEqual("a=37, b=null", evalResult.Value.ToManagedString(context));
             }
         }
+
+        [TestCase]
+        public void InvokeTest () {
+            JSContext context;
+            JSGlobalObject globalObject;
+            DefaultInit(out context, out globalObject);
+
+            using (context.Request())
+            using (context.EnterCompartment(globalObject)) {
+                context.Evaluate(
+                    globalObject, "function f () { return 42; };"
+                );
+
+                var fn = globalObject.Pointer.GetProperty(context, "f");
+                Assert.AreEqual(JSType.JSTYPE_FUNCTION, fn.Value.GetJSType(context));
+
+                var result = fn.Value.InvokeFunction(context, globalObject);
+                Assert.AreEqual(42, result.Value.ToManagedValue(context));
+            }
+        }
     }
 }
