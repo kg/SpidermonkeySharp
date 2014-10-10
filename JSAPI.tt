@@ -211,6 +211,14 @@ namespace Spidermonkey {
             JSMutableHandleValue vp
         );
 
+        <# ImportFunction("?JS_SetUCProperty@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@PB_WIV?$Handle@VValue@JS@@@3@@Z"); #>
+        public static extern bool SetUCProperty(
+            JSContextPtr cx,
+            JSHandleObject obj,
+            IntPtr name, uint namelen,
+            JSHandleValue vp
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

@@ -9,6 +9,24 @@ namespace JS {
     // HACK: This layout is *only valid* in 32-bit mode
     [StructLayout(LayoutKind.Explicit, Size=8)]
     public struct Value : IRootable {
+        [StructLayout(LayoutKind.Explicit, Size = 8)]
+        private struct Packed {
+            [FieldOffset(0)]
+            public Int32 i32;
+            [FieldOffset(0)]
+            public UInt32 u32;
+            [FieldOffset(0)]
+            public double f64;
+            [FieldOffset(0)]
+            public JSStringPtr str;
+            [FieldOffset(0)]
+            public JSObjectPtr obj;
+            [FieldOffset(0)]
+            public IntPtr ptr;
+            [FieldOffset(0)]
+            public UIntPtr uintptr;
+        }
+
         public static readonly Value Null = new Value {
             tag = JSValueTag.NULL
         };
@@ -18,23 +36,8 @@ namespace JS {
 
         [FieldOffset(0)]
         UInt64 asBits;
-
         [FieldOffset(0)]
-        Int32 i32;
-        [FieldOffset(0)]
-        UInt32 u32;
-        [FieldOffset(0)]
-        double asDouble;
-        [FieldOffset(0)]
-        JSStringPtr str;
-        [FieldOffset(0)]
-        JSObjectPtr obj;
-        [FieldOffset(0)]
-        IntPtr ptr;
-        [FieldOffset(0)]
-        UIntPtr uintptr;
-        // [FieldOffset(0)]
-        // JSSymbolPtr sym;
+        Packed packed;
 
         [FieldOffset(4)]
         JSValueTag tag;
@@ -46,6 +49,24 @@ namespace JS {
     } s;
     void *asPtr;
          */
+
+        public Value (bool b) {
+            this = default(Value);
+            tag = JSValueTag.BOOLEAN;
+            packed.i32 = b ? 1 : 0;
+        }
+
+        public Value (int i) {
+            this = default(Value);
+            tag = JSValueTag.INT32;
+            packed.i32 = i;
+        }
+
+        public Value (double d) {
+            this = default(Value);
+            tag = JSValueTag.DOUBLE;
+            packed.f64 = d;
+        }
 
         public bool IsNullOrUndefined {
             get {
@@ -61,6 +82,10 @@ namespace JS {
 
                 return result;
             }
+            set {
+                var newTag = (tag & JSValueTag.CLEAR) | (JSValueTag)value;
+                tag = newTag;
+            }
         }
 
         public JSStringPtr AsString {
@@ -68,7 +93,7 @@ namespace JS {
                 if (ValueType != JSValueType.STRING)
                     throw new InvalidOperationException();
 
-                return str;
+                return packed.str;
             }
         }
 
@@ -77,7 +102,7 @@ namespace JS {
                 if (ValueType != JSValueType.OBJECT)
                     throw new InvalidOperationException();
 
-                return obj;
+                return packed.obj;
             }
         }
 
@@ -96,15 +121,15 @@ namespace JS {
         public object ToManagedValue (JSContextPtr context) {
             switch (ValueType) {
                 case JSValueType.DOUBLE:
-                    return asDouble;
+                    return packed.f64;
                 case JSValueType.INT32:
-                    return i32;
+                    return packed.i32;
                 case JSValueType.STRING:
                     return ToManagedString(context);
                 case JSValueType.NULL:
                     return null;
                 case JSValueType.BOOLEAN:
-                    return (i32 != 0);
+                    return (packed.i32 != 0);
 
                 default:
                     throw new NotImplementedException("Value type '" + ValueType + "' not convertible");
@@ -114,11 +139,11 @@ namespace JS {
         public static explicit operator double (Value value) {
             switch (value.ValueType) {
                 case JSValueType.DOUBLE:
-                    return value.asDouble;
+                    return value.packed.f64;
 
                 case JSValueType.INT32:
                 case JSValueType.BOOLEAN:
-                    return value.i32;
+                    return value.packed.i32;
 
                 default:
                     throw new InvalidOperationException("Value is not numeric");
@@ -129,7 +154,7 @@ namespace JS {
             switch (value.ValueType) {
                 case JSValueType.INT32:
                 case JSValueType.BOOLEAN:
-                    return value.i32;
+                    return value.packed.i32;
 
                 default:
                     throw new InvalidOperationException("Value is not integral");

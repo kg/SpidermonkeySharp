@@ -7,7 +7,7 @@ namespace Test {
     public static class Program {
         public static void Main () {
             var tc = new Tests();
-            tc.GetPropertyTest();
+            tc.SetPropertyTest();
             Console.WriteLine("// Press enter");
             Console.ReadLine();
         }

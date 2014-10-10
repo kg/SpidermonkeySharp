@@ -105,5 +105,31 @@ namespace Test {
                 Assert.IsTrue(d.Value.IsNullOrUndefined);
             }
         }
+
+        [TestCase]
+        public unsafe void SetPropertyTest () {
+            JSContext context;
+            JSGlobalObject globalObject;
+            DefaultInit(out context, out globalObject);
+
+            // Suppress reporting of uncaught exceptions from Evaluate
+            var options = JSAPI.ContextOptionsRef(context);
+            options->Options = JSContextOptionFlags.DontReportUncaught;
+
+            using (context.Request())
+            using (context.EnterCompartment(globalObject)) {
+                JS.Value a = new JS.Value(37);
+                JS.Value b = JS.Value.Null;
+
+                globalObject.Root.Value.SetProperty(context, "a", a);
+                globalObject.Root.Value.SetProperty(context, "b", b);
+
+                var evalResult = context.Evaluate(
+                    globalObject, "'a=' + a + ', b=' + b"
+                );
+
+                Assert.AreEqual("a=37, b=null", evalResult.Value.ToManagedString(context));
+            }
+        }
     }
 }

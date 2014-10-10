@@ -52,6 +52,16 @@ namespace Spidermonkey {
             fixed (char* pName = name)
                 return GetUCProperty(cx, obj, (IntPtr)pName, (uint)name.Length, vp);
         }
+
+        public static unsafe bool SetProperty (
+            JSContextPtr cx,
+            JSHandleObject obj,
+            string name,
+            JSHandleValue vp
+        ) {
+            fixed (char* pName = name)
+                return SetUCProperty(cx, obj, (IntPtr)pName, (uint)name.Length, vp);
+        }
     }
 
     public class JSRuntime {
@@ -204,6 +214,21 @@ namespace Spidermonkey {
                 result.Dispose();
                 return null;
             }
+        }
+
+        public unsafe bool SetProperty (JSContextPtr context, string name, JSHandleValue value) {
+            fixed (JSObjectPtr* pThis = &this) {
+                JSHandleObject handle = new JSHandleObject((IntPtr)pThis);
+
+                return JSAPI.SetProperty(context, handle, name, value);
+            }
+        }
+
+        public unsafe bool SetProperty (JSContextPtr context, string name, JS.Value value) {
+            JS.Value* pValue = &value;
+            JSHandleValue handle = new JSHandleValue((IntPtr)pValue);
+
+            return SetProperty(context, name, handle);
         }
 
         bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {

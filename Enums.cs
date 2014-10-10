@@ -89,6 +89,7 @@ namespace Spidermonkey {
 
     public enum JSValueTag : uint {
         CLEAR                = 0xFFFFFF80,
+        DOUBLE               = CLEAR | JSValueType.DOUBLE,
         INT32                = CLEAR | JSValueType.INT32,
         UNDEFINED            = CLEAR | JSValueType.UNDEFINED,
         STRING               = CLEAR | JSValueType.STRING,
