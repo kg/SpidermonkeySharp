@@ -11,6 +11,7 @@ namespace Spidermonkey {
     <# DefinePointerType("JSStringPtr"); #>
     <# DefinePointerType("JSRootPtr"); #>
     <# DefinePointerType("JSClassPtr"); #>
+    <# DefinePointerType("JSFunctionPtr"); #>
 
     <# DefineHandleType("JSHandleObject", "JSObjectPtr", rootable: true); #>
     <# DefineHandleType("JSHandleValue", "JS.Value", rootable: true); #>

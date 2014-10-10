@@ -62,6 +62,19 @@ namespace Spidermonkey {
             fixed (char* pName = name)
                 return SetUCProperty(cx, obj, (IntPtr)pName, (uint)name.Length, vp);
         }
+
+        public static unsafe JSFunctionPtr DefineFunction (
+            JSContextPtr cx,
+            JSHandleObject obj,
+            string name,
+            JSNative call,
+            uint nargs, uint attrs
+        ) {
+            fixed (char* pName = name)
+                return JSAPI.DefineUCFunction(
+                    cx, obj, (IntPtr)pName, (uint)name.Length, call, nargs, attrs
+                );
+        }
     }
 
     public class JSRuntime {
@@ -165,9 +178,9 @@ namespace Spidermonkey {
                 resolve = JSAPI.ResolveStub,
                 convert = JSAPI.ConvertStub,
                 finalize = null,
-                call = IntPtr.Zero,
+                call = null,
                 hasInstance = null,
-                construct = IntPtr.Zero,
+                construct = null,
                 trace = JSAPI.GlobalObjectTraceHook
             };
 
@@ -235,6 +248,16 @@ namespace Spidermonkey {
             JSHandleValue handle = new JSHandleValue((IntPtr)pValue);
 
             return SetProperty(context, name, handle);
+        }
+
+        public unsafe JSFunctionPtr DefineFunction (JSContextPtr context, string name, JSNative call) {
+            fixed (JSObjectPtr* pThis = &this) {
+                JSHandleObject handle = new JSHandleObject((IntPtr)pThis);
+
+                return JSAPI.DefineFunction(
+                    context, handle, name, call, 0, 0
+                );
+            }
         }
 
         bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {

@@ -167,5 +167,28 @@ namespace Test {
                 }
             }
         }
+
+        public bool TestNative (JSContextPtr cx, uint argc, ref JS.Value vp) {
+            return false;
+        }
+
+        [TestCase]
+        public void DefineFunctionTest () {
+            JSContext context;
+            JSGlobalObject globalObject;
+            DefaultInit(out context, out globalObject);
+
+            using (context.Request())
+            using (context.EnterCompartment(globalObject)) {
+                globalObject.Pointer.DefineFunction(
+                    context, "test", TestNative
+                );
+
+                context.Evaluate(
+                    globalObject,
+                    @"test()"
+                );
+            }
+        }
     }
 }

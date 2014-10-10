@@ -57,9 +57,9 @@ namespace Spidermonkey {
 
         // Optional members (may be null).
         public JSFinalizeOp finalize;            
-        public IntPtr call;                
+        public JSNative call;                
         public JSHasInstanceOp hasInstance;         
-        public IntPtr construct;
+        public JSNative construct;
         public JSTraceOp trace;
 
         fixed byte reserved[10240];
