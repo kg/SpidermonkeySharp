@@ -8,7 +8,7 @@ using Spidermonkey;
 namespace JS {
     // HACK: This layout is *only valid* in 32-bit mode
     [StructLayout(LayoutKind.Explicit, Size=8)]
-    public struct Value {
+    public struct Value : IRootable {
         [FieldOffset(0)]
         UInt64 asBits;
 
@@ -72,6 +72,14 @@ namespace JS {
 
                 return resultJsString.ToManagedString(context);
             }
+        }
+
+        bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {
+            return JSAPI.AddValueRoot(context, root);
+        }
+
+        void IRootable.RemoveRoot (JSContextPtr context, JSRootPtr root) {
+            JSAPI.RemoveValueRoot(context, root);
         }
     }
 }

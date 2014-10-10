@@ -5,9 +5,13 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Spidermonkey {
-    // FIXME: Make this a class to disable default constructor?
-    public struct Rooted<T> : IDisposable 
-        where T : struct
+    public interface IRootable {
+        bool AddRoot (JSContextPtr context, JSRootPtr root);
+        void RemoveRoot (JSContextPtr context, JSRootPtr root);
+    }
+
+    public class Rooted<T> : IDisposable 
+        where T : struct, IRootable
     {
         [StructLayout(LayoutKind.Sequential)]
         public unsafe class _State {
@@ -18,38 +22,49 @@ namespace Spidermonkey {
             }
         }
 
+        public readonly JSContextPtr Context;
         public readonly GCHandle Pin;
         public readonly _State State;
+        public readonly JSRootPtr Root;
+        public bool IsDisposed { get; private set; }
 
         public Rooted (
             JSContextPtr context, 
             T value = default(T)
         ) {
+            Context = context;
             State = new _State(value);
             Pin = GCHandle.Alloc(State, GCHandleType.Pinned);
+            Root = new JSRootPtr(Pin.AddrOfPinnedObject());
 
-            if (!JSAPI.AddObjectRoot(context, this))
+            if (!default(T).AddRoot(context, Root))
                 throw new Exception("Failed to add root");
         }
 
         public void Dispose () {
+            if (IsDisposed)
+                return;
+
+            IsDisposed = true;
+            default(T).RemoveRoot(Context, Root);
             Pin.Free();
+        }
+
+        ~Rooted () {
+            Dispose();
         }
 
         public T Value {
             get {
                 return State.Value;
             }
+            set {
+                State.Value = value;
+            }
         }
 
         public static implicit operator T (Rooted<T> rooted) {
             return rooted.State.Value;
-        }
-
-        // Treats the address of our pinned object pointer as a Handle<JSObject *>.
-        // Make sure the root doesn't die while this handle value is alive!
-        public static unsafe implicit operator JSRootPtr (Rooted<T> rooted) {
-            return new JSRootPtr(rooted.Pin.AddrOfPinnedObject());
         }
     }
 }

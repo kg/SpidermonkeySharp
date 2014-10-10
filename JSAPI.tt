@@ -69,6 +69,31 @@ namespace Spidermonkey {
             JSContextPtr cx, JSRootPtr opp
         );
 
+        <# ImportFunction("?AddValueRoot@JS@@YA_NPAUJSContext@@PAV?$Heap@VValue@JS@@@1@@Z"); #>
+        public static extern bool AddValueRoot(
+            JSContextPtr cx, JSRootPtr opp
+        );
+
+        <# ImportFunction("?AddStringRoot@JS@@YA_NPAUJSContext@@PAV?$Heap@PAVJSString@@@1@@Z"); #>
+        public static extern bool AddStringRoot(
+            JSContextPtr cx, JSRootPtr opp
+        );
+
+        <# ImportFunction("?RemoveObjectRoot@JS@@YAXPAUJSContext@@PAV?$Heap@PAVJSObject@@@1@@Z"); #>
+        public static extern void RemoveObjectRoot(
+            JSContextPtr cx, JSRootPtr opp
+        );
+
+        <# ImportFunction("?RemoveValueRoot@JS@@YAXPAUJSContext@@PAV?$Heap@VValue@JS@@@1@@Z"); #>
+        public static extern void RemoveValueRoot(
+            JSContextPtr cx, JSRootPtr opp
+        );
+
+        <# ImportFunction("?RemoveStringRoot@JS@@YAXPAUJSContext@@PAV?$Heap@PAVJSString@@@1@@Z"); #>
+        public static extern void RemoveStringRoot(
+            JSContextPtr cx, JSRootPtr opp
+        );
+
         <# ImportFunction("?JS_DefaultValue@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@W4JSType@@V?$MutableHandle@VValue@JS@@@3@@Z"); #>
         public static extern bool 
         DefaultValue(

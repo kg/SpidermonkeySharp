@@ -24,17 +24,19 @@ namespace Test {
                 JSErrorReporter errorReporter = ErrorReporter;
                 Assert.AreEqual(null, JSAPI.SetErrorReporter(context, errorReporter));
 
-                var globalObject = JSAPI.NewGlobalObject(
+                var globalRoot = new Rooted<JSObjectPtr>(
                     context,
-                    ref JSClass.DefaultGlobalObjectClass,
-                    null,
-                    JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
-                    ref JSCompartmentOptions.Default
+                    JSAPI.NewGlobalObject(
+                        context,
+                        ref JSClass.DefaultGlobalObjectClass,
+                        null,
+                        JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
+                        ref JSCompartmentOptions.Default
+                    )
                 );
-                Assert.IsTrue(globalObject.IsNonzero);
+                Assert.IsTrue(globalRoot.Value.IsNonzero);
 
-                using (context.EnterCompartment(globalObject)) {
-                    var globalRoot = new Rooted<JSObjectPtr>(context, globalObject);
+                using (context.EnterCompartment(globalRoot)) {
                     Assert.IsTrue(JSAPI.InitStandardClasses(context, globalRoot));
 
                     string testScript =

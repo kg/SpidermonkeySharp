@@ -4,7 +4,17 @@ using System;
 using System.Runtime.InteropServices;
 
 namespace Spidermonkey {
-    <# DefinePointerType("JSObjectPtr"); #>
+    <# BeginPointerType("JSObjectPtr", "IRootable"); #>
+
+        bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {
+            return JSAPI.AddObjectRoot(context, root);
+        }
+
+        void IRootable.RemoveRoot (JSContextPtr context, JSRootPtr root) {
+            JSAPI.RemoveObjectRoot(context, root);
+        }
+    }
+
     <# DefinePointerType("JSRuntimePtr"); #>
     <# DefinePointerType("JSContextPtr"); #>
     <# DefinePointerType("JSCompartmentPtr"); #>
@@ -37,18 +47,23 @@ namespace Spidermonkey {
 
     <# DefinePointerType("JSRootPtr"); #>
 
-    <# DefineHandleType("JSHandleObject", "JSObjectPtr"); #>
-    <# DefineHandleType("JSHandleValue", "JS.Value"); #>
-    <# DefineHandleType("JSHandleId", "jsid"); #>
+    <# DefineHandleType("JSHandleObject", "JSObjectPtr", rootable: true); #>
+    <# DefineHandleType("JSHandleValue", "JS.Value", rootable: true); #>
+    <# DefineHandleType("JSHandleId", "jsid", rootable: false); #>
 
-    <# DefineHandleType("JSMutableHandleValue", "JS.Value"); #>
+    <# DefineHandleType("JSMutableHandleValue", "JS.Value", rootable: true); #>
 }
 
 <#+
-    public void BeginPointerType (string name) {
+    public void BeginPointerType (string name, params string[] interfaces) {
         #>
         [StructLayout(LayoutKind.Sequential)]
-        public struct <#= name #> {
+        public struct <#= name #> 
+        <#+
+            if (interfaces.Length > 0) {
+                #> : <#= String.Join(", ", interfaces) #> <#+
+            }
+        #> {
             public IntPtr Pointer;
 
             public <#= name #> (IntPtr pointer) {
@@ -86,7 +101,7 @@ namespace Spidermonkey {
         <#+
     }
 
-    public void DefineHandleType (string name, string valueName) {
+    public void DefineHandleType (string name, string valueName, bool rootable = false) {
         #>
         [StructLayout(LayoutKind.Sequential)]
         public struct <#= name #> {
@@ -100,12 +115,16 @@ namespace Spidermonkey {
                 <#= valueName #> * pTarget = (<#= valueName #> *)AddressOfTarget;
                 return *pTarget;
             }
-
+        <#+
+        if (rootable) {
+            #>
             public static implicit operator <#= name #> (Rooted< <#= valueName #> > root) {
-                JSRootPtr pRoot = root;
-                return new <#= name #>(pRoot.Pointer);
+                return new <#= name #>(root.Root.Pointer);
             }
+            <#+
         }
+        #>
+            }
         <#+
     }
 #>
