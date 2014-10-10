@@ -7,13 +7,14 @@ using NUnit.Framework;
 using Spidermonkey;
 
 namespace Test {
-    public static class Program {
+    [TestFixture]
+    public class Tests {
         public static void ErrorReporter (JSContextPtr context, string message, ref JSErrorReport report) {
             throw new Exception();
         }
 
-        [STAThread]
-        public unsafe static void Main () {
+        [TestCase]
+        public unsafe static void BasicTest () {
             Assert.IsTrue(JSAPI.Init());
 
             var runtime = JSAPI.NewRuntime(1024 * 1024 * 4);
