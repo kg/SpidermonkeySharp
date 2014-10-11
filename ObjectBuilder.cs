@@ -26,6 +26,9 @@ namespace Spidermonkey {
             : this(objRoot.Context, objRoot.Value) {
         }
 
+        /// <summary>
+        /// If valueRoot does not contain an object value, this will throw.
+        /// </summary>
         public JSObjectReference (Rooted<JS.Value> valueRoot)
             : this(valueRoot.Context, valueRoot.Value.AsObject) {
         }

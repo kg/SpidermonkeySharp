@@ -107,7 +107,7 @@ namespace JS {
         public JSStringPtr AsString {
             get {
                 if (ValueType != JSValueType.STRING)
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException("Value is not a string");
 
                 return packed.str;
             }
@@ -115,10 +115,12 @@ namespace JS {
 
         public JSObjectPtr AsObject {
             get {
-                if (ValueType != JSValueType.OBJECT)
-                    throw new InvalidOperationException();
-
-                return packed.obj;
+                if (ValueType == JSValueType.NULL)
+                    return JSObjectPtr.Zero;
+                else if (ValueType == JSValueType.OBJECT)
+                    return packed.obj;
+                else
+                    throw new InvalidOperationException("Value is not an object");
             }
         }
 
