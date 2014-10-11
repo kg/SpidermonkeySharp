@@ -110,7 +110,9 @@ namespace Spidermonkey {
 
     public class JSContext : IDisposable {
         private static readonly ConcurrentDictionary<JSContextPtr, WeakReference>
-            ContextRegistry = new ConcurrentDictionary<JSContextPtr, WeakReference>();
+            ContextRegistry = new ConcurrentDictionary<JSContextPtr, WeakReference>(
+                JSContextPtr.Comparer
+            );
 
         public readonly JSContextPtr Pointer;
         public readonly JSContextExceptionStatus Exception;

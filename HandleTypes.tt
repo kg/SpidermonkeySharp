@@ -2,6 +2,7 @@
 <#@ output extension=".generated.cs" #>
 using System;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace Spidermonkey {
     <# DefinePointerType("JSObjectPtr", "IRootable"); #>
@@ -30,6 +31,21 @@ namespace Spidermonkey {
                 #> : <#= String.Join(", ", interfaces) #> <#+
             }
         #> {
+            public class TComparer : IComparer< <#= name #> >, IEqualityComparer< <#= name #> > {
+                public int Compare (<#= name #> lhs, <#= name #> rhs) {
+                    return lhs.Pointer.ToInt64().CompareTo(rhs.Pointer.ToInt64());
+                }
+
+                public int GetHashCode (<#= name #> ptr) {
+                    return ptr.Pointer.GetHashCode();
+                }
+
+                public bool Equals (<#= name #> lhs, <#= name #> rhs) {
+                    return lhs.Pointer == rhs.Pointer;
+                }
+            }
+
+            public static readonly TComparer Comparer = new TComparer();
             public static readonly <#= name #> Zero = new <#= name #>(IntPtr.Zero);
 
             public IntPtr Pointer;
