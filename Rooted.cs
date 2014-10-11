@@ -41,6 +41,9 @@ namespace Spidermonkey {
             JSContextPtr context, 
             T value
         ) {
+            if (context.IsZero)
+                throw new ArgumentNullException("context");
+
             // HACK: Attempt to locate a managed context for a raw pointer if that's all we have.
             // This lets us finalize safely.
             if (managedContext == null)

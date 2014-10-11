@@ -11,12 +11,23 @@ namespace Spidermonkey {
 
         private Rooted<JS.Value> LazyRootedValue;
 
-        protected JSObjectReference(
+        public JSObjectReference(
             JSContextPtr context,
             JSObjectPtr obj
         ) {
+            if (context.IsZero)
+                throw new ArgumentNullException("context");
+
             Context = context;
             Root = new Rooted<JSObjectPtr>(Context, obj);
+        }
+
+        public JSObjectReference (Rooted<JSObjectPtr> objRoot)
+            : this(objRoot.Context, objRoot.Value) {
+        }
+
+        public JSObjectReference (Rooted<JS.Value> valueRoot)
+            : this(valueRoot.Context, valueRoot.Value.AsObject) {
         }
 
         public JSObjectPtr Pointer {

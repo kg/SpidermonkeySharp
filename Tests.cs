@@ -103,33 +103,30 @@ namespace Test {
                 );
 
                 Assert.AreEqual(JSValueType.OBJECT, evalResult.Value.ValueType);
-                var objRoot = new Rooted<JSObjectPtr>(tc, evalResult.Value.AsObject);
+                var obj = new JSObjectReference(evalResult);
 
-                var a = objRoot.Value.GetProperty(tc, "a");
-                Assert.AreEqual(JSValueType.INT32, a.Value.ValueType);
-                Assert.AreEqual(1, (int)a.Value);
+                var a = obj["a"];
+                Assert.AreEqual(JSValueType.INT32, a.ValueType);
+                Assert.AreEqual(1, (int)a);
 
-                var b = objRoot.Value.GetProperty(tc, "b");
-                Assert.AreEqual(JSValueType.STRING, b.Value.ValueType);
-                Assert.AreEqual("hello", b.Value.ToManagedValue(tc));
+                var b = obj["b"];
+                Assert.AreEqual(JSValueType.STRING, b.ValueType);
+                Assert.AreEqual("hello", b.ToManagedValue(tc));
 
-                var c = objRoot.Value.GetProperty(tc, "c");
-                Assert.AreEqual(JSValueType.DOUBLE, c.Value.ValueType);
-                Assert.AreEqual(3.5, (double)c.Value);
+                var c = obj["c"];
+                Assert.AreEqual(JSValueType.DOUBLE, c.ValueType);
+                Assert.AreEqual(3.5, (double)c);
 
-                var d = objRoot.Value.GetProperty(tc, "d");
-                Assert.IsTrue(d.Value.IsNullOrUndefined);
+                var d = obj["d"];
+                Assert.IsTrue(d.IsNullOrUndefined);
             }
         }
 
         [TestCase]
         public void SetPropertyTest () {
             using (var tc = new TestContext()) {
-                var a = new JS.Value(37);
-                var b = JS.Value.Null;
-
-                tc.Global.Pointer.SetProperty(tc, "a", a);
-                tc.Global.Pointer.SetProperty(tc, "b", b);
+                tc.Global["a"] = new JS.Value(37);
+                tc.Global["b"] = JS.Value.Null;
 
                 var evalResult = tc.Context.Evaluate(
                     tc.Global, "'a=' + a + ', b=' + b"
@@ -216,7 +213,7 @@ namespace Test {
             using (var tc = new TestContext()) {
                 // Implicit conversion from Rooted<JSObjectPtr> to JS.Value
                 JS.Value val = tc.Global.Root;
-                tc.Global.Pointer.SetProperty(tc, "g", val);
+                tc.Global["g"] = val;
 
                 var evalResult = tc.Context.Evaluate(tc.Global, "g");
                 Assert.AreEqual(val, evalResult.Value);
@@ -228,8 +225,7 @@ namespace Test {
         public void ObjectBuilderTest () {
             using (var tc = new TestContext())
             using (var obj = new JSObjectBuilder(tc)) {
-                tc.Global.Pointer.SetProperty(tc, "obj", obj);
-
+                tc.Global["obj"] = obj;
                 obj["a"] = new JS.Value(5);
 
                 var evalResult = tc.Context.Evaluate(tc.Global, "obj.a");
