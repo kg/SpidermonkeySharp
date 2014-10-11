@@ -210,5 +210,28 @@ namespace Test {
                 Assert.AreEqual(32, evalResult.Value.ToManagedValue(tc));
             }
         }
+
+        [TestCase]
+        public void ValueFromObject () {
+            using (var tc = new TestContext()) {
+                // Implicit conversion from Rooted<JSObjectPtr> to JS.Value
+                JS.Value val = tc.Global.Root;
+                tc.Global.Pointer.SetProperty(tc, "g", val);
+
+                var evalResult = tc.Context.Evaluate(tc.Global, "g");
+                Assert.AreEqual(val, evalResult.Value);
+                Assert.AreEqual(tc.Global.Pointer, evalResult.Value.AsObject);
+            }
+        }
+
+        /*
+        [TestCase]
+        public void DefineObjectTest () {
+            using (var tc = new TestContext())
+            using (var obj = new JSObjectBuilder(tc)) {
+                tc.Global.Pointer.SetProperty(tc, "obj", obj);
+            }
+        }
+         */
     }
 }
