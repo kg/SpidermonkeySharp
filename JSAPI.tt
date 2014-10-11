@@ -258,6 +258,14 @@ namespace Spidermonkey {
             JSRuntimePtr runtime
         );
 
+        <# ImportFunction("?JS_NewObject@@YAPAVJSObject@@PAUJSContext@@PBUJSClass@@V?$Handle@PAVJSObject@@@JS@@2@Z"); #>
+        public static extern JSObjectPtr NewObject(
+            JSContextPtr cx, 
+            JSClassPtr clasp, 
+            JSHandleObject proto, 
+            JSHandleObject parent
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

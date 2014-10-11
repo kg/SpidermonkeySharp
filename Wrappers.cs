@@ -226,69 +226,6 @@ namespace Spidermonkey {
         }
     }
 
-    public class JSGlobalObject : IDisposable {
-        private static /* readonly */ JSClass DefaultClassDefinition;
-        private static JSClassPtr DefaultClass;
-        private static GCHandle DefaultClassHandle;
-
-        public readonly JSContextPtr Context;
-        public readonly Rooted<JSObjectPtr> Root;
-
-        static JSGlobalObject () {
-            DefaultClassDefinition = new JSClass {
-                name = "global",
-                flags = JSClassFlags.GLOBAL_FLAGS,
-                addProperty = JSAPI.PropertyStub,
-                delProperty = JSAPI.DeletePropertyStub,
-                getProperty = JSAPI.PropertyStub,
-                setProperty = JSAPI.StrictPropertyStub,
-                enumerate = JSAPI.EnumerateStub,
-                resolve = JSAPI.ResolveStub,
-                convert = JSAPI.ConvertStub,
-                finalize = null,
-                call = null,
-                hasInstance = null,
-                construct = null,
-                trace = JSAPI.GlobalObjectTraceHook
-            };
-
-            // We have to pin our JSClass (so everything it points to is retained)
-            //  and marshal it into a manually-allocated buffer that doesn't expire.
-            // JSClass buffer needs to live as long as the global object, or longer.
-            DefaultClass = new JSClassPtr(ref DefaultClassDefinition, out DefaultClassHandle);
-        }
-
-        public JSGlobalObject (JSContextPtr context) {
-            Context = context;
-            Root = new Rooted<JSObjectPtr>(Context);
-
-            Root.Value = JSAPI.NewGlobalObject(
-                Context,
-                DefaultClass, null,
-                JSOnNewGlobalHookOption.DontFireOnNewGlobalHook,
-                ref JSCompartmentOptions.Default
-            );
-        }
-
-        public JSObjectPtr Pointer {
-            get {
-                return Root.Value;
-            }
-        }
-
-        public void Dispose () {
-            Root.Dispose();
-        }
-
-        public static implicit operator JSObjectPtr (JSGlobalObject self) {
-            return self.Root.Value;
-        }
-
-        public static implicit operator JSHandleObject (JSGlobalObject self) {
-            return self.Root;
-        }
-    }
-
     public partial struct JSObjectPtr {
         public unsafe Rooted<JS.Value> GetProperty (JSContextPtr context, string name) {
             var result = new Rooted<JS.Value>(context);

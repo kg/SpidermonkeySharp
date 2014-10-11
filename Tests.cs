@@ -224,14 +224,17 @@ namespace Test {
             }
         }
 
-        /*
         [TestCase]
-        public void DefineObjectTest () {
+        public void ObjectBuilderTest () {
             using (var tc = new TestContext())
             using (var obj = new JSObjectBuilder(tc)) {
                 tc.Global.Pointer.SetProperty(tc, "obj", obj);
+
+                obj.Pointer.SetProperty(tc, "a", new JS.Value(5));
+
+                var evalResult = tc.Context.Evaluate(tc.Global, "obj.a");
+                Assert.AreEqual(5, evalResult.Value.ToManagedValue(tc));
             }
         }
-         */
     }
 }
