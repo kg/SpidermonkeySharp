@@ -22,17 +22,37 @@ namespace Spidermonkey {
             }
         }
 
+        private readonly WeakReference ManagedContextReference;
         public readonly JSContextPtr Context;
+
         public readonly GCHandle Pin;
         public readonly _State State;
         public readonly JSRootPtr Root;
         public bool IsDisposed { get; private set; }
 
-        public Rooted (
+        public bool IsFinalizerEnabled {
+            get {
+                return (ManagedContextReference != null);
+            }
+        }
+
+        private Rooted (
+            JSContext managedContext,
             JSContextPtr context, 
-            T value = default(T)
+            T value
         ) {
+            // HACK: Attempt to locate a managed context for a raw pointer if that's all we have.
+            // This lets us finalize safely.
+            if (managedContext == null)
+                managedContext = JSContext.FromPointer(context);
+
+            if (managedContext != null)
+                ManagedContextReference = managedContext.WeakSelf;
+            else
+                ManagedContextReference = null;
+
             Context = context;
+
             State = new _State(value);
             Pin = GCHandle.Alloc(State, GCHandleType.Pinned);
             Root = new JSRootPtr(Pin.AddrOfPinnedObject());
@@ -41,17 +61,53 @@ namespace Spidermonkey {
                 throw new Exception("Failed to add root");
         }
 
+        public Rooted (
+            JSContext managedContext,
+            T value = default(T)
+        ) : this(managedContext, managedContext, value) {
+        }
+
+        /// <summary>
+        /// WARNING: Roots created using this constructor will leak if not disposed.
+        /// </summary>
+        public Rooted (
+            JSContextPtr context,
+            T value = default(T)
+        ) : this(null, context, value) {
+        }
+
         public void Dispose () {
             if (IsDisposed)
                 return;
 
             IsDisposed = true;
+            GC.SuppressFinalize(this);
+
             default(T).RemoveRoot(Context, Root);
             Pin.Free();
         }
 
         ~Rooted () {
-            Dispose();
+            if (IsDisposed)
+                return;
+
+            // Determine whether it is safe to delete this root.
+            // If the owning context is destroyed, we will crash when unrooting.
+            // On the other hand, a dead context doesn't have roots anymore. :-)
+            bool canDispose = true;
+            JSContext mc;
+
+            if (ManagedContextReference == null)
+                canDispose = false;
+            else if (!ManagedContextReference.IsAlive)
+                canDispose = false;
+            else if ((mc = (JSContext)ManagedContextReference.Target) == null)
+                canDispose = false;
+            else if (mc.IsDisposed)
+                canDispose = false;
+
+            if (canDispose)
+                Dispose();
         }
 
         public T Value {

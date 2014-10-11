@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -77,8 +79,9 @@ namespace Spidermonkey {
         }
     }
 
-    public class JSRuntime {
+    public class JSRuntime : IDisposable {
         public readonly JSRuntimePtr Pointer;
+        public bool IsDisposed { get; private set; }
 
         public JSRuntime (uint maxBytes = 1024 * 1024 * 8) {
             Pointer = JSAPI.NewRuntime(maxBytes);
@@ -89,11 +92,31 @@ namespace Spidermonkey {
         public static implicit operator JSRuntimePtr (JSRuntime obj) {
             return obj.Pointer;
         }
+
+        public void Dispose () {
+            if (IsDisposed)
+                return;
+
+            IsDisposed = true;
+            GC.SuppressFinalize(this);
+
+            JSAPI.DestroyRuntime(Pointer);
+        }
+
+        ~JSRuntime () {
+            Dispose();
+        }
     }
 
-    public class JSContext {
+    public class JSContext : IDisposable {
+        private static readonly ConcurrentDictionary<JSContextPtr, WeakReference>
+            ContextRegistry = new ConcurrentDictionary<JSContextPtr, WeakReference>();
+
         public readonly JSContextPtr Pointer;
         public readonly JSContextExceptionStatus Exception;
+        public bool IsDisposed { get; private set; }
+
+        public readonly WeakReference WeakSelf;
 
         public JSContext (JSRuntimePtr runtime) {
             Pointer = JSAPI.NewContext(runtime, 8192);
@@ -101,6 +124,23 @@ namespace Spidermonkey {
                 throw new Exception();
 
             Exception = new JSContextExceptionStatus(Pointer);
+            WeakSelf = new WeakReference(this, true);
+
+            if (!ContextRegistry.TryAdd(Pointer, WeakSelf))
+                throw new Exception("Failed to update context registry");
+        }
+
+        public static JSContext FromPointer (JSContextPtr pointer) {
+            WeakReference wr;
+
+            if (!ContextRegistry.TryGetValue(pointer, out wr))
+                return null;
+
+            if (!wr.IsAlive)
+                return null;
+
+            JSContext result = (JSContext)wr.Target;
+            return result;
         }
 
         public JSRequest Request () {
@@ -127,6 +167,32 @@ namespace Spidermonkey {
 
             resultRoot.Dispose();
             return null;
+        }
+
+        public void Dispose (bool collectGarbage = true) {
+            if (IsDisposed)
+                return;
+
+            IsDisposed = true;
+            GC.SuppressFinalize(this);
+
+            WeakReference temp;
+            if (!ContextRegistry.TryRemove(Pointer, out temp))
+                Debug.WriteLine("Failed to remove context from registry");
+
+            if (collectGarbage)
+                JSAPI.DestroyContext(Pointer);
+            else
+                JSAPI.DestroyContextNoGC(Pointer);
+        }
+
+        void IDisposable.Dispose () {
+            Dispose(true);
+        }
+
+        ~JSContext () {
+            // Suppress GC since we're in a finalizer.
+            Dispose(false);
         }
     }
 

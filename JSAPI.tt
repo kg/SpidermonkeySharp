@@ -243,6 +243,21 @@ namespace Spidermonkey {
             uint nargs, uint attrs
         );       
 
+        <# ImportFunction("?JS_DestroyContextNoGC@@YAXPAUJSContext@@@Z"); #>
+        public static extern void DestroyContextNoGC(
+            JSContextPtr context
+        );
+
+        <# ImportFunction("?JS_DestroyContext@@YAXPAUJSContext@@@Z"); #>
+        public static extern void DestroyContext(
+            JSContextPtr context
+        );
+
+        <# ImportFunction("?JS_DestroyRuntime@@YAXPAUJSRuntime@@@Z"); #>
+        public static extern void DestroyRuntime(
+            JSRuntimePtr runtime
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(
