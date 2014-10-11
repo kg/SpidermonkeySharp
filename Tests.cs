@@ -230,7 +230,7 @@ namespace Test {
             using (var obj = new JSObjectBuilder(tc)) {
                 tc.Global.Pointer.SetProperty(tc, "obj", obj);
 
-                obj.Pointer.SetProperty(tc, "a", new JS.Value(5));
+                obj["a"] = new JS.Value(5);
 
                 var evalResult = tc.Context.Evaluate(tc.Global, "obj.a");
                 Assert.AreEqual(5, evalResult.Value.ToManagedValue(tc));

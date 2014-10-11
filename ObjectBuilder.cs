@@ -31,12 +31,29 @@ namespace Spidermonkey {
             return new JS.Value(self.Root);
         }
 
+        public static implicit operator JSHandleValue (JSObjectReference self) {
+            return new Rooted<JS.Value>(self.Context, self.Root);
+        }
+
         public static implicit operator JSObjectPtr (JSObjectReference self) {
             return self.Root.Value;
         }
 
         public static implicit operator JSHandleObject (JSObjectReference self) {
             return self.Root;
+        }
+
+        /// <summary>
+        /// Value becomes (or is) rooted by the object.
+        /// It's your responsibility to root it if you need it to outlive the object.
+        /// </summary>
+        public JS.Value this[string name] {
+            get {
+                return Pointer.GetProperty(Context, name);
+            }
+            set {
+                Pointer.SetProperty(Context, name, value);
+            }
         }
     }
 

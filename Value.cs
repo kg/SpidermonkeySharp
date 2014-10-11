@@ -228,3 +228,22 @@ namespace JS {
         }
     }
 }
+
+namespace Spidermonkey {
+    // Type system ambiguity buster
+    public struct JSUnrootedValue {
+        public readonly JS.Value Value;
+
+        public JSUnrootedValue (JS.Value value) {
+            Value = value;
+        }
+
+        public static implicit operator JS.Value (JSUnrootedValue self) {
+            return self.Value;
+        }
+
+        public static implicit operator JSUnrootedValue (JS.Value val) {
+            return new JSUnrootedValue(val);
+        }
+    }
+}

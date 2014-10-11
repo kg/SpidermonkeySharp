@@ -248,8 +248,9 @@ namespace Spidermonkey {
             }
         }
 
-        public unsafe bool SetProperty (JSContextPtr context, string name, JS.Value value) {
-            JS.Value* pValue = &value;
+        public unsafe bool SetProperty (JSContextPtr context, string name, JSUnrootedValue value) {
+            JS.Value _value = value;
+            JS.Value* pValue = &_value;
             JSHandleValue handle = new JSHandleValue((IntPtr)pValue);
 
             return SetProperty(context, name, handle);
