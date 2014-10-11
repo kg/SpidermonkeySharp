@@ -9,6 +9,8 @@ namespace Spidermonkey {
         public readonly JSContextPtr Context;
         public readonly Rooted<JSObjectPtr> Root;
 
+        private Rooted<JS.Value> LazyRootedValue;
+
         protected JSObjectReference(
             JSContextPtr context,
             JSObjectPtr obj
@@ -27,12 +29,19 @@ namespace Spidermonkey {
             Root.Dispose();
         }
 
+        // Since we're rooted it's safe to implicitly convert to a value
         public static implicit operator JS.Value (JSObjectReference self) {
             return new JS.Value(self.Root);
         }
 
+        // We have to lazily construct a rooted JS.Value for ourselves so that
+        //  it can serve as the address of our JS.Value in order to produce a JSHandleValue.
+        // Gross.
         public static implicit operator JSHandleValue (JSObjectReference self) {
-            return new Rooted<JS.Value>(self.Context, self.Root);
+            if (self.LazyRootedValue == null)
+                self.LazyRootedValue = new Rooted<JS.Value>(self.Context, self.Root);
+
+            return self.LazyRootedValue;
         }
 
         public static implicit operator JSObjectPtr (JSObjectReference self) {
