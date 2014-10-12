@@ -319,16 +319,19 @@ namespace Test {
                 var cc = new JSCustomClass(tc, "testClass", tc.Global);
                 cc.Initialize();
 
+                cc.Prototype["a"] = new JSString(tc, "hello");
+
                 var classObj = new JSObjectReference(tc, tc.Global["testClass"].AsObject);
 
-                Console.WriteLine(new JS.Value(cc.Prototype).ToManagedString(tc));
-                Console.WriteLine(classObj.ToString());
+                Assert.AreEqual(cc.Prototype.Pointer, classObj["prototype"].AsObject);
 
-                Assert.AreEqual(cc.Prototype, classObj["prototype"].AsObject);
+                Assert.AreEqual("hello", tc.Context.Evaluate(tc.Global, "testClass.prototype.a").Value.ToManagedString(tc));
 
-                var evalResult = tc.Context.Evaluate(tc.Global, "new testClass()");
-                Assert.AreEqual(JSValueType.OBJECT, evalResult.Value.ValueType);
-                Console.WriteLine(evalResult.Value.ToManagedString(tc));
+                var evalResult = tc.Context.Evaluate(tc.Global, "(new testClass())");
+                var resultObj = new JSObjectReference(evalResult);
+
+                // FIXME: Why doesn't this work?
+                Assert.AreEqual("hello", resultObj["a"].ToManagedString(tc));
             }
         }
     }

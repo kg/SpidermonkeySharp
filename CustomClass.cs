@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Spidermonkey {
+namespace Spidermonkey.Managed {
     // FIXME: If the context outlives this instance, the JSClass might get unpinned
     public class JSCustomClass /* : IDisposable */ {
         public readonly JSContextPtr Context;
@@ -12,9 +12,10 @@ namespace Spidermonkey {
         private /* readonly */ JSClass ClassDefinition;
         private readonly JSClassPtr ClassPtr;
         private /* readonly */ GCHandle ClassPin;
-        private readonly JSNative NativeConstructor;
+        private JSNative NativeConstructor;
+        private NativeToManagedProxy ManagedConstructor;
 
-        private Rooted<JSObjectPtr> PrototypeRoot;
+        public JSObjectReference Prototype { get; private set; }
 
         private readonly JSHandleObject GlobalObject;
 
@@ -25,8 +26,8 @@ namespace Spidermonkey {
             Context = context;
             ClassDefinition = new JSClass(name);
             ClassPtr = new JSClassPtr(ref ClassDefinition, out ClassPin);            
-            NativeConstructor = Constructor;
-            PrototypeRoot = new Rooted<JSObjectPtr>(context);
+            NativeConstructor = DefaultConstructor;
+            ManagedConstructor = null;
             GlobalObject = globalObject;
         }
 
@@ -49,6 +50,30 @@ namespace Spidermonkey {
                 AssertNotInitialized();
                 ClassDefinition.flags = value;
             }
+        }
+
+        public void SetConstructor (JSNative constructor) {
+            AssertNotInitialized();
+            NativeConstructor = constructor;
+            ManagedConstructor = null;
+        }
+
+        public void SetConstructor<T> (T constructor) {
+            var ctorDelegate = constructor as Delegate;
+            if (ctorDelegate == null)
+                throw new ArgumentException("Must be a managed delegate", "constructor");
+
+            // No need to create a proxy
+            if (ctorDelegate is JSNative) {
+                SetConstructor((JSNative)ctorDelegate);
+                return;
+            }
+
+            AssertNotInitialized();
+
+            // Wrap the delegate in a proxy and retain the proxy
+            ManagedConstructor = new NativeToManagedProxy(ctorDelegate);
+            NativeConstructor = ManagedConstructor.WrappedMethod;
         }
 
         public uint NumConstructorArguments {
@@ -77,36 +102,24 @@ namespace Spidermonkey {
             // Repack in case members were changed
             ClassPtr.Pack(ref ClassDefinition);
 
-            PrototypeRoot.Value = JSAPI.InitClass(
+            Prototype = new JSObjectReference(Context, JSAPI.InitClass(
                 Context, GlobalObject, _ParentPrototype,
                 ClassPtr, NativeConstructor, _NumConstructorArguments,
                 JSPropertySpecPtr.Zero,
                 JSFunctionSpecPtr.Zero,
                 JSPropertySpecPtr.Zero,
                 JSFunctionSpecPtr.Zero
-            );
+            ));
         }
 
         public bool IsInitialized {
             get {
-                return PrototypeRoot.Value.IsNonzero;
+                return Prototype != null;
             }
         }
 
-        public JSHandleObject PrototypeHandle {
-            get {
-                return PrototypeRoot;
-            }
-        }
-
-        public JSObjectPtr Prototype {
-            get {
-                return PrototypeRoot.Value;
-            }
-        }
-
-        protected bool Constructor (JSContextPtr context, uint argc, JSCallArgumentsPtr vp) {
-            return false;
+        public static bool DefaultConstructor (JSContextPtr context, uint argc, JSCallArgumentsPtr vp) {
+            return true;
         }
 
         /*

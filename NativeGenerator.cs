@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Spidermonkey {
+namespace Spidermonkey.Managed {
     public class NativeToManagedProxy : IDisposable {
         public readonly Delegate ManagedMethod;
         public readonly JSNative WrappedMethod;

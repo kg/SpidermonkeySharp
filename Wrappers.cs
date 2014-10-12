@@ -127,7 +127,7 @@ namespace Spidermonkey {
         public unsafe JSFunctionPtr DefineFunction (
             JSContextPtr context, string name, Delegate @delegate, uint attrs = 0
         ) {
-            var wrapped = new NativeToManagedProxy(@delegate);
+            var wrapped = new Managed.NativeToManagedProxy(@delegate);
             return DefineFunction(context, name, wrapped.WrappedMethod, wrapped.ArgumentCount, attrs);
         }
 

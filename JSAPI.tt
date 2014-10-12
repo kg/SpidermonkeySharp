@@ -412,6 +412,12 @@ namespace Spidermonkey {
             JSPropertySpecPtr static_ps, JSFunctionSpecPtr static_fs
         );
 
+        <# ImportFunction("?JS_New@@YAPAVJSObject@@PAUJSContext@@V?$Handle@PAVJSObject@@@JS@@ABVHandleValueArray@4@@Z"); #>
+        public static extern JSObjectPtr New(
+            JSContextPtr cx, JSHandleObject ctor,
+            ref JS.ValueArrayPtr args
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(
