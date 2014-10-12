@@ -266,6 +266,21 @@ namespace Spidermonkey {
             JSHandleObject parent
         );
 
+        <# ImportFunction("?JS_NewObjectWithGivenProto@@YAPAVJSObject@@PAUJSContext@@PBUJSClass@@V?$Handle@PAVJSObject@@@JS@@2@Z"); #>
+        public static extern JSObjectPtr NewObjectWithGivenProto(
+            JSContextPtr cx, 
+            JSClassPtr clasp, 
+            JSHandleObject proto, 
+            JSHandleObject parent
+        );
+
+        <# ImportFunction("?JS_NewObjectForConstructor@@YAPAVJSObject@@PAUJSContext@@PBUJSClass@@ABVCallArgs@JS@@@Z"); #>
+        public static extern JSObjectPtr NewObjectForConstructor(
+            JSContextPtr cx, 
+            JSClassPtr clasp, 
+            ref JSCallArgs args
+        );
+
         <# ImportFunction("?JS_IsArrayObject@@YA_NPAUJSContext@@V?$Handle@VValue@JS@@@JS@@@Z"); #>
         public static extern bool IsArrayObject(
             JSContextPtr context, JSHandleValue val
@@ -387,6 +402,14 @@ namespace Spidermonkey {
             ref JS.AutoCheckCannotGC nogc, 
             JSStringPtr str,
             out UInt32 length
+        );
+
+        <# ImportFunction("?JS_InitClass@@YAPAVJSObject@@PAUJSContext@@V?$Handle@PAVJSObject@@@JS@@1PBUJSClass@@P6A_N0IPAVValue@4@@ZIPBUJSPropertySpec@@PBUJSFunctionSpec@@56@Z"); #>
+        public static extern JSObjectPtr InitClass(
+            JSContextPtr cx, JSHandleObject obj, JSHandleObject parent_proto,
+            JSClassPtr clasp, JSNative constructor, UInt32 nargs,
+            JSPropertySpecPtr ps,        JSFunctionSpecPtr fs,
+            JSPropertySpecPtr static_ps, JSFunctionSpecPtr static_fs
         );
 
         /*

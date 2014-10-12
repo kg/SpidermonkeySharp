@@ -62,7 +62,24 @@ namespace Spidermonkey {
         public JSNative construct;
         public JSTraceOp trace;
 
-        fixed byte reserved[10240];
+        // HACK
+        fixed byte reserved[1024];
+
+        public JSClass (string name, JSClassFlags flags = default(JSClassFlags)) {
+            this = default(JSClass);
+
+            this.name = name;
+            this.flags = flags;
+
+            addProperty = JSAPI.PropertyStub;
+            delProperty = JSAPI.DeletePropertyStub;
+            getProperty = JSAPI.PropertyStub;
+            setProperty = JSAPI.StrictPropertyStub;
+            enumerate = JSAPI.EnumerateStub;
+            resolve = JSAPI.ResolveStub;
+            convert = JSAPI.ConvertStub;
+            trace = JSAPI.GlobalObjectTraceHook;
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -90,7 +107,8 @@ namespace Spidermonkey {
         IntPtr addonId;
         bool preserveJitCode;
 
-        fixed byte reserved[10240];
+        // HACK
+        fixed byte reserved[1024];
 
         static JSCompartmentOptions () {
             Default = new JSCompartmentOptions {

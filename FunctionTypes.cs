@@ -77,7 +77,7 @@ namespace Spidermonkey {
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate bool JSNative (
-        JSContextPtr cx, uint argc, JSCallArgs vp
+        JSContextPtr cx, uint argc, JSCallArgumentsPtr vp
     );
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

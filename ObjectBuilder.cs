@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using JS;
 
 namespace Spidermonkey.Managed {
     public class JSObjectReference : IDisposable {
@@ -78,6 +79,11 @@ namespace Spidermonkey.Managed {
                 Pointer.SetProperty(Context, name, value);
             }
         }
+
+        public override string ToString() {
+            JS.Value self = this;
+            return self.ToManagedString(Context);
+        }
     }
 
     public class JSObjectBuilder : JSObjectReference {
@@ -100,22 +106,9 @@ namespace Spidermonkey.Managed {
         private static GCHandle DefaultClassHandle;
 
         static JSGlobalObject () {
-            DefaultClassDefinition = new JSClass {
-                name = "global",
-                flags = JSClassFlags.GLOBAL_FLAGS,
-                addProperty = JSAPI.PropertyStub,
-                delProperty = JSAPI.DeletePropertyStub,
-                getProperty = JSAPI.PropertyStub,
-                setProperty = JSAPI.StrictPropertyStub,
-                enumerate = JSAPI.EnumerateStub,
-                resolve = JSAPI.ResolveStub,
-                convert = JSAPI.ConvertStub,
-                finalize = null,
-                call = null,
-                hasInstance = null,
-                construct = null,
-                trace = JSAPI.GlobalObjectTraceHook
-            };
+            DefaultClassDefinition = new JSClass(
+                "global", JSClassFlags.GLOBAL_FLAGS
+            );
 
             // We have to pin our JSClass (so everything it points to is retained)
             //  and marshal it into a manually-allocated buffer that doesn't expire.

@@ -165,7 +165,7 @@ namespace Test {
             }
         }
 
-        public static bool TestNative (JSContextPtr cx, uint argc, JSCallArgs vp) {
+        public static bool TestNative (JSContextPtr cx, uint argc, JSCallArgumentsPtr vp) {
             if (argc < 1)
                 return false;
 
@@ -306,6 +306,29 @@ namespace Test {
                 var evalResult = tc.Context.Evaluate(tc.Global, "str + '!!!'");
                 var evalResultS = new JSString(evalResult);
                 Assert.AreEqual(expected + "!!!", evalResultS.ToString());
+            }
+        }
+
+        public static bool TestNativeConstructor (JSContextPtr cx, uint argc, JSCallArgumentsPtr vp) {
+            return true;
+        }
+
+        [TestCase]
+        public void CustomClassTest () {
+            using (var tc = new TestContext()) {
+                var cc = new JSCustomClass(tc, "testClass", tc.Global);
+                cc.Initialize();
+
+                var classObj = new JSObjectReference(tc, tc.Global["testClass"].AsObject);
+
+                Console.WriteLine(new JS.Value(cc.Prototype).ToManagedString(tc));
+                Console.WriteLine(classObj.ToString());
+
+                Assert.AreEqual(cc.Prototype, classObj["prototype"].AsObject);
+
+                var evalResult = tc.Context.Evaluate(tc.Global, "new testClass()");
+                Assert.AreEqual(JSValueType.OBJECT, evalResult.Value.ValueType);
+                Console.WriteLine(evalResult.Value.ToManagedString(tc));
             }
         }
     }

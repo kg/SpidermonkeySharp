@@ -33,7 +33,7 @@ namespace Spidermonkey {
             return (JS.Value)Activator.CreateInstance(typeof(JS.Value), value);
         }
 
-        private bool Invoke (JSContextPtr cx, uint argc, JSCallArgs args) {
+        private bool Invoke (JSContextPtr cx, uint argc, JSCallArgumentsPtr args) {
             var managedArgs = new object[ArgumentCount];
             for (uint i = 0, l = Math.Min(ArgumentCount, argc); i < l; i++)
                 managedArgs[i] = NativeToManaged(cx, args[i]);

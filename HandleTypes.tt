@@ -13,6 +13,8 @@ namespace Spidermonkey {
     <# DefinePointerType("JSRootPtr"); #>
     <# DefinePointerType("JSClassPtr"); #>
     <# DefinePointerType("JSFunctionPtr"); #>
+    <# DefinePointerType("JSFunctionSpecPtr"); #>
+    <# DefinePointerType("JSPropertySpecPtr"); #>
 
     <# DefineHandleType("JSHandleObject", "JSObjectPtr", rootable: true); #>
     <# DefineHandleType("JSHandleString", "JSStringPtr", rootable: true); #>
@@ -75,6 +77,25 @@ namespace Spidermonkey {
                 get {
                     return (Pointer != IntPtr.Zero);
                 }
+            }
+
+            public bool Equals (<#= name #> rhs) {
+                return (Pointer == rhs.Pointer);
+            }
+
+            public override bool Equals (object obj) {
+                if (obj is <#= name #>)
+                    return Equals((<#= name #>)obj);
+                else
+                    return base.Equals(obj);
+            }
+
+            public override int GetHashCode () {
+                return Pointer.GetHashCode();
+            }
+
+            public override string ToString () {
+                return String.Format("<{0} 0x{1:X4}>", "<#= name #>", Pointer.ToInt64());
             }
         }
         <#+

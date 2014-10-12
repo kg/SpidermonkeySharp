@@ -66,6 +66,7 @@
     <Compile Include="Array.cs" />
     <Compile Include="CallArgs.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="CustomClass.cs" />
     <Compile Include="NativeGenerator.cs" />
     <Compile Include="ObjectBuilder.cs" />
     <Compile Include="RuntimeAndContext.cs" />
