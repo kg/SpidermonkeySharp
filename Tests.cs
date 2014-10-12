@@ -280,11 +280,12 @@ namespace Test {
         public void StringTest () {
             using (var tc = new TestContext()) {
                 var expected = "hello world";
-                var s = new Rooted<JSStringPtr>(tc, JSAPI.NewStringCopy(tc, expected));
+                var s = new JSString(tc, expected);
                 tc.Global["str"] = s;
 
                 var evalResult = tc.Context.Evaluate(tc.Global, "str + '!!!'");
-                Assert.AreEqual(expected + "!!!", evalResult.Value.ToManagedString(tc));
+                var evalResultS = new JSString(evalResult);
+                Assert.AreEqual(expected + "!!!", evalResultS.ToString());
             }
         }
     }
