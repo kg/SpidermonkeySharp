@@ -73,6 +73,7 @@ namespace Spidermonkey {
             return self.Root.Value;
         }
 
+        // FIXME: This causes an ambiguity with SetElement since it accepts either HandleValue or HandleString
         public static implicit operator JSHandleString (JSString self) {
             return self.Root;
         }

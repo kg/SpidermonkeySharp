@@ -321,6 +321,8 @@ namespace Spidermonkey {
             JSHandleObject v
         );
 
+        // HACK: Ambiguity between HandleObject and HandleString w/JSString...
+        /*
         <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@IV?$Handle@PAVJSString@@@3@@Z"); #>
         public static extern bool SetElement(
             JSContextPtr cx,
@@ -328,6 +330,7 @@ namespace Spidermonkey {
             UInt32 index,
             JSHandleString v
         );
+        */
 
         <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@IH@Z"); #>
         public static extern bool SetElement(

@@ -266,8 +266,8 @@ namespace Test {
                 Assert.IsTrue(JSAPI.SetElement(tc, array, 0, 1.5));
                 Assert.IsTrue(JSAPI.SetElement(tc, array, 1, 5));
 
-                var temp = new Rooted<JSStringPtr>(tc, JSAPI.NewStringCopy(tc, "hello"));
-                Assert.IsTrue(JSAPI.SetElement(tc, array, 2, temp));
+                var hello = new JSString(tc, "hello");
+                Assert.IsTrue(JSAPI.SetElement(tc, array, 2, hello));
 
                 tc.Global["arr"] = array;
 
