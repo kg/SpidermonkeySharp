@@ -218,6 +218,14 @@ namespace JS {
             }
         }
 
+        public JSObjectPtr InvokeConstructor (
+            JSContextPtr context,
+            params Value[] arguments
+        ) {
+            var obj = AsObject;
+            return obj.InvokeConstructor(context, arguments);
+        }
+
         public static explicit operator JSObjectPtr (Value value) {
             return value.AsObject;
         }

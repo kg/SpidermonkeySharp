@@ -336,5 +336,20 @@ namespace Test {
                 Assert.AreEqual("hello", resultObj["a"].ToManagedString(tc));
             }
         }
+
+        [TestCase]
+        public void NewInstanceTest () {
+            using (var tc = new TestContext()) {
+                tc.Context.Evaluate(tc.Global, "function cls (x) { this.x = x; };");
+
+                var cls = tc.Global["cls"];
+                var arg1 = new JS.Value(1.5);
+                var instance = new JSObjectReference(
+                    tc, cls.InvokeConstructor(tc, arg1)
+                );
+
+                Assert.AreEqual(arg1, instance["x"]);
+            }
+        }
     }
 }

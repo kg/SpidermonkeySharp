@@ -131,6 +131,24 @@ namespace Spidermonkey {
             return DefineFunction(context, name, wrapped.WrappedMethod, wrapped.ArgumentCount, attrs);
         }
 
+        public unsafe JSObjectPtr InvokeConstructor (
+            JSContextPtr context,
+            params JS.Value[] arguments
+        ) {
+            fixed (JSObjectPtr* pThis = &this)
+            fixed (JS.Value* pArgs = arguments) {
+                var argsPtr = new JS.ValueArrayPtr((uint)arguments.Length, (IntPtr)pArgs);
+                var resultRoot = new Rooted<JSObjectPtr>(context);
+                var thisHandle = new JSHandleObject((IntPtr)pThis);
+
+                JSObjectPtr result = JSAPI.New(
+                    context, thisHandle,
+                    ref argsPtr
+                );
+                return result;
+            }
+        }
+
         bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {
             return JSAPI.AddObjectRoot(context, root);
         }
