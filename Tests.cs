@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using JS;
 using NUnit.Framework;
 using Spidermonkey;
+using Spidermonkey.Managed;
 
 namespace Test {
     public class TestContext : IDisposable {
@@ -259,15 +261,11 @@ namespace Test {
         [TestCase]
         public void ArrayWriteTest () {
             using (var tc = new TestContext()) {
-                var array = new Rooted<JSObjectPtr>(
-                    tc, JSAPI.NewArrayObject(tc, 3)
-                );
+                var array = new JSArray(tc, 3);
 
-                Assert.IsTrue(JSAPI.SetElement(tc, array, 0, 1.5));
-                Assert.IsTrue(JSAPI.SetElement(tc, array, 1, 5));
-
-                var hello = new JSString(tc, "hello");
-                Assert.IsTrue(JSAPI.SetElement(tc, array, 2, hello));
+                array[0] = new Value(1.5);
+                array[1] = new Value(5);
+                array[2] = new JSString(tc, "hello");
 
                 tc.Global["arr"] = array;
 
