@@ -281,6 +281,78 @@ namespace Spidermonkey {
             JSContextPtr context, JSHandleObject obj, out UInt32 length
         );
 
+        <# ImportFunction("?JS_SetArrayLength@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@I@Z"); #>
+        public static extern bool SetArrayLength(
+            JSContextPtr context, JSHandleObject obj, UInt32 length
+        );
+
+        <# ImportFunction("?JS_NewArrayObject@@YAPAVJSObject@@PAUJSContext@@ABVHandleValueArray@JS@@@Z"); #>
+        public static extern JSObjectPtr NewArrayObject(
+            JSContextPtr context, 
+            ref JS.ValueArrayPtr contents
+        );
+
+        <# ImportFunction("?JS_NewArrayObject@@YAPAVJSObject@@PAUJSContext@@I@Z"); #>
+        public static extern JSObjectPtr NewArrayObject(
+            JSContextPtr context, UInt32 length
+        );
+
+        <# ImportFunction("?JS_GetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@IV?$MutableHandle@VValue@JS@@@3@@Z"); #>
+        public static extern bool GetElement(
+            JSContextPtr cx,
+            JSHandleObject objArg,
+            UInt32 index,
+            JSMutableHandleValue vp
+        );
+
+        <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@IV?$Handle@VValue@JS@@@3@@Z"); #>
+        public static extern bool SetElement(
+            JSContextPtr cx,
+            JSHandleObject objArg,
+            UInt32 index,
+            JSHandleValue v
+        );
+
+        <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@I1@Z"); #>
+        public static extern bool SetElement(
+            JSContextPtr cx,
+            JSHandleObject objArg,
+            UInt32 index,
+            JSHandleObject v
+        );
+
+        <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@IV?$Handle@PAVJSString@@@3@@Z"); #>
+        public static extern bool SetElement(
+            JSContextPtr cx,
+            JSHandleObject objArg,
+            UInt32 index,
+            JSHandleString v
+        );
+
+        <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@IH@Z"); #>
+        public static extern bool SetElement(
+            JSContextPtr cx,
+            JSHandleObject objArg,
+            UInt32 index,
+            Int32 v
+        );
+
+        <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@II@Z"); #>
+        public static extern bool SetElement(
+            JSContextPtr cx,
+            JSHandleObject objArg,
+            UInt32 index,
+            UInt32 v
+        );
+
+        <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@IN@Z"); #>
+        public static extern bool SetElement(
+            JSContextPtr cx,
+            JSHandleObject objArg,
+            UInt32 index,
+            Double v
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

@@ -237,10 +237,22 @@ namespace Test {
         public void ArrayReadTest () {
             using (var tc = new TestContext()) {
                 var evalResult = tc.Context.Evaluate(tc.Global, "[1, 2, 3, 4]");
+
                 Assert.IsTrue(JSAPI.IsArrayObject(tc, evalResult));
+
+                var arrayHandle = (JSHandleObject)evalResult;
+
                 uint length;
-                Assert.IsTrue(JSAPI.GetArrayLength(tc, (JSHandleObject)evalResult, out length));
+                Assert.IsTrue(JSAPI.GetArrayLength(tc, arrayHandle, out length));
                 Assert.AreEqual(4, length);
+
+                var elementRoot = new Rooted<JS.Value>(tc);
+
+                Assert.IsTrue(JSAPI.GetElement(tc, arrayHandle, 0, elementRoot));
+                Assert.AreEqual(1, elementRoot.Value.ToManagedValue(tc));
+
+                Assert.IsTrue(JSAPI.GetElement(tc, arrayHandle, 3, elementRoot));
+                Assert.AreEqual(4, elementRoot.Value.ToManagedValue(tc));
             }
         }
     }

@@ -6,15 +6,16 @@ using System.Collections.Generic;
 
 namespace Spidermonkey {
     <# DefinePointerType("JSObjectPtr", "IRootable"); #>
+    <# DefinePointerType("JSStringPtr", "IRootable"); #>
     <# DefinePointerType("JSRuntimePtr"); #>
     <# DefinePointerType("JSContextPtr"); #>
     <# DefinePointerType("JSCompartmentPtr"); #>
-    <# DefinePointerType("JSStringPtr"); #>
     <# DefinePointerType("JSRootPtr"); #>
     <# DefinePointerType("JSClassPtr"); #>
     <# DefinePointerType("JSFunctionPtr"); #>
 
     <# DefineHandleType("JSHandleObject", "JSObjectPtr", rootable: true); #>
+    <# DefineHandleType("JSHandleString", "JSStringPtr", rootable: true); #>
     <# DefineHandleType("JSHandleValue", "JS.Value", rootable: true); #>
     <# DefineHandleType("JSHandleId", "jsid", rootable: false); #>
 

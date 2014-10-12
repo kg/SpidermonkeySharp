@@ -301,6 +301,14 @@ namespace Spidermonkey {
                 Marshal.FreeHGlobal(buffer);
             }
         }
+
+        bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {
+            return JSAPI.AddStringRoot(context, root);
+        }
+
+        void IRootable.RemoveRoot (JSContextPtr context, JSRootPtr root) {
+            JSAPI.RemoveStringRoot(context, root);
+        }
     }
 
     public partial struct JSClassPtr {
