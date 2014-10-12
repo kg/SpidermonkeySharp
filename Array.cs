@@ -43,6 +43,28 @@ namespace Spidermonkey.Managed {
             : this(context, JSAPI.NewArrayObject(context, ref contents)) {
         }
 
+        public JSArray (JSContextPtr context, JS.Value[] contents, uint offset = 0, uint count = 0xFFFFFFFF)
+            : this(context, CreateArrayImpl(context, contents, offset, count)) {
+        }
+
+        private unsafe static JSObjectPtr CreateArrayImpl(
+            JSContextPtr context, JS.Value[] contents, uint offset, uint count
+        ) {
+            if (count == 0xFFFFFFFF)
+                count = (uint)(contents.Length - offset);
+
+            if (
+                (count > (contents.Length - offset)) ||
+                (offset >= contents.Length)
+            )
+                throw new ArgumentException("offset/count out of range");
+            
+            fixed (JS.Value * pContents = &contents[offset]) {
+                var valueArray = new JS.ValueArrayPtr(count, (IntPtr)pContents);
+                return JSAPI.NewArrayObject(context, ref valueArray);
+            }
+        }
+
         public JSObjectPtr Pointer {
             get {
                 return Root.Value;

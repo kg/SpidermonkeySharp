@@ -275,6 +275,24 @@ namespace Test {
         }
 
         [TestCase]
+        public void ArrayFromManagedArray () {
+            using (var tc = new TestContext()) {
+                var array = new JSArray(tc, new[] {
+                    new JS.Value(1),
+                    new JS.Value(1.5),
+                    new JS.Value(3),
+                    new JSString(tc, "hello"),
+                    JS.Value.Null,
+                }, 1, 3);
+
+                tc.Global["arr"] = array;
+
+                var evalResult = tc.Context.Evaluate(tc.Global, "'[' + String(arr) + ']'");
+                Assert.AreEqual("[1.5,3,hello]", evalResult.Value.ToManagedString(tc));
+            }
+        }
+
+        [TestCase]
         public void StringTest () {
             using (var tc = new TestContext()) {
                 var expected = "hello world";
