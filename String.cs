@@ -44,6 +44,12 @@ namespace Spidermonkey.Managed {
             : this(context, JSAPI.NewStringCopy(context, text)) {
         }
 
+        public uint Length {
+            get {
+                return JSAPI.GetStringLength(Pointer);
+            }
+        }
+
         public JSStringPtr Pointer {
             get {
                 return Root.Value;

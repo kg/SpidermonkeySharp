@@ -243,6 +243,10 @@ namespace JS {
             JSAPI.RemoveValueRoot(context, root);
         }
     }
+
+    public struct AutoCheckCannotGC {
+        public static AutoCheckCannotGC Instance = new AutoCheckCannotGC();
+    }
 }
 
 namespace Spidermonkey {

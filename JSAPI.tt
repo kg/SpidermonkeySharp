@@ -368,6 +368,27 @@ namespace Spidermonkey {
             IntPtr finalizer
         );
 
+        <# ImportFunction("?JS_StringHasLatin1Chars@@YA_NPAVJSString@@@Z"); #>
+        public static extern bool StringHasLatin1Chars(
+            JSStringPtr str
+        );
+
+        <# ImportFunction("?JS_GetLatin1StringCharsAndLength@@YAPBEPAUJSContext@@ABVAutoCheckCannotGC@JS@@PAVJSString@@PAI@Z"); #>
+        public static extern IntPtr GetLatin1StringCharsAndLength(
+            JSContextPtr cx,
+            ref JS.AutoCheckCannotGC nogc, 
+            JSStringPtr str,
+            out UInt32 length
+        );
+
+        <# ImportFunction("?JS_GetTwoByteStringCharsAndLength@@YAPB_WPAUJSContext@@ABVAutoCheckCannotGC@JS@@PAVJSString@@PAI@Z"); #>
+        public static extern IntPtr GetTwoByteStringCharsAndLength(
+            JSContextPtr cx,
+            ref JS.AutoCheckCannotGC nogc, 
+            JSStringPtr str,
+            out UInt32 length
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

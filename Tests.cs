@@ -289,6 +289,8 @@ namespace Test {
 
                 var evalResult = tc.Context.Evaluate(tc.Global, "'[' + String(arr) + ']'");
                 Assert.AreEqual("[1.5,3,hello]", evalResult.Value.ToManagedString(tc));
+
+                Assert.AreEqual(new JS.Value(1.5), array[0]);
             }
         }
 
@@ -298,6 +300,8 @@ namespace Test {
                 var expected = "hello world";
                 var s = new JSString(tc, expected);
                 tc.Global["str"] = s;
+
+                Assert.AreEqual(expected.Length, s.Length);
 
                 var evalResult = tc.Context.Evaluate(tc.Global, "str + '!!!'");
                 var evalResultS = new JSString(evalResult);

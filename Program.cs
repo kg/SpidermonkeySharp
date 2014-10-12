@@ -7,7 +7,7 @@ namespace Test {
     public static class Program {
         public static void Main () {
             var tc = new Tests();
-            tc.DefineMarshalledFunctionTest();
+            tc.StringTest();
             Console.WriteLine("// Press enter");
             Console.ReadLine();
         }

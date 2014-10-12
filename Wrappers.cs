@@ -142,25 +142,29 @@ namespace Spidermonkey {
 
     public partial struct JSStringPtr {
         // Creates a copy
-        public unsafe string ToManagedString (JSContextPtr context) {
-            var length = JSAPI.GetStringLength(this);
+        internal static unsafe string ToManagedString (JSContextPtr context, JSStringPtr ptr) {
+            uint length;
 
-            uint numBytes = length * 2;
-            var buffer = Marshal.AllocHGlobal((int)numBytes);
+            if (JSAPI.StringHasLatin1Chars(ptr)) {
+                var pChars = JSAPI.GetLatin1StringCharsAndLength(
+                    context, ref JS.AutoCheckCannotGC.Instance,
+                    ptr, out length
+                );
 
-            try {
-                if (!JSAPI.CopyStringChars(
-                    context,
-                    new mozilla.Range(buffer, numBytes),
-                    this
-                ))
-                    throw new Exception("String copy failed");
+                var latin1 = Encoding.GetEncoding("ISO-8859-1");
+                return new String((sbyte*)pChars, 0, (int)length, latin1);
+            } else {
+                var pChars = JSAPI.GetTwoByteStringCharsAndLength(
+                    context, ref JS.AutoCheckCannotGC.Instance,
+                    ptr, out length
+                );
 
-                var result = new String((char*)buffer, 0, (int)length);
-                return result;
-            } finally {
-                Marshal.FreeHGlobal(buffer);
+                return new String((char*)pChars, 0, (int)length);
             }
+        }
+
+        public unsafe string ToManagedString (JSContextPtr context) {
+            return ToManagedString(context, this);
         }
 
         bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {
