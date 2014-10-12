@@ -93,7 +93,7 @@ namespace Spidermonkey {
                 return new JSHandleObject((IntPtr)pThis);
         }
 
-        public unsafe Rooted<JS.Value> GetProperty (JSContextPtr context, string name) {
+        public Rooted<JS.Value> GetProperty (JSContextPtr context, string name) {
             var result = new Rooted<JS.Value>(context);
 
             if (JSAPI.GetProperty(context, TransientSelf(), name, result))
@@ -103,7 +103,7 @@ namespace Spidermonkey {
             return null;
         }
 
-        public unsafe bool SetProperty (JSContextPtr context, string name, JSHandleValue value) {
+        public bool SetProperty (JSContextPtr context, string name, JSHandleValue value) {
             return JSAPI.SetProperty(context, TransientSelf(), name, value);
         }
 
@@ -124,11 +124,20 @@ namespace Spidermonkey {
             );
         }
 
-        public unsafe JSFunctionPtr DefineFunction (
+        public JSFunctionPtr DefineFunction (
             JSContextPtr context, string name, Delegate @delegate, uint attrs = 0
         ) {
             var wrapped = new Managed.NativeToManagedProxy(@delegate);
             return DefineFunction(context, name, wrapped.WrappedMethod, wrapped.ArgumentCount, attrs);
+        }
+
+        public Rooted<JS.Value> InvokeFunction (
+            JSContextPtr context,
+            JSHandleObject thisReference,
+            params JS.Value[] arguments
+        ) {
+            var thisValue = new JS.Value(this);
+            return thisValue.InvokeFunction(context, thisReference, arguments);
         }
 
         public unsafe JSObjectPtr InvokeConstructor (
