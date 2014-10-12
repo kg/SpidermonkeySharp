@@ -82,14 +82,10 @@ namespace Spidermonkey {
 
     public class JSObjectBuilder : JSObjectReference {
         public static unsafe JSObjectPtr CreateInstance (JSContextPtr context) {
-            JSObjectPtr zero;
-            var pZero = &zero;
-            var hZero = new JSHandleObject((IntPtr)pZero);
-
             return JSAPI.NewObject(
                 context,
                 JSClassPtr.Zero,                
-                hZero, hZero
+                JSHandleObject.Zero, JSHandleObject.Zero
             );
         }
 

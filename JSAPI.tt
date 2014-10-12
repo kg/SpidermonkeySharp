@@ -266,6 +266,21 @@ namespace Spidermonkey {
             JSHandleObject parent
         );
 
+        <# ImportFunction("?JS_IsArrayObject@@YA_NPAUJSContext@@V?$Handle@VValue@JS@@@JS@@@Z"); #>
+        public static extern bool IsArrayObject(
+            JSContextPtr context, JSHandleValue val
+        );
+
+        <# ImportFunction("?JS_IsArrayObject@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@@Z"); #>
+        public static extern bool IsArrayObject(
+            JSContextPtr context, JSHandleObject obj
+        );
+
+        <# ImportFunction("?JS_GetArrayLength@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@PAI@Z"); #>
+        public static extern bool GetArrayLength(
+            JSContextPtr context, JSHandleObject obj, out UInt32 length
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

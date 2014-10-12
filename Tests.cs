@@ -232,5 +232,16 @@ namespace Test {
                 Assert.AreEqual(5, evalResult.Value.ToManagedValue(tc));
             }
         }
+
+        [TestCase]
+        public void ArrayReadTest () {
+            using (var tc = new TestContext()) {
+                var evalResult = tc.Context.Evaluate(tc.Global, "[1, 2, 3, 4]");
+                Assert.IsTrue(JSAPI.IsArrayObject(tc, evalResult));
+                uint length;
+                Assert.IsTrue(JSAPI.GetArrayLength(tc, (JSHandleObject)evalResult, out length));
+                Assert.AreEqual(4, length);
+            }
+        }
     }
 }

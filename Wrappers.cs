@@ -227,25 +227,23 @@ namespace Spidermonkey {
     }
 
     public partial struct JSObjectPtr {
+        private unsafe JSHandleObject TransientSelf () {
+            fixed (JSObjectPtr * pThis = &this)
+                return new JSHandleObject((IntPtr)pThis);
+        }
+
         public unsafe Rooted<JS.Value> GetProperty (JSContextPtr context, string name) {
             var result = new Rooted<JS.Value>(context);
 
-            fixed (JSObjectPtr * pThis = &this) {
-                JSHandleObject handle = new JSHandleObject((IntPtr)pThis);
-                if (JSAPI.GetProperty(context, handle, name, result))
-                    return result;
+            if (JSAPI.GetProperty(context, TransientSelf(), name, result))
+                return result;
 
-                result.Dispose();
-                return null;
-            }
+            result.Dispose();
+            return null;
         }
 
         public unsafe bool SetProperty (JSContextPtr context, string name, JSHandleValue value) {
-            fixed (JSObjectPtr* pThis = &this) {
-                JSHandleObject handle = new JSHandleObject((IntPtr)pThis);
-
-                return JSAPI.SetProperty(context, handle, name, value);
-            }
+            return JSAPI.SetProperty(context, TransientSelf(), name, value);
         }
 
         public unsafe bool SetProperty (JSContextPtr context, string name, JSUnrootedValue value) {
@@ -260,13 +258,9 @@ namespace Spidermonkey {
             JSContextPtr context, string name, JSNative call,
             uint nargs = 0, uint attrs = 0
         ) {
-            fixed (JSObjectPtr* pThis = &this) {
-                JSHandleObject handle = new JSHandleObject((IntPtr)pThis);
-
-                return JSAPI.DefineFunction(
-                    context, handle, name, call, nargs, attrs
-                );
-            }
+            return JSAPI.DefineFunction(
+                context, TransientSelf(), name, call, nargs, attrs
+            );
         }
 
         public unsafe JSFunctionPtr DefineFunction (
@@ -350,6 +344,31 @@ namespace Spidermonkey {
 
         public void Clear () {
             JSAPI.ClearPendingException(Context);
+        }
+    }
+
+    public partial struct JSHandleObject {
+        private static JSObjectPtr ZeroPtr = JSObjectPtr.Zero;
+
+        public static readonly JSHandleObject Zero;
+
+        unsafe static JSHandleObject () {
+            fixed (JSObjectPtr* pZero = &ZeroPtr)
+                Zero = new JSHandleObject((IntPtr)pZero);
+        }
+
+        public static JSHandleObject FromValue (Rooted<JS.Value> rval) {
+            // Assert that we can actually convert the value into an object pointer.
+            var ptr = rval.Value.AsObject;
+            // Now get a handle to the value
+            JSHandleValue v = rval;
+            // HACK: Now take the value handle and turn it into an object handle.
+            // This is valid because JS.Value type tagging is at the end of the 8 bytes.
+            return new JSHandleObject(v.AddressOfTarget);
+        }
+
+        public static explicit operator JSHandleObject (Rooted<JS.Value> rval) {
+            return FromValue(rval);
         }
     }
 }
