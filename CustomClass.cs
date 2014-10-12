@@ -118,7 +118,23 @@ namespace Spidermonkey.Managed {
             }
         }
 
-        public static bool DefaultConstructor (JSContextPtr context, uint argc, JSCallArgumentsPtr vp) {
+        /// <summary>
+        /// Creates a this-reference for use inside this class's constructor.
+        /// </summary>
+        public JS.Value NewObjectForConstructor (uint argc, JSCallArgumentsPtr vp) {
+            var callArgs = new JSCallArgs(vp, argc);
+
+            return new JS.Value(
+                JSAPI.NewObjectForConstructor(
+                    Context, ClassPtr, ref callArgs
+                )
+            );
+        }
+
+        public bool DefaultConstructor (JSContextPtr context, uint argc, JSCallArgumentsPtr vp) {
+            // We have to invoke NewObjectForConstructor in order to construct a this-reference
+            //  that has our class's prototype and .constructor values.
+            vp.Result = NewObjectForConstructor(argc, vp);
             return true;
         }
 

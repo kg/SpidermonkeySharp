@@ -321,7 +321,8 @@ namespace Test {
 
                 cc.Prototype["a"] = new JSString(tc, "hello");
 
-                var classObj = new JSObjectReference(tc, tc.Global["testClass"].AsObject);
+                var jsCtor = tc.Global["testClass"];
+                var classObj = new JSObjectReference(tc, jsCtor.AsObject);
 
                 Assert.AreEqual(cc.Prototype.Pointer, classObj["prototype"].AsObject);
 
@@ -330,7 +331,8 @@ namespace Test {
                 var evalResult = tc.Context.Evaluate(tc.Global, "(new testClass())");
                 var resultObj = new JSObjectReference(evalResult);
 
-                // FIXME: Why doesn't this work?
+                Assert.AreEqual(jsCtor.AsObject, resultObj["constructor"].AsObject);
+
                 Assert.AreEqual("hello", resultObj["a"].ToManagedString(tc));
             }
         }

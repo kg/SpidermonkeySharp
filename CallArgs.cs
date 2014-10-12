@@ -54,7 +54,12 @@ namespace Spidermonkey {
         public readonly Value* argv;
         public readonly UInt32 argc;
 
-        public JSCallArgs (Value* argv, UInt32 argc) {
+        public unsafe JSCallArgs (Value* argv, UInt32 argc) {
+            this.argv = argv;
+            this.argc = argc;
+        }
+
+        public JSCallArgs (JSCallArgumentsPtr argv, UInt32 argc) {
             this.argv = argv;
             this.argc = argc;
         }
