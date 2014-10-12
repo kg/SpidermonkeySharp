@@ -255,5 +255,25 @@ namespace Test {
                 Assert.AreEqual(4, elementRoot.Value.ToManagedValue(tc));
             }
         }
+
+        [TestCase]
+        public void ArrayWriteTest () {
+            using (var tc = new TestContext()) {
+                var array = new Rooted<JSObjectPtr>(
+                    tc, JSAPI.NewArrayObject(tc, 3)
+                );
+
+                Assert.IsTrue(JSAPI.SetElement(tc, array, 0, 1.5));
+                Assert.IsTrue(JSAPI.SetElement(tc, array, 1, 5));
+
+                var temp = new Rooted<JS.Value>(tc, JS.Value.Null);
+                Assert.IsTrue(JSAPI.SetElement(tc, array, 2, temp));
+
+                tc.Global["arr"] = array;
+
+                var evalResult = tc.Context.Evaluate(tc.Global, "'[' + String(arr) + ']'");
+                Assert.AreEqual("[1.5,5,]", evalResult.Value.ToManagedString(tc));
+            }
+        }
     }
 }
