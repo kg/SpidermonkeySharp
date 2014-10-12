@@ -353,6 +353,18 @@ namespace Spidermonkey {
             Double v
         );
 
+        <# ImportFunction("?JS_NewUCStringCopyN@@YAPAVJSString@@PAUJSContext@@PB_WI@Z"); #>
+        public static extern JSStringPtr NewUCStringCopyN(
+            JSContextPtr cx, IntPtr s, UInt32 n 
+        );
+
+        <# ImportFunction("?JS_NewExternalString@@YAPAVJSString@@PAUJSContext@@PB_WIPBUJSStringFinalizer@@@Z"); #>
+        public static extern void NewExternalString(
+            JSContextPtr cx, IntPtr chars, UInt32 length, 
+            /* JSStringFinalizer * */
+            IntPtr finalizer
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

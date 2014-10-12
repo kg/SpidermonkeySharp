@@ -105,6 +105,7 @@ namespace Spidermonkey {
         }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct JSContextOptions {
         public JSContextOptionFlags Options;
     }

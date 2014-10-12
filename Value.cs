@@ -84,6 +84,16 @@ namespace JS {
             packed.obj = o;
         }
 
+        /// <summary>
+        /// WARNING: Make sure this string is already rooted!
+        /// </summary>
+        /// <param name="s"></param>
+        public Value (JSStringPtr s) {
+            this = default(Value);
+            tag = JSValueTag.STRING;
+            packed.str = s;
+        }
+
         public bool IsNullOrUndefined {
             get {
                 return (ValueType == JSValueType.NULL) ||
@@ -219,6 +229,10 @@ namespace JS {
         // Allow implicit conversions from rooted JSObject to Value
         public static implicit operator Value (Rooted<JSObjectPtr> obj) {
             return new Value(obj);
+        }
+
+        public static implicit operator Value (Rooted<JSStringPtr> str) {
+            return new Value(str);
         }
 
         bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {

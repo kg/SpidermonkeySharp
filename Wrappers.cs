@@ -73,9 +73,17 @@ namespace Spidermonkey {
             uint nargs, uint attrs
         ) {
             fixed (char* pName = name)
-                return JSAPI.DefineUCFunction(
+                return DefineUCFunction(
                     cx, obj, (IntPtr)pName, (uint)name.Length, call, nargs, attrs
                 );
+        }
+
+        public static unsafe JSStringPtr NewStringCopy (
+            JSContextPtr cx,
+            string s
+        ) {
+            fixed (char* pChars = s)
+                return NewUCStringCopyN(cx, (IntPtr)pChars, (uint)s.Length);
         }
     }
 

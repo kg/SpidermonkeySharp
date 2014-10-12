@@ -79,4 +79,9 @@ namespace Spidermonkey {
     public delegate bool JSNative (
         JSContextPtr cx, uint argc, JSCallArgs vp
     );
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate void JSStringFinalizerCallback (
+        IntPtr fin, IntPtr chars
+    );
 }

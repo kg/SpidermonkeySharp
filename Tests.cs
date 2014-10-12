@@ -266,13 +266,25 @@ namespace Test {
                 Assert.IsTrue(JSAPI.SetElement(tc, array, 0, 1.5));
                 Assert.IsTrue(JSAPI.SetElement(tc, array, 1, 5));
 
-                var temp = new Rooted<JS.Value>(tc, JS.Value.Null);
+                var temp = new Rooted<JSStringPtr>(tc, JSAPI.NewStringCopy(tc, "hello"));
                 Assert.IsTrue(JSAPI.SetElement(tc, array, 2, temp));
 
                 tc.Global["arr"] = array;
 
                 var evalResult = tc.Context.Evaluate(tc.Global, "'[' + String(arr) + ']'");
-                Assert.AreEqual("[1.5,5,]", evalResult.Value.ToManagedString(tc));
+                Assert.AreEqual("[1.5,5,hello]", evalResult.Value.ToManagedString(tc));
+            }
+        }
+
+        [TestCase]
+        public void StringTest () {
+            using (var tc = new TestContext()) {
+                var expected = "hello world";
+                var s = new Rooted<JSStringPtr>(tc, JSAPI.NewStringCopy(tc, expected));
+                tc.Global["str"] = s;
+
+                var evalResult = tc.Context.Evaluate(tc.Global, "str + '!!!'");
+                Assert.AreEqual(expected + "!!!", evalResult.Value.ToManagedString(tc));
             }
         }
     }
