@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Spidermonkey {
+namespace Spidermonkey.Managed {
     public class JSObjectReference : IDisposable {
         public readonly JSContextPtr Context;
         public readonly Rooted<JSObjectPtr> Root;

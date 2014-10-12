@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Spidermonkey {
+namespace Spidermonkey.Managed {
     public class JSString : IDisposable {
         public readonly JSContextPtr Context;
         public readonly Rooted<JSStringPtr> Root;
