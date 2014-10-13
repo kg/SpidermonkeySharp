@@ -12,7 +12,7 @@ namespace Spidermonkey.Managed {
         public JSObjectReference Constructor {
             get {
                 return new JSObjectReference(
-                    Context, base["constructor"].AsObject
+                    Context, base["constructor"]
                 );
             }
         }

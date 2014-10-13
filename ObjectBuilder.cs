@@ -87,6 +87,46 @@ namespace Spidermonkey.Managed {
             }
         }
 
+        /// <summary>
+        /// Recursively retrieves named properties. Returns true if all property names were found.
+        /// If a value along the chain is not an object, false is returned and that value is the result.
+        /// </summary>
+        public bool TryGetNested (out JS.Value result, params string[] propertyNames) {
+            var searchScope = Pointer;
+            var temp = new Rooted<JS.Value>(Context);
+
+            for (int i = 0, l = propertyNames.Length; i < l; i++) {
+                var name = propertyNames[i];
+                temp = searchScope.GetProperty(Context, name);
+
+                if (i == (l - 1)) {
+                    result = temp.Value;
+                    return true;
+                }
+
+                if (temp.Value.ValueType != JSValueType.OBJECT) {
+                    result = temp.Value;
+                    return false;
+                }
+
+                searchScope = temp.Value.AsObject;
+            }
+
+            throw new Exception("Unexpected");
+        }
+
+        /// <summary>
+        /// Recursively retrieves named properties. If one of the names is not found, returns undefined.
+        /// </summary>
+        public JS.Value GetNested (params string[] propertyNames) {
+            JS.Value result;
+
+            if (TryGetNested(out result, propertyNames))
+                return result;
+            else
+                return JS.Value.Undefined;
+        }
+
         public JSObjectReference Prototype {
             get {
                 var result = new Rooted<JSObjectPtr>(Context);

@@ -388,8 +388,8 @@ namespace Test {
                 var a = new JSObjectReference(tc, arr[2]);
 
                 var getClassProto = (Func<string, JSObjectReference>)( (name) => {
-                    var cls = new JSObjectReference(tc, tc.Global[name]);
-                    return new JSObjectReference(tc, cls["prototype"]);
+                    var p = tc.Global.GetNested(name, "prototype");
+                    return new JSObjectReference(tc, p);
                 });
 
                 Assert.AreEqual(
