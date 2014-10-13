@@ -4,22 +4,11 @@ using System.Linq;
 using System.Text;
 
 namespace Spidermonkey.Managed {
-    public class JSArray : IDisposable {
-        public readonly JSContextPtr Context;
-        public readonly Rooted<JSObjectPtr> Root;
-
-        private Rooted<JS.Value> LazyRootedValue;
-
+    public class JSArray : JSObjectReference {
         public JSArray(
             JSContextPtr context,
             JSObjectPtr obj
-        ) {
-            if (context.IsZero)
-                throw new ArgumentNullException("context");
-
-            Context = context;
-            Root = new Rooted<JSObjectPtr>(Context, obj);
-
+        ) : base (context, obj) {
             if (!JSAPI.IsArrayObject(context, Root))
                 throw new ArgumentException("Value is not an array", "obj");
         }
@@ -65,39 +54,6 @@ namespace Spidermonkey.Managed {
             }
         }
 
-        public JSObjectPtr Pointer {
-            get {
-                return Root.Value;
-            }
-        }
-
-        public void Dispose () {
-            Root.Dispose();
-        }
-
-        // Since we're rooted it's safe to implicitly convert to a value
-        public static implicit operator JS.Value (JSArray self) {
-            return new JS.Value(self.Root);
-        }
-
-        // We have to lazily construct a rooted JS.Value for ourselves so that
-        //  it can serve as the address of our JS.Value in order to produce a JSHandleValue.
-        // Gross.
-        public static implicit operator JSHandleValue (JSArray self) {
-            if (self.LazyRootedValue == null)
-                self.LazyRootedValue = new Rooted<JS.Value>(self.Context, self.Root);
-
-            return self.LazyRootedValue;
-        }
-
-        public static implicit operator JSObjectPtr (JSArray self) {
-            return self.Root.Value;
-        }
-
-        public static implicit operator JSHandleObject (JSArray self) {
-            return self.Root;
-        }
-
         public uint Length {
             get {
                 uint length;
@@ -130,23 +86,5 @@ namespace Spidermonkey.Managed {
                     throw new Exception("Operation failed");
             }
         }
-
-        public override int GetHashCode () {
-            return Pointer.GetHashCode();
-        }
-
-        // FIXME: Deep comparison?
-        public bool Equals (JSArray rhs) {
-            return Pointer.Equals(rhs.Pointer);
-        }
-
-        public override bool Equals (object obj) {
-            var rhs = obj as JSArray;
-            if (rhs != null)
-                return Equals(rhs);
-            else
-                return base.Equals(obj);
-        }
-
     }
 }

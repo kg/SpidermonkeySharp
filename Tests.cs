@@ -406,5 +406,35 @@ namespace Test {
                 );
             }
         }
+
+        public static int TestManagedObjArg (JSObjectReference o) {
+            return (int)(o["x"]) * 2;
+        }
+
+        [TestCase]
+        public void MarshalledFunctionTypeChecks () {
+            using (var tc = new TestContext()) {
+                var managed = (Func<JSObjectReference, int>)TestManagedObjArg;
+                tc.Global.Pointer.DefineFunction(
+                    tc, "test", managed
+                );
+
+                var evalResult = tc.Context.Evaluate(
+                    tc.Global,
+                    @"test({x: 16})"
+                );
+                Assert.AreEqual(32, evalResult.Value.ToManaged(tc));
+
+                JSError error;
+                tc.Context.Evaluate(
+                    tc.Global,
+                    @"test(5)",
+                    out error
+                );
+
+                Assert.IsNotNull(error);
+                Console.WriteLine(error);
+            }
+        }
     }
 }

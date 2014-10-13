@@ -424,6 +424,11 @@ namespace Spidermonkey {
             JSMutableHandleObject protop
         );
 
+        <# ImportFunction("?JS_GetConstructor@@YAPAVJSObject@@PAUJSContext@@V?$Handle@PAVJSObject@@@JS@@@Z"); #>
+        public static extern JSObjectPtr GetConstructor(
+            JSContextPtr cx, JSHandleObject proto
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

@@ -16,6 +16,7 @@ namespace Spidermonkey.Managed {
         private NativeToManagedProxy ManagedConstructor;
 
         public JSObjectReference Prototype { get; private set; }
+        public JSObjectReference Constructor { get; private set; }
 
         private readonly JSHandleObject GlobalObject;
 
@@ -110,6 +111,9 @@ namespace Spidermonkey.Managed {
                 JSPropertySpecPtr.Zero,
                 JSFunctionSpecPtr.Zero
             ));
+
+            JSObjectPtr ctor = JSAPI.GetConstructor(Context, Prototype);
+            Constructor = new JSObjectReference(Context, ctor);
         }
 
         public bool IsInitialized {

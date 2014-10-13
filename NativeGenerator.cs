@@ -38,10 +38,18 @@ namespace Spidermonkey.Managed {
             for (uint i = 0, l = Math.Min(ArgumentCount, argc); i < l; i++)
                 managedArgs[i] = NativeToManaged(cx, args[i]);
 
-            var managedResult = ManagedMethod.DynamicInvoke(managedArgs);
+            try {
+                var managedResult = ManagedMethod.DynamicInvoke(managedArgs);
 
-            args.Result = ManagedToNative(cx, managedResult);
-            return true;
+                args.Result = ManagedToNative(cx, managedResult);
+                return true;
+            } catch (Exception exc) {
+                args.Result = JS.Value.Undefined;
+
+                var error = new Rooted<JS.Value>(cx);
+                JSAPI.SetPendingException(cx, error);
+                return false;
+            }
         }
 
         public void Dispose () {
