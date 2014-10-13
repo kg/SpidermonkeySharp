@@ -152,10 +152,10 @@ namespace JS {
         }
 
         public unsafe bool IsArray (JSContextPtr context) {
-            fixed (Value * pThis = &this) {
-                var handleThis = new JSHandleValue((IntPtr)pThis);
-                return JSAPI.IsArrayObject(context, handleThis);
-            }
+            if (ValueType != JSValueType.OBJECT)
+                return false;
+
+            return JSAPI.IsArrayObject(context, this.AsObject);
         }
 
         public unsafe object ToManagedObject (JSContextPtr context) {

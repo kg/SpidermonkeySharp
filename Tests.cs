@@ -262,7 +262,7 @@ namespace Test {
             using (var tc = new TestContext()) {
                 var evalResult = tc.Context.Evaluate(tc.Global, "[1, 2, 3, 4]");
 
-                Assert.IsTrue(JSAPI.IsArrayObject(tc, evalResult));
+                Assert.IsTrue(JSAPI.IsArrayObject(tc, evalResult.Value.AsObject));
 
                 var arrayHandle = (JSHandleObject)evalResult;
 

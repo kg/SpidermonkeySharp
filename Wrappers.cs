@@ -98,6 +98,35 @@ namespace Spidermonkey {
 
             return New(cx, new JSHandleObject((IntPtr)pConstructor), ref args);
         }
+
+        // HACK: Implement this algorithm by hand since the actual function is broken :/
+        public static unsafe bool IsArrayObject (
+            JSContextPtr context, JSObjectPtr obj
+        ) {
+            var pObj = &obj;
+            var hObj = new JSHandleObject((IntPtr)pObj);
+
+            var proto = JSObjectPtr.Zero;
+            var pProto = &proto;
+            var hProto = new JSMutableHandleObject((IntPtr)pProto);
+
+            if (!JSAPI.GetPrototype(context, hObj, hProto))
+                return false;
+
+            var pConstructor = JSAPI.GetConstructor(context, new JSHandleObject((IntPtr)pProto));
+
+            var temp = JS.Value.Undefined;
+            var pTemp = &temp;
+            var hTemp = new JSMutableHandleValue((IntPtr)pTemp);
+
+            var global = JSAPI.GetGlobalForObject(context, obj);
+            var pGlobal = &global;
+            var hGlobal = new JSHandleObject((IntPtr)pGlobal);
+            if (!JSAPI.GetProperty(context, hGlobal, "Array", hTemp))
+                return false;
+
+            return temp.AsObject.Equals(pConstructor);
+        }
     }
 
     public partial struct JSObjectPtr {

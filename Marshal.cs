@@ -81,7 +81,6 @@ namespace Spidermonkey.Managed {
 
         public static void Throw (JSContextPtr cx, Exception managedException) {
             var errorRoot = ManagedToNativeException(cx, managedException);
-
             JSAPI.SetPendingException(cx, errorRoot);
         }
 

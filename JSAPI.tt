@@ -281,6 +281,8 @@ namespace Spidermonkey {
             ref JSCallArgs args
         );
 
+        // Broken :/
+        /*
         <# ImportFunction("?JS_IsArrayObject@@YA_NPAUJSContext@@V?$Handle@VValue@JS@@@JS@@@Z"); #>
         public static extern bool IsArrayObject(
             JSContextPtr context, JSHandleValue val
@@ -290,6 +292,7 @@ namespace Spidermonkey {
         public static extern bool IsArrayObject(
             JSContextPtr context, JSHandleObject obj
         );
+        */
 
         <# ImportFunction("?JS_GetArrayLength@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@PAI@Z"); #>
         public static extern bool GetArrayLength(
