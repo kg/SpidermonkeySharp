@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Spidermonkey;
 using Spidermonkey.Managed;
 
 namespace Test {
@@ -42,9 +43,9 @@ namespace Test {
             Global = new JSGlobalObject(Context);
             Entry = Context.EnterCompartment(Global);
 
-            Spidermonkey.JSAPI.SetErrorReporter(Context, ReportError);
+            JSAPI.SetErrorReporter(Context, ReportError);
 
-            if (!Spidermonkey.JSAPI.InitStandardClasses(Context, Global))
+            if (!JSAPI.InitStandardClasses(Context, Global))
                 throw new Exception("Failed to initialize standard classes");
 
             Global.Pointer.DefineFunction(
@@ -56,9 +57,18 @@ namespace Test {
             Global.Pointer.DefineFunction(
                 Context, "putstr", (Action<object>)Putstr
             );
+            Global.Pointer.DefineFunction(
+                Context, "timeout", NoOp
+            );
         }
 
-        private void ReportError (Spidermonkey.JSContextPtr cx, string message, ref Spidermonkey.JSErrorReport report) {
+        private JSBool NoOp (JSContextPtr cx, uint argc, JSCallArgumentsPtr argv) {
+            argv.Result = JS.Value.Undefined;
+
+            return true;
+        }
+
+        private void ReportError (JSContextPtr cx, string message, ref JSErrorReport report) {
             Console.WriteLine(message);
         }
 
@@ -81,6 +91,8 @@ namespace Test {
                 } else {
                     Console.WriteLine("// {0}Loaded {1}", new String(' ', LoadDepth - 1), filename);
                 }
+            } catch (Exception exc) {
+                throw;
             } finally {
                 LoadDepth -= 1;
             }

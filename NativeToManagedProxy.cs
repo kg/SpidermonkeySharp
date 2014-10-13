@@ -15,6 +15,9 @@ namespace Spidermonkey.Managed {
         private readonly GCHandle Pin;
 
         public NativeToManagedProxy (Delegate managedMethod) {
+            if (managedMethod == null)
+                throw new ArgumentNullException("managedMethod");
+
             ManagedMethod = managedMethod;
 
             var invoke = GetType().GetMethod("Invoke", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -52,7 +55,10 @@ namespace Spidermonkey.Managed {
                 return false;
             }
 
-            if (ManagedMethod.Method.ReturnType.FullName == "System.Void") {
+            if (
+                (ManagedMethod.Method.ReturnType == null) ||
+                (ManagedMethod.Method.ReturnType.FullName == "System.Void")
+            ) {
                 args.Result = JS.Value.Undefined;
                 return true;
             }

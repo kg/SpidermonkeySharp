@@ -2,6 +2,7 @@
 <#@ output extension=".generated.cs" #>
 using System;
 using System.Runtime.InteropServices;
+using System.Security;
 
 namespace Spidermonkey {
     public static partial class JSAPI {
@@ -462,9 +463,11 @@ namespace Spidermonkey {
 <#+
     public void ImportFunction (string name) {
         #>
+        [SuppressUnmanagedCodeSecurity]
         [DllImport(
             "mozjs.dll",
             BestFitMapping = false,
+            // FIXME: StdCall?
             CallingConvention = CallingConvention.Cdecl,
             EntryPoint = "<#= name #>",
             ExactSpelling = true,
