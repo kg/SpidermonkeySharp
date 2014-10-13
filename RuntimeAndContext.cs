@@ -41,6 +41,7 @@ namespace Spidermonkey.Managed {
                 JSContextPtr.Comparer
             );
 
+        public readonly JSRuntimePtr Runtime;
         public readonly JSContextPtr Pointer;
         public readonly JSContextExceptionStatus Exception;
         public bool IsDisposed { get; private set; }
@@ -48,6 +49,8 @@ namespace Spidermonkey.Managed {
         public readonly WeakReference WeakSelf;
 
         public JSContext (JSRuntimePtr runtime) {
+            Runtime = runtime;
+
             Pointer = JSAPI.NewContext(runtime, 8192);
             if (Pointer.IsZero)
                 throw new Exception();
@@ -109,10 +112,12 @@ namespace Spidermonkey.Managed {
             try {
                 ReportUncaughtExceptions = false;
 
-                Exception.Clear();
-                var result = Evaluate(scope, scriptSource, filename, lineNumber);
+                var isAlreadyThrowing = Exception.IsPending;
 
-                if (Exception.IsPending) {
+                var result = Evaluate(scope, scriptSource, filename, lineNumber);
+                JSAPI.GC(Runtime);
+
+                if (Exception.IsPending && !isAlreadyThrowing) {
                     var exc = Exception.Get();
                     if (exc.Value.ValueType == JSValueType.OBJECT) {
                         error = new JSError(this, exc.Value.AsObject);
@@ -125,6 +130,7 @@ namespace Spidermonkey.Managed {
                     error = null;
                 }
 
+                JSAPI.GC(Runtime);
                 return result;
             } finally {
                 ReportUncaughtExceptions = prior;

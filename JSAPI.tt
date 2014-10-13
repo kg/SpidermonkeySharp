@@ -444,6 +444,11 @@ namespace Spidermonkey {
             JSContextPtr cx
         );
 
+        <# ImportFunction("?JS_GC@@YAXPAUJSRuntime@@@Z"); #>
+        public static extern void GC(
+            JSRuntimePtr runtime
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

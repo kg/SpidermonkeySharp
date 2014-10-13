@@ -8,7 +8,7 @@ using Spidermonkey.Managed;
 namespace Test {
     public static class Program {
         public static void Main () {
-            if (true) {
+            if (false) {
                 var tc = new Tests();
                 tc.ExceptionTest();
             } else {
@@ -33,9 +33,7 @@ namespace Test {
         private readonly JSRequest Request;
         public readonly JSGlobalObject Global;
         private readonly JSCompartmentEntry Entry;
-        private readonly Queue<string> LoadQueue = new Queue<string>();
-        private JSObjectReference OnceLoadedCallback;
-        private bool IsLoading = false;
+        private int LoadDepth = 0;
 
         public InProcessEvaluator () {
             Runtime = new JSRuntime(1024 * 1024 * 128);
@@ -58,54 +56,34 @@ namespace Test {
             Global.Pointer.DefineFunction(
                 Context, "putstr", (Action<object>)Putstr
             );
-            Global.Pointer.DefineFunction(
-                Context, "onceLoaded", (Action<JSObjectReference>)OnceLoaded
-            );
         }
 
         private void ReportError (Spidermonkey.JSContextPtr cx, string message, ref Spidermonkey.JSErrorReport report) {
             Console.WriteLine(message);
         }
 
-        private void OnceLoaded (JSObjectReference callback) {
-            OnceLoadedCallback = callback;
-        }
-
         private unsafe void Load (string filename) {
-            LoadQueue.Enqueue(filename);
+            try {
+                Console.WriteLine("// {0}Loading {1}...", new String(' ', LoadDepth), filename);
+                LoadDepth += 1;
+                var js = File.ReadAllText(filename);
 
-            if (IsLoading)
-                return;
-
-            IsLoading = true;
-
-            Context.ReportUncaughtExceptions = true;
-
-            while (LoadQueue.Count > 0) {
-                var _filename = LoadQueue.Dequeue();
-                var js = File.ReadAllText(_filename);
-
-                // JSError error;
+                JSError error;
                 Context.Evaluate(
                     Global, js,
-                    filename: _filename
+                    out error,
+                    filename: filename
                 );
 
-                Console.WriteLine("// Loaded {0}", _filename);
-
-                /*
-                if (error != null)
-                    throw new Exception("Error while loading " + _filename, error.ToException());
-                 */
+                if (error != null) {
+                    if (error != null)
+                        throw new Exception("Error while loading " + filename, error.ToException());
+                } else {
+                    Console.WriteLine("// {0}Loaded {1}", new String(' ', LoadDepth - 1), filename);
+                }
+            } finally {
+                LoadDepth -= 1;
             }
-
-            if (OnceLoadedCallback != null) {
-                Spidermonkey.JSObjectPtr zero = Spidermonkey.JSObjectPtr.Zero;
-                OnceLoadedCallback.Invoke(&zero);
-                OnceLoadedCallback = null;
-            }
-
-            IsLoading = false;
         }
 
         private void Print (object o) {
