@@ -84,6 +84,46 @@ namespace Spidermonkey.Managed {
             return obj.Pointer;
         }
 
+        public unsafe bool ReportUncaughtExceptions {
+            get {
+                var r = JSAPI.ContextOptionsRef(this);
+                return !r->Options.HasFlag(JSContextOptionFlags.DontReportUncaught);
+            }
+            set {
+                var r = JSAPI.ContextOptionsRef(this);
+                var masked = 
+                    (r->Options & ~JSContextOptionFlags.DontReportUncaught);
+
+                if (value)
+                    r->Options = masked;
+                else
+                    r->Options = masked | JSContextOptionFlags.DontReportUncaught;
+            }
+        }
+
+        public Rooted<JS.Value> Evaluate (
+            JSHandleObject scope, string scriptSource, out JSError error,
+            string filename = null, uint lineNumber = 0
+        ) {
+            var prior = ReportUncaughtExceptions;
+            try {
+                ReportUncaughtExceptions = false;
+
+                var result = Evaluate(scope, scriptSource, filename, lineNumber);
+
+                if (Exception.IsPending) {
+                    error = new JSError(this, Exception.Get().Value.AsObject);
+                    Exception.Clear();
+                } else {
+                    error = null;
+                }
+
+                return result;
+            } finally {
+                ReportUncaughtExceptions = prior;
+            }
+        }
+
         public Rooted<JS.Value> Evaluate (JSHandleObject scope, string scriptSource, string filename = null, uint lineNumber = 0) {
             var resultRoot = new Rooted<JS.Value>(this, JS.Value.Undefined);
 

@@ -44,6 +44,28 @@ namespace Spidermonkey.Managed {
             : this(context, JSAPI.NewStringCopy(context, text)) {
         }
 
+        /// <summary>
+        /// Creates a JSString wrapper from a JS string pointer.
+        /// If the pointer is zero, null is returned.
+        /// </summary>
+        public static JSString New (JSContextPtr context, JSStringPtr str) {
+            if (str.IsZero)
+                return null;
+
+            return new JSString(context, str);
+        }
+
+        /// <summary>
+        /// Creates a JSString wrapper from a JS value containing a string.
+        /// If the value is null or undefined, null is returned.
+        /// </summary>
+        public static JSString New (JSContextPtr context, JS.Value str) {
+            if (str.IsNullOrUndefined)
+                return null;
+
+            return new JSString(context, str.AsString);
+        }
+
         public uint Length {
             get {
                 return JSAPI.GetStringLength(Pointer);

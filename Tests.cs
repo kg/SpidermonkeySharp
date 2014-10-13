@@ -68,17 +68,14 @@ namespace Test {
         [TestCase]
         public unsafe void ExceptionTest () {
             using (var tc = new TestContext()) {
-                // Suppress reporting of uncaught exceptions from Evaluate
-                var options = JSAPI.ContextOptionsRef(tc);
-                options->Options = JSContextOptionFlags.DontReportUncaught;
+                tc.Context.ReportUncaughtExceptions = false;
 
                 var evalResult = tc.Context.Evaluate(
                     tc.Global, 
                     @"function fn() { 
                         throw new Error('test'); 
                       }; 
-                      fn()
-                    "
+                      fn()"
                 );
                 Assert.AreEqual(JS.Value.Undefined, evalResult.Value);
 
@@ -88,6 +85,30 @@ namespace Test {
 
                 Assert.AreEqual(JSValueType.OBJECT, exc.Value.ValueType);
                 Assert.AreEqual("Error: test", exc.Value.ToManagedString(tc));
+            }
+        }
+
+        [TestCase]
+        public unsafe void WrappedErrorTest () {
+            using (var tc = new TestContext()) {
+                tc.Context.ReportUncaughtExceptions = false;
+
+                JSError evalError;
+                tc.Context.Evaluate(
+                    tc.Global,
+                    @"function fn() { 
+                        throw new Error('test'); 
+                      }; 
+                      fn()",
+                    out evalError,
+                    filename: "testScript"
+                );
+
+                Assert.IsNotNull(evalError);
+                Assert.AreEqual(tc.Global["Error"].AsObject, evalError.Constructor.Pointer);
+                Assert.AreEqual("test", evalError.Message.ToString());
+                Assert.AreEqual("testScript", evalError.FileName.ToString());
+                Assert.AreEqual(1, evalError.LineNumber);
             }
         }
 
