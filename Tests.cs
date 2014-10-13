@@ -428,12 +428,22 @@ namespace Test {
                 JSError error;
                 tc.Context.Evaluate(
                     tc.Global,
-                    @"test(5)",
-                    out error
+                    @"function testFunction () {
+                        return test(5);
+                      }
+                      testFunction()",
+                    out error,
+                    filename: "evalExpr"
                 );
 
-                Assert.IsNotNull(error);
-                Console.WriteLine(error);
+                Assert.AreEqual(
+                    "Object of type 'System.Int32' cannot be converted to type 'Spidermonkey.Managed.JSObjectReference'.",
+                    error.Message.ToString()
+                );
+
+                var stackText = error.Stack.ToString();
+                Assert.IsTrue(stackText.Contains("System.RuntimeType.TryChangeType"));
+                Assert.IsTrue(stackText.Contains("testFunction@evalExpr"));
             }
         }
     }

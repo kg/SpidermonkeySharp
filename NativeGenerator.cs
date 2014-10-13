@@ -43,33 +43,100 @@ namespace Spidermonkey.Managed {
             return (JS.Value)Activator.CreateInstance(typeof(JS.Value), value);
         }
 
-        private static unsafe void Throw (JSContextPtr cx, params object[] errorArguments) {
+        private static Rooted<JS.Value> NewError (JSContextPtr cx, params object[] errorArguments) {
             var jsErrorArgs = new JS.ValueArray((uint)errorArguments.Length);
+
             for (int i = 0; i < errorArguments.Length; i++)
                 jsErrorArgs.Elements[i] = ManagedToNative(cx, errorArguments[i]);
 
             JS.ValueArrayPtr vaPtr = jsErrorArgs;
-            var errorRoot = new Rooted<JS.Value>(
+            return new Rooted<JS.Value>(
                 cx, new JS.Value(JSAPI.NewError(cx, ref vaPtr))
             );
+        }
+
+        public static unsafe Rooted<JS.Value> ManagedToNativeException (JSContextPtr cx, Exception managedException) {
+            var errorRoot = NewError(cx, managedException.Message);
+            var errorObj = errorRoot.Value.AsObject;
+            var pErrorObj = &errorObj;
+            var errorObjHandle = new JSHandleObject((IntPtr)pErrorObj);
+
+            var existingStackRoot = new Rooted<JS.Value>(cx);
+            JSAPI.GetProperty(
+                cx, errorObjHandle, "stack", existingStackRoot
+            );
+            var existingStackText = existingStackRoot.Value.ToManagedString(cx);
+
+            JSAPI.SetProperty(
+                cx, errorObjHandle, "stack",
+                new JSString(
+                    cx, 
+                    managedException.StackTrace +
+                    "\n//---- JS-to-native boundary ----//\n" + 
+                    existingStackText
+                )
+            );
+
+            if (managedException.InnerException != null) {
+                var inner = ManagedToNativeException(cx, managedException.InnerException);
+
+                JSAPI.SetProperty(cx, errorObjHandle, "innerException", inner);
+            }
+
+            return errorRoot;
+        }
+
+        public static void Throw (JSContextPtr cx, Exception managedException) {
+            var errorRoot = ManagedToNativeException(cx, managedException);
+
+            JSAPI.SetPendingException(cx, errorRoot);
+        }
+
+        public static void Throw (JSContextPtr cx, params object[] errorArguments) {
+            var errorRoot = NewError(cx, errorArguments);
             JSAPI.SetPendingException(cx, errorRoot);
         }
 
         private bool Invoke (JSContextPtr cx, uint argc, JSCallArgumentsPtr args) {
             var managedArgs = new object[ArgumentCount];
-            for (uint i = 0, l = Math.Min(ArgumentCount, argc); i < l; i++)
-                managedArgs[i] = NativeToManaged(cx, args[i]);
 
+            for (uint i = 0, l = Math.Min(ArgumentCount, argc); i < l; i++) {
+                try {
+                    managedArgs[i] = NativeToManaged(cx, args[i]);
+                } catch (Exception exc) {
+                    var wrapped = new Exception(
+                        "Argument #" + i + " could not be converted",
+                        exc
+                    );
+
+                    Throw(cx, wrapped);
+                    return false;
+                }
+            }
+
+            object managedResult;
             try {
-                var managedResult = ManagedMethod.DynamicInvoke(managedArgs);
-
-                args.Result = ManagedToNative(cx, managedResult);
-                return true;
+                managedResult = ManagedMethod.DynamicInvoke(managedArgs);
             } catch (Exception exc) {
-                Throw(cx, exc.Message);
-
+                Throw(cx, exc);
                 return false;
             }
+
+            JS.Value nativeResult;
+            try {
+                nativeResult = ManagedToNative(cx, managedResult);
+            } catch (Exception exc) {
+                var wrapped = new Exception(
+                    "Return value could not be converted",
+                    exc
+                );
+
+                Throw(cx, wrapped);
+                return false;
+            }
+
+            args.Result = nativeResult;
+            return true;
         }
 
         public void Dispose () {

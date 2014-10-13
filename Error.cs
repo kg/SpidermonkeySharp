@@ -60,5 +60,24 @@ namespace Spidermonkey.Managed {
                 );
             }
         }
+
+        public override string ToString () {
+            return String.Format(
+                "{0}{1}{2}",
+                base.ToString(),
+                Environment.NewLine,
+                Stack
+            );
+        }
+
+        public JSRuntimeException ToException () {
+            return new JSRuntimeException(this);
+        }
+    }
+
+    public class JSRuntimeException : Exception {
+        public JSRuntimeException (JSError error)
+            : base(error.ToString()) {
+        }
     }
 }
