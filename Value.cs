@@ -153,7 +153,8 @@ namespace JS {
             if (ValueType != JSValueType.OBJECT)
                 return false;
 
-            return JSAPI.IsArrayObject(context, this.AsObject);
+            var obj = this.AsObject;
+            return JSAPI.IsArrayObject(context, &obj);
         }
 
         public unsafe object ToManagedObject (JSContextPtr context) {

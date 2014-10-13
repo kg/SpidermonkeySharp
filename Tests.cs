@@ -77,11 +77,12 @@ namespace Test {
                       }; 
                       fn()"
                 );
-                Assert.AreEqual(JS.Value.Undefined, evalResult.Value);
+                Assert.IsNull(evalResult);
 
                 Assert.IsTrue(tc.Context.Exception.IsPending);
                 var exc = tc.Context.Exception.Get();
                 tc.Context.Exception.Clear();
+                Assert.IsFalse(tc.Context.Exception.IsPending);
 
                 Assert.AreEqual(JSValueType.OBJECT, exc.Value.ValueType);
                 Assert.AreEqual("Error: test", exc.Value.ToManagedString(tc));
@@ -187,7 +188,7 @@ namespace Test {
             }
         }
 
-        public static bool TestNative (JSContextPtr cx, uint argc, JSCallArgumentsPtr vp) {
+        public static JSBool TestNative (JSContextPtr cx, uint argc, JSCallArgumentsPtr vp) {
             if (argc < 1)
                 return false;
 
@@ -258,11 +259,12 @@ namespace Test {
         }
 
         [TestCase]
-        public void ArrayReadTest () {
+        public unsafe void ArrayReadTest () {
             using (var tc = new TestContext()) {
                 var evalResult = tc.Context.Evaluate(tc.Global, "[1, 2, 3, 4]");
 
-                Assert.IsTrue(JSAPI.IsArrayObject(tc, evalResult.Value.AsObject));
+                var obj = evalResult.Value.AsObject;
+                Assert.IsTrue(JSAPI.IsArrayObject(tc, &obj));
 
                 var arrayHandle = (JSHandleObject)evalResult;
 

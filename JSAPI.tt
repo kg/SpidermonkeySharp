@@ -12,7 +12,7 @@ namespace Spidermonkey {
         /// In the past JS_Init once had the signature JSRuntime * JS_Init(uint32_t maxbytes) and was used to create new JSRuntime instances.  This meaning has been removed; use JS_NewRuntime instead.
         /// </summary>
         <# ImportFunction("?JS_Init@@YA_NXZ"); #>
-        private static extern bool Init ();
+        private static extern JSBool Init ();
 
         /// <summary>
         /// JS_NewRuntime initializes the JavaScript runtime environment. Call JS_NewRuntime before making any other API calls. JS_NewRuntime allocates memory for the JSRuntime and initializes certain internal runtime structures. maxbytes specifies the number of allocated bytes after which garbage collection is run.
@@ -41,7 +41,7 @@ namespace Spidermonkey {
         /// Typically, the error reporting mechanism you define should log the error where appropriate (such as to a log file), and display an error to the user of your application. The error you log and display can make use of the information passed about the error condition in the JSErrorReport structure.
         /// The error reporter callback must not reenter the JSAPI. Like all other SpiderMonkey callbacks, the error reporter callback must not throw a C++ exception.
         /// </summary>
-        <# ImportFunction("?JS_SetErrorReporter@@YAP6AXPAUJSContext@@PBDPAUJSErrorReport@@@ZPAUJSRuntime@@P6AX012@Z@Z"); #>
+        <# ImportFunction("?JS_SetErrorReporter@@YAP6AXPAUJSContext@@PBDPAUJSErrorReport@@@Z0P6AX012@Z@Z"); #>
         public static extern JSErrorReporter SetErrorReporter(JSContextPtr cx, JSErrorReporter er);
 
         /// <summary>
@@ -60,22 +60,22 @@ namespace Spidermonkey {
         );
 
         <# ImportFunction("?JS_InitStandardClasses@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@@Z"); #>
-        public static extern bool InitStandardClasses(
+        public static extern JSBool InitStandardClasses(
             JSContextPtr cx, JSHandleObject obj
         );
 
         <# ImportFunction("?AddObjectRoot@JS@@YA_NPAUJSContext@@PAV?$Heap@PAVJSObject@@@1@@Z"); #>
-        public static extern bool AddObjectRoot(
+        public static extern JSBool AddObjectRoot(
             JSContextPtr cx, JSRootPtr opp
         );
 
         <# ImportFunction("?AddValueRoot@JS@@YA_NPAUJSContext@@PAV?$Heap@VValue@JS@@@1@@Z"); #>
-        public static extern bool AddValueRoot(
+        public static extern JSBool AddValueRoot(
             JSContextPtr cx, JSRootPtr opp
         );
 
         <# ImportFunction("?AddStringRoot@JS@@YA_NPAUJSContext@@PAV?$Heap@PAVJSString@@@1@@Z"); #>
-        public static extern bool AddStringRoot(
+        public static extern JSBool AddStringRoot(
             JSContextPtr cx, JSRootPtr opp
         );
 
@@ -95,37 +95,37 @@ namespace Spidermonkey {
         );
 
         <# ImportFunction("?JS_DefaultValue@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@W4JSType@@V?$MutableHandle@VValue@JS@@@3@@Z"); #>
-        public static extern bool 
+        public static extern JSBool 
         DefaultValue(
             JSContextPtr cx, JSHandleObject obj, JSType hint,
                         JSMutableHandleValue vp
         );
 
         <# ImportFunction("?JS_PropertyStub@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$Handle@Ujsid@@@3@V?$MutableHandle@VValue@JS@@@3@@Z"); #>
-        public static extern bool 
+        public static extern JSBool 
         PropertyStub(JSContextPtr cx, JSHandleObject obj, JSHandleId id,
                         JSMutableHandleValue vp);
 
         <# ImportFunction("?JS_StrictPropertyStub@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$Handle@Ujsid@@@3@_NV?$MutableHandle@VValue@JS@@@3@@Z"); #>
-        public static extern bool 
-        StrictPropertyStub(JSContextPtr cx, JSHandleObject obj, JSHandleId id, bool strict,
+        public static extern JSBool 
+        StrictPropertyStub(JSContextPtr cx, JSHandleObject obj, JSHandleId id, JSBool strict,
                               JSMutableHandleValue vp);
 
         <# ImportFunction("?JS_DeletePropertyStub@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$Handle@Ujsid@@@3@PA_N@Z"); #>
-        public static extern bool 
+        public static extern JSBool 
         DeletePropertyStub(JSContextPtr cx, JSHandleObject obj, JSHandleId id,
-                              ref bool succeeded);
+                              ref JSBool succeeded);
 
         <# ImportFunction("?JS_EnumerateStub@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@@Z"); #>
-        public static extern bool 
+        public static extern JSBool 
         EnumerateStub(JSContextPtr cx, JSHandleObject obj);
 
         <# ImportFunction("?JS_ResolveStub@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$Handle@Ujsid@@@3@@Z"); #>
-        public static extern bool 
+        public static extern JSBool 
         ResolveStub(JSContextPtr cx, JSHandleObject obj, JSHandleId id);
 
         <# ImportFunction("?JS_ConvertStub@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@W4JSType@@V?$MutableHandle@VValue@JS@@@3@@Z"); #>
-        public static extern bool 
+        public static extern JSBool 
         ConvertStub(JSContextPtr cx, JSHandleObject obj, JSType type,
                        JSMutableHandleValue vp);
 
@@ -148,7 +148,7 @@ namespace Spidermonkey {
 
         // FIXME: This might be the wrong entry point
         <# ImportFunction("?JS_EvaluateUCScript@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@PB_WIPBDIV?$MutableHandle@VValue@JS@@@3@@Z"); #>
-        public static extern bool EvaluateUCScript(
+        public static extern JSBool EvaluateUCScript(
             JSContextPtr cx, 
             JSHandleObject scope,
             // char16_t * chars
@@ -170,19 +170,19 @@ namespace Spidermonkey {
         );
 
         <# ImportFunction("?JS_CopyStringChars@@YA_NPAUJSContext@@V?$Range@_W@mozilla@@PAVJSString@@@Z"); #>
-        public static extern bool CopyStringChars(
+        public static extern JSBool CopyStringChars(
             JSContextPtr cx, 
             mozilla.Range dest,
             JSStringPtr str
         );
 
         <# ImportFunction("?JS_IsExceptionPending@@YA_NPAUJSContext@@@Z"); #>
-        public static extern bool IsExceptionPending(
+        public static extern JSBool IsExceptionPending(
             JSContextPtr cx
         );
 
         <# ImportFunction("?JS_GetPendingException@@YA_NPAUJSContext@@V?$MutableHandle@VValue@JS@@@JS@@@Z"); #>
-        public static extern bool GetPendingException(
+        public static extern JSBool GetPendingException(
             JSContextPtr cx,
             JSMutableHandleValue vp
         );
@@ -204,7 +204,7 @@ namespace Spidermonkey {
         );
 
         <# ImportFunction("?JS_GetUCProperty@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@PB_WIV?$MutableHandle@VValue@JS@@@3@@Z"); #>
-        public static extern bool GetUCProperty(
+        public static extern JSBool GetUCProperty(
             JSContextPtr cx,
             JSHandleObject obj,
             IntPtr name, uint namelen,
@@ -212,7 +212,7 @@ namespace Spidermonkey {
         );
 
         <# ImportFunction("?JS_SetUCProperty@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@PB_WIV?$Handle@VValue@JS@@@3@@Z"); #>
-        public static extern bool SetUCProperty(
+        public static extern JSBool SetUCProperty(
             JSContextPtr cx,
             JSHandleObject obj,
             IntPtr name, uint namelen,
@@ -226,7 +226,7 @@ namespace Spidermonkey {
         );
         
         <# ImportFunction("?JS_CallFunctionValue@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$Handle@VValue@JS@@@3@ABVHandleValueArray@3@V?$MutableHandle@VValue@JS@@@3@@Z"); #>
-        public static extern bool CallFunctionValue(
+        public static extern JSBool CallFunctionValue(
             JSContextPtr cx, 
             JSHandleObject obj, 
             JSHandleValue fval,
@@ -281,26 +281,23 @@ namespace Spidermonkey {
             ref JSCallArgs args
         );
 
-        // Broken :/
-        /*
         <# ImportFunction("?JS_IsArrayObject@@YA_NPAUJSContext@@V?$Handle@VValue@JS@@@JS@@@Z"); #>
-        public static extern bool IsArrayObject(
+        public static extern JSBool IsArrayObject(
             JSContextPtr context, JSHandleValue val
         );
 
         <# ImportFunction("?JS_IsArrayObject@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@@Z"); #>
-        public static extern bool IsArrayObject(
+        public static extern JSBool IsArrayObject(
             JSContextPtr context, JSHandleObject obj
         );
-        */
 
         <# ImportFunction("?JS_GetArrayLength@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@PAI@Z"); #>
-        public static extern bool GetArrayLength(
+        public static extern JSBool GetArrayLength(
             JSContextPtr context, JSHandleObject obj, out UInt32 length
         );
 
         <# ImportFunction("?JS_SetArrayLength@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@I@Z"); #>
-        public static extern bool SetArrayLength(
+        public static extern JSBool SetArrayLength(
             JSContextPtr context, JSHandleObject obj, UInt32 length
         );
 
@@ -316,7 +313,7 @@ namespace Spidermonkey {
         );
 
         <# ImportFunction("?JS_GetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@IV?$MutableHandle@VValue@JS@@@3@@Z"); #>
-        public static extern bool GetElement(
+        public static extern JSBool GetElement(
             JSContextPtr cx,
             JSHandleObject objArg,
             UInt32 index,
@@ -324,7 +321,7 @@ namespace Spidermonkey {
         );
 
         <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@IV?$Handle@VValue@JS@@@3@@Z"); #>
-        public static extern bool SetElement(
+        public static extern JSBool SetElement(
             JSContextPtr cx,
             JSHandleObject objArg,
             UInt32 index,
@@ -332,7 +329,7 @@ namespace Spidermonkey {
         );
 
         <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@I1@Z"); #>
-        public static extern bool SetElement(
+        public static extern JSBool SetElement(
             JSContextPtr cx,
             JSHandleObject objArg,
             UInt32 index,
@@ -342,7 +339,7 @@ namespace Spidermonkey {
         // HACK: Ambiguity between HandleObject and HandleString w/JSString...
         /*
         <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@IV?$Handle@PAVJSString@@@3@@Z"); #>
-        public static extern bool SetElement(
+        public static extern JSBool SetElement(
             JSContextPtr cx,
             JSHandleObject objArg,
             UInt32 index,
@@ -351,7 +348,7 @@ namespace Spidermonkey {
         */
 
         <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@IH@Z"); #>
-        public static extern bool SetElement(
+        public static extern JSBool SetElement(
             JSContextPtr cx,
             JSHandleObject objArg,
             UInt32 index,
@@ -359,7 +356,7 @@ namespace Spidermonkey {
         );
 
         <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@II@Z"); #>
-        public static extern bool SetElement(
+        public static extern JSBool SetElement(
             JSContextPtr cx,
             JSHandleObject objArg,
             UInt32 index,
@@ -367,7 +364,7 @@ namespace Spidermonkey {
         );
 
         <# ImportFunction("?JS_SetElement@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@IN@Z"); #>
-        public static extern bool SetElement(
+        public static extern JSBool SetElement(
             JSContextPtr cx,
             JSHandleObject objArg,
             UInt32 index,
@@ -387,7 +384,7 @@ namespace Spidermonkey {
         );
 
         <# ImportFunction("?JS_StringHasLatin1Chars@@YA_NPAVJSString@@@Z"); #>
-        public static extern bool StringHasLatin1Chars(
+        public static extern JSBool StringHasLatin1Chars(
             JSStringPtr str
         );
 
@@ -422,7 +419,7 @@ namespace Spidermonkey {
         );
 
         <# ImportFunction("?JS_GetPrototype@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$MutableHandle@PAVJSObject@@@3@@Z"); #>
-        public static extern bool GetPrototype(
+        public static extern JSBool GetPrototype(
             JSContextPtr cx, JSHandleObject obj,
             JSMutableHandleObject protop
         );

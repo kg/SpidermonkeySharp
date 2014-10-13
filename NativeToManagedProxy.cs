@@ -26,7 +26,8 @@ namespace Spidermonkey.Managed {
             Pin = GCHandle.Alloc(WrappedMethod);
         }
 
-        private bool Invoke (JSContextPtr cx, uint argc, JSCallArgumentsPtr args) {
+        // Bound via reflection
+        private JSBool Invoke (JSContextPtr cx, uint argc, JSCallArgumentsPtr args) {
             var managedArgs = new object[ArgumentCount];
 
             for (uint i = 0, l = Math.Min(ArgumentCount, argc); i < l; i++) {
@@ -49,6 +50,11 @@ namespace Spidermonkey.Managed {
             } catch (Exception exc) {
                 JSMarshal.Throw(cx, exc);
                 return false;
+            }
+
+            if (ManagedMethod.Method.ReturnType.FullName == "System.Void") {
+                args.Result = JS.Value.Undefined;
+                return true;
             }
 
             JS.Value nativeResult;

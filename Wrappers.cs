@@ -96,6 +96,7 @@ namespace Spidermonkey {
             return New(cx, &errorConstructor, ref args);
         }
 
+        /*
         // HACK: Implement this algorithm by hand since the actual function is broken :/
         public static unsafe bool IsArrayObject (
             JSContextPtr context, JSObjectPtr obj
@@ -113,6 +114,7 @@ namespace Spidermonkey {
 
             return temp.AsObject.Equals(pConstructor);
         }
+         */
     }
 
     public partial struct JSObjectPtr {

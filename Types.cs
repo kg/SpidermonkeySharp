@@ -127,4 +127,35 @@ namespace Spidermonkey {
     public struct JSContextOptions {
         public JSContextOptionFlags Options;
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct JSBool {
+        private readonly byte _Value;
+
+        public JSBool (byte value) {
+            _Value = value;
+        }
+
+        public JSBool (bool value) {
+            _Value = (byte)(value ? 1 : 0);
+        }
+
+        public bool Value {
+            get {
+                return _Value != 0;
+            }
+        }
+
+        public static implicit operator bool (JSBool b) {
+            return (b._Value != 0);
+        }
+
+        public static implicit operator JSBool (bool b) {
+            return new JSBool(b);
+        }
+
+        public static implicit operator JSBool (byte b) {
+            return new JSBool(b);
+        }
+    }
 }

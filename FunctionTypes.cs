@@ -14,7 +14,7 @@ namespace Spidermonkey {
     );
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate bool JSPropertyOp (
+    public delegate JSBool JSPropertyOp (
         JSContextPtr cx,
         JSHandleObject obj,
         JSHandleId id,
@@ -22,37 +22,37 @@ namespace Spidermonkey {
     );
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate bool JSStrictPropertyOp (
+    public delegate JSBool JSStrictPropertyOp (
         JSContextPtr cx,
         JSHandleObject obj,
         JSHandleId id, 
-        bool strict,
+        JSBool strict,
         JSMutableHandleValue vp
     );
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate bool JSDeletePropertyOp (
+    public delegate JSBool JSDeletePropertyOp (
         JSContextPtr cx,
         JSHandleObject obj,
         JSHandleId id, 
-        ref bool succeeded
+        ref JSBool succeeded
     );
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate bool JSEnumerateOp (
+    public delegate JSBool JSEnumerateOp (
         JSContextPtr cx,
         JSHandleObject obj
     );
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate bool JSResolveOp (
+    public delegate JSBool JSResolveOp (
         JSContextPtr cx,
         JSHandleObject obj,
         JSHandleId id
     );
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate bool JSConvertOp (
+    public delegate JSBool JSConvertOp (
         JSContextPtr cx,
         JSHandleObject obj, 
         JSType type, 
@@ -60,13 +60,13 @@ namespace Spidermonkey {
     );
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate bool JSFinalizeOp (
+    public delegate JSBool JSFinalizeOp (
         IntPtr fop, JSObjectPtr obj
     );
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate bool JSHasInstanceOp (
-        JSContextPtr cx, JSHandleObject obj, JSMutableHandleValue vp, ref bool bp
+    public delegate JSBool JSHasInstanceOp (
+        JSContextPtr cx, JSHandleObject obj, JSMutableHandleValue vp, ref JSBool bp
     );
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -76,7 +76,7 @@ namespace Spidermonkey {
     );
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate bool JSNative (
+    public delegate JSBool JSNative (
         JSContextPtr cx, uint argc, JSCallArgumentsPtr vp
     );
 

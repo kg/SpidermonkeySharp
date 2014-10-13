@@ -8,23 +8,25 @@ using Spidermonkey.Managed;
 namespace Test {
     public static class Program {
         public static void Main () {
-            /*
-            var tc = new Tests();
-            tc.MarshalArray();
-             */
-            using (var ipe = new InProcessEvaluator()) {
-                var js = File.ReadAllText(@"C:\Users\Katelyn\Documents\test.js");
+            if (true) {
+                var tc = new Tests();
+                tc.ExceptionTest();
+            } else {
+                using (var ipe = new InProcessEvaluator()) {
+                    var js = File.ReadAllText(@"C:\Users\Katelyn\Documents\test.js");
 
-                JSError error;
-                ipe.Context.Evaluate(ipe.Global, js, out error, filename: "test.js");
-                if (error != null)
-                    throw error.ToException();
+                    JSError error;
+                    ipe.Context.Evaluate(ipe.Global, js, out error, filename: "test.js");
+                    if (error != null)
+                        throw error.ToException();
+                }
             }
 
             Console.WriteLine("// Press enter");
             Console.ReadLine();
         }
     }
+
     class InProcessEvaluator : IDisposable {
         public readonly JSRuntime Runtime;
         public readonly JSContext Context;
@@ -36,11 +38,13 @@ namespace Test {
         private bool IsLoading = false;
 
         public InProcessEvaluator () {
-            Runtime = new JSRuntime();
+            Runtime = new JSRuntime(1024 * 1024 * 128);
             Context = new JSContext(Runtime);
             Request = Context.Request();
             Global = new JSGlobalObject(Context);
             Entry = Context.EnterCompartment(Global);
+
+            Spidermonkey.JSAPI.SetErrorReporter(Context, ReportError);
 
             if (!Spidermonkey.JSAPI.InitStandardClasses(Context, Global))
                 throw new Exception("Failed to initialize standard classes");
@@ -59,6 +63,10 @@ namespace Test {
             );
         }
 
+        private void ReportError (Spidermonkey.JSContextPtr cx, string message, ref Spidermonkey.JSErrorReport report) {
+            Console.WriteLine(message);
+        }
+
         private void OnceLoaded (JSObjectReference callback) {
             OnceLoadedCallback = callback;
         }
@@ -71,21 +79,24 @@ namespace Test {
 
             IsLoading = true;
 
+            Context.ReportUncaughtExceptions = true;
+
             while (LoadQueue.Count > 0) {
                 var _filename = LoadQueue.Dequeue();
                 var js = File.ReadAllText(_filename);
 
-                JSError error;
+                // JSError error;
                 Context.Evaluate(
                     Global, js,
-                    out error,
                     filename: _filename
                 );
 
                 Console.WriteLine("// Loaded {0}", _filename);
 
+                /*
                 if (error != null)
                     throw new Exception("Error while loading " + _filename, error.ToException());
+                 */
             }
 
             if (OnceLoadedCallback != null) {
