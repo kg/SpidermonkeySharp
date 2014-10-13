@@ -106,6 +106,7 @@ namespace Test {
 
                 Assert.IsNotNull(evalError);
                 Assert.AreEqual(tc.Global["Error"].AsObject, evalError.Constructor.Pointer);
+                Assert.AreEqual("Error", evalError.ConstructorName.ToString());
                 Assert.AreEqual("test", evalError.Message.ToString());
                 Assert.AreEqual("testScript", evalError.FileName.ToString());
                 Assert.AreEqual(1, evalError.LineNumber);

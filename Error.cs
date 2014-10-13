@@ -17,6 +17,16 @@ namespace Spidermonkey.Managed {
             }
         }
 
+        public JSString ConstructorName {
+            get {
+                var constructor = Constructor;
+
+                return JSString.New(
+                    Context, constructor["name"]
+                );
+            }
+        }
+
         public JSString Message {
             get {
                 return JSString.New(
