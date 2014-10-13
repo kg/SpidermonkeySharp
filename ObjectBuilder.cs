@@ -11,6 +11,7 @@ namespace Spidermonkey.Managed {
         public readonly Rooted<JSObjectPtr> Root;
 
         private Rooted<JS.Value> LazyRootedValue;
+        private List<IDisposable> LazyRetainedObjects;
 
         public JSObjectReference(
             JSContextPtr context,
@@ -48,6 +49,13 @@ namespace Spidermonkey.Managed {
         }
 
         public void Dispose () {
+            if (LazyRetainedObjects != null) {
+                foreach (var disposable in LazyRetainedObjects)
+                    disposable.Dispose();
+
+                LazyRetainedObjects.Clear();
+            }
+
             Root.Dispose();
         }
 
@@ -203,6 +211,50 @@ namespace Spidermonkey.Managed {
             return new JSObjectReference(
                 Context, Pointer.InvokeConstructor(Context, arguments)
             );
+        }
+
+        public void Retain (IDisposable disposable) {
+            if (LazyRetainedObjects == null)
+                LazyRetainedObjects = new List<IDisposable>();
+
+            LazyRetainedObjects.Add(disposable);
+        }
+
+        /// <summary>
+        /// Registers a managed JSNative as a property on the target object.
+        /// The JSNative should return true on success and always set a result value.
+        /// </summary>
+        /// <param name="autoRetain">If true, the marshalling proxy is automatically retained by the object wrapper.</param>
+        /// <returns>
+        /// A pinning handle for the function that must be retained as long as the function is available to JS.
+        /// </returns>
+        public JSNativePin DefineFunction (
+            JSContextPtr context, string name, JSNative call,
+            uint nargs = 0, uint attrs = 0,
+            bool autoRetain = true
+        ) {
+            var result = Pointer.DefineFunction(Context, name, @call, nargs, attrs);
+            if (autoRetain)
+                Retain(result);
+            return result;
+        }
+
+        /// <summary>
+        /// Registers a managed function as a property on the target object.
+        /// The managed function is wrapped automatically by a marshalling proxy.
+        /// </summary>
+        /// <param name="autoRetain">If true, the marshalling proxy is automatically retained by the object wrapper.</param>
+        /// <returns>
+        /// The function's marshalling proxy that must be retained as long as the function is available to JS.
+        /// </returns>
+        public NativeToManagedProxy DefineFunction (
+            JSContextPtr context, string name, Delegate @delegate, uint attrs = 0,
+            bool autoRetain = true
+        ) {
+            var result = Pointer.DefineFunction(Context, name, @delegate, attrs);
+            if (autoRetain)
+                Retain(result);
+            return result;
         }
     }
 

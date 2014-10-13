@@ -35,7 +35,7 @@ namespace Test {
         public readonly JSGlobalObject Global;
         private readonly JSCompartmentEntry Entry;
         private int LoadDepth = 0;
-        private readonly List<IDisposable> Functions;
+        private bool Trace = false;
 
         public InProcessEvaluator () {
             Runtime = new JSRuntime(1024 * 1024 * 128);
@@ -49,21 +49,18 @@ namespace Test {
             if (!JSAPI.InitStandardClasses(Context, Global))
                 throw new Exception("Failed to initialize standard classes");
 
-            // The functions we register must be retained so the GC doesn't collect them
-            Functions = new List<IDisposable> {
-                Global.Pointer.DefineFunction(
-                    Context, "load", (Action<string>)Load
-                ),
-                Global.Pointer.DefineFunction(
-                    Context, "print", (Action<object>)Print
-                ),
-                Global.Pointer.DefineFunction(
-                    Context, "putstr", (Action<object>)Putstr
-                ),
-                Global.Pointer.DefineFunction(
-                    Context, "timeout", NoOp
-                )
-            };
+            Global.DefineFunction(
+                Context, "load", (Action<string>)Load
+            );
+            Global.DefineFunction(
+                Context, "print", (Action<object>)Print
+            );
+            Global.DefineFunction(
+                Context, "putstr", (Action<object>)Putstr
+            );
+            Global.DefineFunction(
+                Context, "timeout", NoOp
+            );
         }
 
         private JSBool NoOp (JSContextPtr cx, uint argc, JSCallArgumentsPtr argv) {
@@ -78,8 +75,10 @@ namespace Test {
 
         private unsafe void Load (string filename) {
             try {
-                Console.WriteLine("// {0}Loading {1}...", new String(' ', LoadDepth), filename);
+                if (Trace)
+                    Console.WriteLine("// {0}Loading {1}...", new String(' ', LoadDepth), filename);
                 LoadDepth += 1;
+
                 var js = File.ReadAllText(filename);
 
                 JSError error;
@@ -93,10 +92,9 @@ namespace Test {
                     if (error != null)
                         throw new Exception("Error while loading " + filename, error.ToException());
                 } else {
-                    Console.WriteLine("// {0}Loaded {1}", new String(' ', LoadDepth - 1), filename);
+                    if (Trace)
+                        Console.WriteLine("// {0}Loaded {1}", new String(' ', LoadDepth - 1), filename);
                 }
-            } catch (Exception exc) {
-                throw;
             } finally {
                 LoadDepth -= 1;
             }
@@ -111,9 +109,6 @@ namespace Test {
         }
 
         public void Dispose () {
-            foreach (var fn in Functions)
-                fn.Dispose();
-
             Entry.Dispose();
             Global.Dispose();
             Request.Dispose();
