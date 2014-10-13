@@ -429,6 +429,21 @@ namespace Spidermonkey {
             JSContextPtr cx, JSHandleObject proto
         );
 
+        <# ImportFunction("?JS_GetGlobalForObject@@YAPAVJSObject@@PAUJSContext@@PAV1@@Z"); #>
+        public static extern JSObjectPtr GetGlobalForObject(
+            JSContextPtr cx, JSObjectPtr obj
+        );
+
+        <# ImportFunction("?JS_GetArrayPrototype@@YAPAVJSObject@@PAUJSContext@@V?$Handle@PAVJSObject@@@JS@@@Z"); #>
+        public static extern JSObjectPtr GetArrayPrototype(
+            JSContextPtr cx, JSHandleObject forObj
+        );
+
+        <# ImportFunction("?JS_GetErrorPrototype@@YAPAVJSObject@@PAUJSContext@@@Z"); #>
+        public static extern JSObjectPtr GetErrorPrototype(
+            JSContextPtr cx
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

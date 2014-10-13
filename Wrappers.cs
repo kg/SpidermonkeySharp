@@ -85,6 +85,19 @@ namespace Spidermonkey {
             fixed (char* pChars = s)
                 return NewUCStringCopyN(cx, (IntPtr)pChars, (uint)s.Length);
         }
+
+        public static unsafe JSObjectPtr NewError (
+            JSContextPtr cx,
+            ref JS.ValueArrayPtr args
+        ) {
+            var errorPrototype = GetErrorPrototype(cx);
+            var pPrototype = &errorPrototype;
+
+            var errorConstructor = GetConstructor(cx, new JSHandleObject((IntPtr)pPrototype));
+            var pConstructor = &errorConstructor;
+
+            return New(cx, new JSHandleObject((IntPtr)pConstructor), ref args);
+        }
     }
 
     public partial struct JSObjectPtr {
@@ -147,14 +160,12 @@ namespace Spidermonkey {
             fixed (JSObjectPtr* pThis = &this)
             fixed (JS.Value* pArgs = arguments) {
                 var argsPtr = new JS.ValueArrayPtr((uint)arguments.Length, (IntPtr)pArgs);
-                var resultRoot = new Rooted<JSObjectPtr>(context);
                 var thisHandle = new JSHandleObject((IntPtr)pThis);
 
-                JSObjectPtr result = JSAPI.New(
+                return JSAPI.New(
                     context, thisHandle,
                     ref argsPtr
                 );
-                return result;
             }
         }
 
@@ -234,7 +245,7 @@ namespace Spidermonkey {
         }
 
         public Rooted<JS.Value> Get () {
-            var root = new Rooted<JS.Value>(Context);
+            var root = new Rooted<JS.Value>(Context, JS.Value.Undefined);
             if (JSAPI.GetPendingException(Context, root))
                 return root;
 

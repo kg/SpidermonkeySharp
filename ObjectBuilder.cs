@@ -93,7 +93,7 @@ namespace Spidermonkey.Managed {
         /// </summary>
         public bool TryGetNested (out JS.Value result, params string[] propertyNames) {
             var searchScope = Pointer;
-            var temp = new Rooted<JS.Value>(Context);
+            var temp = new Rooted<JS.Value>(Context, JS.Value.Undefined);
 
             for (int i = 0, l = propertyNames.Length; i < l; i++) {
                 var name = propertyNames[i];

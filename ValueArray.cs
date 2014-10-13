@@ -7,7 +7,7 @@ using Spidermonkey;
 
 namespace JS {
     public class ValueArray {
-        private readonly Value[] Elements;
+        public readonly Value[] Elements;
         private readonly GCHandle ElementsPin;
 
         public ValueArray (uint length)
@@ -17,6 +17,12 @@ namespace JS {
         private ValueArray (Value[] elements) {
             Elements = elements;
             ElementsPin = GCHandle.Alloc(Elements, GCHandleType.Pinned);
+        }
+
+        public int Length {
+            get {
+                return Elements.Length;
+            }
         }
 
         public static implicit operator ValueArrayPtr (ValueArray self) {

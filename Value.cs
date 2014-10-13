@@ -220,7 +220,7 @@ namespace JS {
             fixed (Value * pThis = &this)
             fixed (Value * pArgs = arguments) {
                 var argsPtr = new ValueArrayPtr((uint)arguments.Length, (IntPtr)pArgs);
-                var resultRoot = new Rooted<Value>(context);
+                var resultRoot = new Rooted<Value>(context, Undefined);
                 var thisVal = new JSHandleValue((IntPtr)pThis);
 
                 if (JSAPI.CallFunctionValue(

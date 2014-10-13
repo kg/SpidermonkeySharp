@@ -25,12 +25,34 @@ namespace Spidermonkey.Managed {
             Pin = GCHandle.Alloc(WrappedMethod);
         }
 
-        private object NativeToManaged (JSContextPtr cx, JS.Value value) {
+        private static object NativeToManaged (JSContextPtr cx, JS.Value value) {
             return value.ToManaged(cx);
         }
 
-        private JS.Value ManagedToNative (JSContextPtr cx, object value) {
+        private static JS.Value ManagedToNative (JSContextPtr cx, object value) {
+            if (value == null) {
+                return JS.Value.Null;
+            }
+
+            var s = value as string;
+            if (s != null) {
+                var pString = JSAPI.NewStringCopy(cx, s);
+                return new JS.Value(pString);
+            }
+
             return (JS.Value)Activator.CreateInstance(typeof(JS.Value), value);
+        }
+
+        private static unsafe void Throw (JSContextPtr cx, params object[] errorArguments) {
+            var jsErrorArgs = new JS.ValueArray((uint)errorArguments.Length);
+            for (int i = 0; i < errorArguments.Length; i++)
+                jsErrorArgs.Elements[i] = ManagedToNative(cx, errorArguments[i]);
+
+            JS.ValueArrayPtr vaPtr = jsErrorArgs;
+            var errorRoot = new Rooted<JS.Value>(
+                cx, new JS.Value(JSAPI.NewError(cx, ref vaPtr))
+            );
+            JSAPI.SetPendingException(cx, errorRoot);
         }
 
         private bool Invoke (JSContextPtr cx, uint argc, JSCallArgumentsPtr args) {
@@ -44,10 +66,8 @@ namespace Spidermonkey.Managed {
                 args.Result = ManagedToNative(cx, managedResult);
                 return true;
             } catch (Exception exc) {
-                args.Result = JS.Value.Undefined;
+                Throw(cx, exc.Message);
 
-                var error = new Rooted<JS.Value>(cx);
-                JSAPI.SetPendingException(cx, error);
                 return false;
             }
         }
