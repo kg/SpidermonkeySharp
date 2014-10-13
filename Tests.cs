@@ -135,7 +135,7 @@ namespace Test {
 
                 var b = obj["b"];
                 Assert.AreEqual(JSValueType.STRING, b.ValueType);
-                Assert.AreEqual("hello", b.ToManagedValue(tc));
+                Assert.AreEqual("hello", b.ToManaged(tc));
 
                 var c = obj["c"];
                 Assert.AreEqual(JSValueType.DOUBLE, c.ValueType);
@@ -174,7 +174,7 @@ namespace Test {
                     Assert.AreEqual(JSType.JSTYPE_FUNCTION, fn.Value.GetJSType(tc));
 
                     var result = fn.Value.InvokeFunction(tc, tc.Global);
-                    Assert.AreEqual(42, result.Value.ToManagedValue(tc));
+                    Assert.AreEqual(42, result.Value.ToManaged(tc));
                 }
 
                 {
@@ -182,7 +182,7 @@ namespace Test {
                     Assert.AreEqual(JSType.JSTYPE_FUNCTION, fn.Value.GetJSType(tc));
 
                     var result = fn.Value.InvokeFunction(tc, tc.Global, new JS.Value(16));
-                    Assert.AreEqual(32, result.Value.ToManagedValue(tc));
+                    Assert.AreEqual(32, result.Value.ToManaged(tc));
                 }
             }
         }
@@ -208,7 +208,7 @@ namespace Test {
                     tc.Global,
                     @"test(16)"
                 );
-                Assert.AreEqual(32, evalResult.Value.ToManagedValue(tc));
+                Assert.AreEqual(32, evalResult.Value.ToManaged(tc));
             }
         }
 
@@ -228,7 +228,7 @@ namespace Test {
                     tc.Global,
                     @"test(16)"
                 );
-                Assert.AreEqual(32, evalResult.Value.ToManagedValue(tc));
+                Assert.AreEqual(32, evalResult.Value.ToManaged(tc));
             }
         }
 
@@ -253,7 +253,7 @@ namespace Test {
                 obj["a"] = new JS.Value(5);
 
                 var evalResult = tc.Context.Evaluate(tc.Global, "obj.a");
-                Assert.AreEqual(5, evalResult.Value.ToManagedValue(tc));
+                Assert.AreEqual(5, evalResult.Value.ToManaged(tc));
             }
         }
 
@@ -273,10 +273,10 @@ namespace Test {
                 var elementRoot = new Rooted<JS.Value>(tc);
 
                 Assert.IsTrue(JSAPI.GetElement(tc, arrayHandle, 0, elementRoot));
-                Assert.AreEqual(1, elementRoot.Value.ToManagedValue(tc));
+                Assert.AreEqual(1, elementRoot.Value.ToManaged(tc));
 
                 Assert.IsTrue(JSAPI.GetElement(tc, arrayHandle, 3, elementRoot));
-                Assert.AreEqual(4, elementRoot.Value.ToManagedValue(tc));
+                Assert.AreEqual(4, elementRoot.Value.ToManaged(tc));
             }
         }
 

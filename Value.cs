@@ -151,21 +151,39 @@ namespace JS {
             }
         }
 
-        public object ToManagedValue (JSContextPtr context) {
+        public unsafe object ToManagedObject (JSContextPtr context) {
+            fixed (Value * pThis = &this) {
+                var handleThis = new JSHandleValue((IntPtr)pThis);
+
+                if (JSAPI.IsArrayObject(context, handleThis))
+                    return new Spidermonkey.Managed.JSArray(context, packed.obj);
+                else
+                    return new Spidermonkey.Managed.JSObjectReference(context, packed.obj);
+            }
+        }
+
+        public object ToManaged (JSContextPtr context) {
             switch (ValueType) {
                 case JSValueType.DOUBLE:
                     return packed.f64;
+
                 case JSValueType.INT32:
                     return packed.i32;
+
                 case JSValueType.STRING:
                     return ToManagedString(context);
+
                 case JSValueType.NULL:
                     return null;
+
                 case JSValueType.BOOLEAN:
                     return (packed.i32 != 0);
 
+                case JSValueType.OBJECT:
+                    return ToManagedObject(context);
+
                 default:
-                    throw new NotImplementedException("Value type '" + ValueType + "' not convertible");
+                    throw new NotImplementedException("Type '" + ValueType + "' not convertible");
             }
         }
 

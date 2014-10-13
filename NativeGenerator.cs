@@ -26,7 +26,7 @@ namespace Spidermonkey.Managed {
         }
 
         private object NativeToManaged (JSContextPtr cx, JS.Value value) {
-            return value.ToManagedValue(cx);
+            return value.ToManaged(cx);
         }
 
         private JS.Value ManagedToNative (JSContextPtr cx, object value) {
