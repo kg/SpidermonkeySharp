@@ -110,6 +110,23 @@ namespace Spidermonkey.Managed {
             return self.ToString();
         }
 
+        public override int GetHashCode () {
+            return Pointer.GetHashCode();
+        }
+
+        // FIXME: Should this also compare the stringified values? Probably not desirable.
+        public bool Equals (JSString rhs) {
+            return Pointer.Equals(rhs.Pointer);
+        }
+
+        public override bool Equals (object obj) {
+            var rhs = obj as JSString;
+            if (rhs != null)
+                return Equals(rhs);
+            else
+                return base.Equals(obj);
+        }
+
         public override string ToString () {
             return Root.Value.ToManagedString(Context);
         }

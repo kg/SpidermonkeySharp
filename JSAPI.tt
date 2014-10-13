@@ -418,6 +418,12 @@ namespace Spidermonkey {
             ref JS.ValueArrayPtr args
         );
 
+        <# ImportFunction("?JS_GetPrototype@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$MutableHandle@PAVJSObject@@@3@@Z"); #>
+        public static extern bool GetPrototype(
+            JSContextPtr cx, JSHandleObject obj,
+            JSMutableHandleObject protop
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

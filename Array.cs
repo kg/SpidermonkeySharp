@@ -130,5 +130,23 @@ namespace Spidermonkey.Managed {
                     throw new Exception("Operation failed");
             }
         }
+
+        public override int GetHashCode () {
+            return Pointer.GetHashCode();
+        }
+
+        // FIXME: Deep comparison?
+        public bool Equals (JSArray rhs) {
+            return Pointer.Equals(rhs.Pointer);
+        }
+
+        public override bool Equals (object obj) {
+            var rhs = obj as JSArray;
+            if (rhs != null)
+                return Equals(rhs);
+            else
+                return base.Equals(obj);
+        }
+
     }
 }

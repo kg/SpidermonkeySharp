@@ -34,6 +34,13 @@ namespace Spidermonkey.Managed {
             : this(valueRoot.Context, valueRoot.Value.AsObject) {
         }
 
+        /// <summary>
+        /// If value does not contain an object, this will throw.
+        /// </summary>
+        public JSObjectReference (JSContextPtr context, JS.Value value)
+            : this(context, value.AsObject) {
+        }
+
         public JSObjectPtr Pointer {
             get {
                 return Root.Value;
@@ -80,6 +87,33 @@ namespace Spidermonkey.Managed {
             }
         }
 
+        public JSObjectReference Prototype {
+            get {
+                var result = new Rooted<JSObjectPtr>(Context);
+
+                if (!JSAPI.GetPrototype(Context, Root, result))
+                    throw new Exception("Failed to get prototype");
+
+                return new JSObjectReference(result);
+            }
+        }
+
+        public override int GetHashCode () {
+            return Pointer.GetHashCode();
+        }
+
+        public bool Equals (JSObjectReference rhs) {
+            return Pointer.Equals(rhs.Pointer);
+        }
+
+        public override bool Equals (object obj) {
+            var rhs = obj as JSObjectReference;
+            if (rhs != null)
+                return Equals(rhs);
+            else
+                return base.Equals(obj);
+        }
+
         public override string ToString() {
             JS.Value self = this;
             return self.ToManagedString(Context);
@@ -87,7 +121,7 @@ namespace Spidermonkey.Managed {
     }
 
     public class JSObjectBuilder : JSObjectReference {
-        public static unsafe JSObjectPtr CreateInstance (JSContextPtr context) {
+        public static JSObjectPtr CreateInstance (JSContextPtr context) {
             return JSAPI.NewObject(
                 context,
                 JSClassPtr.Zero,                

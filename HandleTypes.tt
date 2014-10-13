@@ -21,6 +21,7 @@ namespace Spidermonkey {
     <# DefineHandleType("JSHandleValue", "JS.Value", rootable: true); #>
     <# DefineHandleType("JSHandleId", "jsid", rootable: false); #>
 
+    <# DefineHandleType("JSMutableHandleObject", "JSObjectPtr", rootable: true); #>
     <# DefineHandleType("JSMutableHandleValue", "JS.Value", rootable: true); #>
 }
 

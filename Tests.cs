@@ -66,7 +66,7 @@ namespace Test {
         }
 
         [TestCase]
-        public unsafe void ExceptionTest () {
+        public void ExceptionTest () {
             using (var tc = new TestContext()) {
                 tc.Context.ReportUncaughtExceptions = false;
 
@@ -89,7 +89,7 @@ namespace Test {
         }
 
         [TestCase]
-        public unsafe void WrappedErrorTest () {
+        public void WrappedErrorTest () {
             using (var tc = new TestContext()) {
                 tc.Context.ReportUncaughtExceptions = false;
 
@@ -344,7 +344,7 @@ namespace Test {
                 cc.Prototype["a"] = new JSString(tc, "hello");
 
                 var jsCtor = tc.Global["testClass"];
-                var classObj = new JSObjectReference(tc, jsCtor.AsObject);
+                var classObj = new JSObjectReference(tc, jsCtor);
 
                 Assert.AreEqual(cc.Prototype.Pointer, classObj["prototype"].AsObject);
 
@@ -371,6 +371,36 @@ namespace Test {
                 );
 
                 Assert.AreEqual(arg1, instance["x"]);
+            }
+        }
+
+        [TestCase]
+        public void GetPrototypeTest () {
+            using (var tc = new TestContext()) {
+                var evalResult = tc.Context.Evaluate(
+                    tc.Global,
+                    "[new String('a'), new Error('b'), []]"
+                );
+
+                var arr = new JSArray(evalResult);
+                var s = new JSObjectReference(tc, arr[0]);
+                var e = new JSObjectReference(tc, arr[1]);
+                var a = new JSObjectReference(tc, arr[2]);
+
+                var getClassProto = (Func<string, JSObjectReference>)( (name) => {
+                    var cls = new JSObjectReference(tc, tc.Global[name]);
+                    return new JSObjectReference(tc, cls["prototype"]);
+                });
+
+                Assert.AreEqual(
+                    getClassProto("String"), s.Prototype
+                );
+                Assert.AreEqual(
+                    getClassProto("Error"), e.Prototype
+                );
+                Assert.AreEqual(
+                    getClassProto("Array"), a.Prototype
+                );
             }
         }
     }
