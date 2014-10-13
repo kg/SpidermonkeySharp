@@ -115,16 +115,47 @@ namespace Spidermonkey.Managed {
             throw new Exception("Unexpected");
         }
 
+        public bool TryGetNested (out JSObjectPtr result, params string[] propertyNames) {
+            JS.Value temp;
+
+            if (TryGetNested(out temp, propertyNames)) {
+                if (
+                    (temp.ValueType == JSValueType.NULL) ||
+                    (temp.ValueType == JSValueType.OBJECT)
+                ) {
+                    result = temp.AsObject;
+                    return true;
+                }
+            }
+
+            result = default(JSObjectPtr);
+            return false;
+        }
+
+        public bool TryGetNested (out JSStringPtr result, params string[] propertyNames) {
+            JS.Value temp;
+
+            if (TryGetNested(out temp, propertyNames)) {
+                if (temp.ValueType == JSValueType.STRING) {
+                    result = temp.AsString;
+                    return true;
+                }
+            }
+
+            result = default(JSStringPtr);
+            return false;
+        }
+
         /// <summary>
-        /// Recursively retrieves named properties. If one of the names is not found, returns undefined.
+        /// Recursively retrieves named properties. If one of the names is not found, returns null.
         /// </summary>
-        public JS.Value GetNested (params string[] propertyNames) {
+        public JS.Value? GetNested (params string[] propertyNames) {
             JS.Value result;
 
             if (TryGetNested(out result, propertyNames))
                 return result;
             else
-                return JS.Value.Undefined;
+                return null;
         }
 
         public JSObjectReference Prototype {

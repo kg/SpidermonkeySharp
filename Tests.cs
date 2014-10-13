@@ -388,7 +388,10 @@ namespace Test {
                 var a = new JSObjectReference(tc, arr[2]);
 
                 var getClassProto = (Func<string, JSObjectReference>)( (name) => {
-                    var p = tc.Global.GetNested(name, "prototype");
+                    JSObjectPtr p;
+                    if (!tc.Global.TryGetNested(out p, name, "prototype"))
+                        throw new Exception("Prototype not found");
+
                     return new JSObjectReference(tc, p);
                 });
 
