@@ -142,20 +142,39 @@ namespace Spidermonkey {
             return SetProperty(context, name, &_value);
         }
 
-        public unsafe JSFunctionPtr DefineFunction (
+        /// <summary>
+        /// Registers a managed JSNative as a property on the target object.
+        /// The JSNative should return true on success and always set a result value.
+        /// </summary>
+        /// <returns>
+        /// A pinning handle for the function that must be retained as long as the function is available to JS.
+        /// </returns>
+        public unsafe Managed.JSNativePin DefineFunction (
             JSContextPtr context, string name, JSNative call,
             uint nargs = 0, uint attrs = 0
         ) {
-            return JSAPI.DefineFunction(
-                context, TransientSelf(), name, call, nargs, attrs
+            var wrapped = new Managed.JSNativePin(call);
+            JSAPI.DefineFunction(
+                context, TransientSelf(), name, wrapped.Target, nargs, attrs
             );
+            return wrapped;
         }
 
-        public JSFunctionPtr DefineFunction (
+        /// <summary>
+        /// Registers a managed function as a property on the target object.
+        /// The managed function is wrapped automatically by a marshalling proxy.
+        /// </summary>
+        /// <returns>
+        /// The function's marshalling proxy that must be retained as long as the function is available to JS.
+        /// </returns>
+        public Managed.NativeToManagedProxy DefineFunction (
             JSContextPtr context, string name, Delegate @delegate, uint attrs = 0
         ) {
             var wrapped = new Managed.NativeToManagedProxy(@delegate);
-            return DefineFunction(context, name, wrapped.WrappedMethod, wrapped.ArgumentCount, attrs);
+            JSAPI.DefineFunction(
+                context, TransientSelf(), name, wrapped.WrappedMethod, wrapped.ArgumentCount, attrs
+            );
+            return wrapped;
         }
 
         public Rooted<JS.Value> InvokeFunction (

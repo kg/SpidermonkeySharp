@@ -35,6 +35,7 @@ namespace Test {
         public readonly JSGlobalObject Global;
         private readonly JSCompartmentEntry Entry;
         private int LoadDepth = 0;
+        private readonly List<IDisposable> Functions;
 
         public InProcessEvaluator () {
             Runtime = new JSRuntime(1024 * 1024 * 128);
@@ -48,18 +49,21 @@ namespace Test {
             if (!JSAPI.InitStandardClasses(Context, Global))
                 throw new Exception("Failed to initialize standard classes");
 
-            Global.Pointer.DefineFunction(
-                Context, "load", (Action<string>)Load
-            );
-            Global.Pointer.DefineFunction(
-                Context, "print", (Action<object>)Print
-            );
-            Global.Pointer.DefineFunction(
-                Context, "putstr", (Action<object>)Putstr
-            );
-            Global.Pointer.DefineFunction(
-                Context, "timeout", NoOp
-            );
+            // The functions we register must be retained so the GC doesn't collect them
+            Functions = new List<IDisposable> {
+                Global.Pointer.DefineFunction(
+                    Context, "load", (Action<string>)Load
+                ),
+                Global.Pointer.DefineFunction(
+                    Context, "print", (Action<object>)Print
+                ),
+                Global.Pointer.DefineFunction(
+                    Context, "putstr", (Action<object>)Putstr
+                ),
+                Global.Pointer.DefineFunction(
+                    Context, "timeout", NoOp
+                )
+            };
         }
 
         private JSBool NoOp (JSContextPtr cx, uint argc, JSCallArgumentsPtr argv) {
@@ -107,6 +111,9 @@ namespace Test {
         }
 
         public void Dispose () {
+            foreach (var fn in Functions)
+                fn.Dispose();
+
             Entry.Dispose();
             Global.Dispose();
             Request.Dispose();

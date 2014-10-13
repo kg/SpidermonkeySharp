@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -12,7 +13,8 @@ namespace Spidermonkey.Managed {
         public readonly JSNative WrappedMethod;
         public readonly uint ArgumentCount;
         public readonly ParameterInfo[] ArgumentInfo;
-        private readonly GCHandle Pin;
+        private readonly GCHandle ManagedPin, WrappedPin;
+        private bool IsDisposed;
 
         public NativeToManagedProxy (Delegate managedMethod) {
             if (managedMethod == null)
@@ -26,11 +28,13 @@ namespace Spidermonkey.Managed {
             ArgumentInfo = managedMethod.Method.GetParameters();
             ArgumentCount = (uint)ArgumentInfo.Length;
 
-            Pin = GCHandle.Alloc(WrappedMethod);
+            ManagedPin = GCHandle.Alloc(ManagedMethod);
+            WrappedPin = GCHandle.Alloc(WrappedMethod);
         }
 
         // Bound via reflection
         private JSBool Invoke (JSContextPtr cx, uint argc, JSCallArgumentsPtr args) {
+            // TODO: Marshal params arrays
             var managedArgs = new object[ArgumentCount];
 
             for (uint i = 0, l = Math.Min(ArgumentCount, argc); i < l; i++) {
@@ -81,7 +85,58 @@ namespace Spidermonkey.Managed {
         }
 
         public void Dispose () {
+            if (IsDisposed)
+                return;
+
+            IsDisposed = true;
+
+            WrappedPin.Free();
+            ManagedPin.Free();
+        }
+
+        ~NativeToManagedProxy () {
+            if (!IsDisposed) {
+                var msg = "A managed function proxy was collected without being disposed. If the associated JSNative is still being used by the runtime, calling it will crash.";
+
+                if (Debugger.IsAttached) {
+                    Debug.WriteLine(msg);
+                    Debugger.Break();
+                } else {
+                    Console.WriteLine(msg);
+                }
+            }
+        }
+    }
+
+    public class JSNativePin : IDisposable {
+        public readonly JSNative Target;
+        public readonly GCHandle Pin;
+        private bool IsDisposed;
+
+        public JSNativePin (JSNative target) {
+            Target = target;
+            Pin = GCHandle.Alloc(target);
+        }
+
+        public void Dispose () {
+            if (IsDisposed)
+                return;
+
+            IsDisposed = true;
             Pin.Free();
+        }
+
+        ~JSNativePin () {
+            if (!IsDisposed) {
+                var msg = "A managed function proxy was collected without being disposed. If the associated JSNative is still being used by the runtime, calling it will crash.";
+
+                if (Debugger.IsAttached) {
+                    Debug.WriteLine(msg);
+                    Debugger.Break();
+                } else {
+                    Console.WriteLine(msg);
+                }
+            }
         }
     }
 }
