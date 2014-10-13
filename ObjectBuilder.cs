@@ -189,6 +189,21 @@ namespace Spidermonkey.Managed {
             JS.Value self = this;
             return self.ToManagedString(Context);
         }
+
+        public Rooted<JS.Value> Invoke (
+            JSHandleObject thisReference,
+            params JS.Value[] arguments
+        ) {
+            return Pointer.InvokeFunction(Context, thisReference, arguments);
+        }
+
+        public JSObjectReference Construct (
+            params JS.Value[] arguments
+        ) {
+            return new JSObjectReference(
+                Context, Pointer.InvokeConstructor(Context, arguments)
+            );
+        }
     }
 
     public class JSObjectBuilder : JSObjectReference {

@@ -86,5 +86,24 @@ namespace Spidermonkey.Managed {
                     throw new Exception("Operation failed");
             }
         }
+
+        /// <summary>
+        /// Value becomes (or is) rooted by the object.
+        /// It's your responsibility to root it if you need it to outlive the object.
+        /// </summary>
+        public JS.Value this[int index] {
+            get {
+                if (index < 0)
+                    throw new ArgumentOutOfRangeException("index");
+
+                return this[(uint)index];
+            }
+            set {
+                if (index < 0)
+                    throw new ArgumentOutOfRangeException("index");
+
+                this[(uint)index] = value;
+            }
+        }
     }
 }

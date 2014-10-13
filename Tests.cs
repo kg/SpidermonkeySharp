@@ -446,5 +446,19 @@ namespace Test {
                 Assert.IsTrue(stackText.Contains("testFunction@evalExpr"));
             }
         }
+
+        [TestCase]
+        public void MarshalArray () {
+            using (var tc = new TestContext()) {
+                var clrArray = new object[] { 1, 1.5, "a" };
+                var jsArray = new Rooted<JS.Value>(
+                    tc, JSMarshal.ManagedToNative(tc, clrArray)
+                );
+                var roundTripArray = JSMarshal.NativeToManaged(tc, jsArray);
+
+                Assert.AreEqual("1,1.5,a", jsArray.Value.ToManagedString(tc));
+                Assert.AreEqual(clrArray, roundTripArray);
+            }
+        }
     }
 }

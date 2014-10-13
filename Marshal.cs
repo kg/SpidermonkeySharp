@@ -6,30 +6,12 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Spidermonkey.Managed {
-    public class NativeToManagedProxy : IDisposable {
-        public readonly Delegate ManagedMethod;
-        public readonly JSNative WrappedMethod;
-        public readonly uint ArgumentCount;
-        public readonly ParameterInfo[] ArgumentInfo;
-        private readonly GCHandle Pin;
-
-        public NativeToManagedProxy (Delegate managedMethod) {
-            ManagedMethod = managedMethod;
-
-            var invoke = GetType().GetMethod("Invoke", BindingFlags.NonPublic | BindingFlags.Instance);
-            WrappedMethod = (JSNative)Delegate.CreateDelegate(typeof(JSNative), this, invoke, true);
-
-            ArgumentInfo = managedMethod.Method.GetParameters();
-            ArgumentCount = (uint)ArgumentInfo.Length;
-
-            Pin = GCHandle.Alloc(WrappedMethod);
-        }
-
-        private static object NativeToManaged (JSContextPtr cx, JS.Value value) {
+    public static class JSMarshal {
+        public static object NativeToManaged (JSContextPtr cx, JS.Value value) {
             return value.ToManaged(cx);
         }
 
-        private static JS.Value ManagedToNative (JSContextPtr cx, object value) {
+        public static JS.Value ManagedToNative (JSContextPtr cx, object value) {
             if (value == null) {
                 return JS.Value.Null;
             }
@@ -38,6 +20,17 @@ namespace Spidermonkey.Managed {
             if (s != null) {
                 var pString = JSAPI.NewStringCopy(cx, s);
                 return new JS.Value(pString);
+            }
+
+            var a = value as Array;
+            if (a != null) {
+                var va = new JS.ValueArray((uint)a.Length);
+                for (int i = 0, l = a.Length; i < l; i++)
+                    va.Elements[i] = ManagedToNative(cx, a.GetValue(i));
+
+                JS.ValueArrayPtr vaPtr = va;
+                var pArray = JSAPI.NewArrayObject(cx, ref vaPtr);
+                return new JS.Value(pArray);
             }
 
             return (JS.Value)Activator.CreateInstance(typeof(JS.Value), value);
@@ -70,9 +63,9 @@ namespace Spidermonkey.Managed {
             JSAPI.SetProperty(
                 cx, errorObjHandle, "stack",
                 new JSString(
-                    cx, 
+                    cx,
                     managedException.StackTrace +
-                    "\n//---- JS-to-native boundary ----//\n" + 
+                    "\n//---- JS-to-native boundary ----//\n" +
                     existingStackText
                 )
             );
@@ -96,51 +89,6 @@ namespace Spidermonkey.Managed {
             var errorRoot = NewError(cx, errorArguments);
             JSAPI.SetPendingException(cx, errorRoot);
         }
-
-        private bool Invoke (JSContextPtr cx, uint argc, JSCallArgumentsPtr args) {
-            var managedArgs = new object[ArgumentCount];
-
-            for (uint i = 0, l = Math.Min(ArgumentCount, argc); i < l; i++) {
-                try {
-                    managedArgs[i] = NativeToManaged(cx, args[i]);
-                } catch (Exception exc) {
-                    var wrapped = new Exception(
-                        "Argument #" + i + " could not be converted",
-                        exc
-                    );
-
-                    Throw(cx, wrapped);
-                    return false;
-                }
-            }
-
-            object managedResult;
-            try {
-                managedResult = ManagedMethod.DynamicInvoke(managedArgs);
-            } catch (Exception exc) {
-                Throw(cx, exc);
-                return false;
-            }
-
-            JS.Value nativeResult;
-            try {
-                nativeResult = ManagedToNative(cx, managedResult);
-            } catch (Exception exc) {
-                var wrapped = new Exception(
-                    "Return value could not be converted",
-                    exc
-                );
-
-                Throw(cx, wrapped);
-                return false;
-            }
-
-            args.Result = nativeResult;
-            return true;
-        }
-
-        public void Dispose () {
-            Pin.Free();
-        }
     }
+
 }

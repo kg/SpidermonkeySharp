@@ -151,14 +151,43 @@ namespace JS {
             }
         }
 
-        public unsafe object ToManagedObject (JSContextPtr context) {
+        public unsafe bool IsArray (JSContextPtr context) {
             fixed (Value * pThis = &this) {
                 var handleThis = new JSHandleValue((IntPtr)pThis);
+                return JSAPI.IsArrayObject(context, handleThis);
+            }
+        }
 
-                if (JSAPI.IsArrayObject(context, handleThis))
+        public unsafe object ToManagedObject (JSContextPtr context) {
+            var w = ToManagedObjectWrapper(context);
+
+            var jsa = w as Spidermonkey.Managed.JSArray;
+            if (jsa != null) {
+                var result = new object[jsa.Length];
+
+                for (int i = 0, l = result.Length; i < l; i++) {
+                    result[i] = Spidermonkey.Managed.JSMarshal.NativeToManaged(context, jsa[i]);
+                }
+
+                return result;
+            }
+
+            return w;
+        }
+
+        public object ToManagedObjectWrapper (JSContextPtr context) {
+            if (ValueType == JSValueType.STRING) {
+                return new Spidermonkey.Managed.JSString(context, packed.str);
+            } else if (ValueType == JSValueType.OBJECT) {
+                if (IsArray(context)) {
                     return new Spidermonkey.Managed.JSArray(context, packed.obj);
-                else
+                } else {
+                    // FIXME: Marshal errors to JSError?
                     return new Spidermonkey.Managed.JSObjectReference(context, packed.obj);
+                }
+            } else {
+                // FIXME: Something more appropriate than boxed JS.Value?
+                return this;
             }
         }
 

@@ -68,7 +68,8 @@
     <Compile Include="Constants.cs" />
     <Compile Include="CustomClass.cs" />
     <Compile Include="Error.cs" />
-    <Compile Include="NativeGenerator.cs" />
+    <Compile Include="Marshal.cs" />
+    <Compile Include="NativeToManagedProxy.cs" />
     <Compile Include="ObjectBuilder.cs" />
     <Compile Include="RuntimeAndContext.cs" />
     <Compile Include="String.cs" />
