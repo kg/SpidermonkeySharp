@@ -51,16 +51,15 @@ namespace Spidermonkey.Managed {
         public static unsafe Rooted<JS.Value> ManagedToNativeException (JSContextPtr cx, Exception managedException) {
             var errorRoot = NewError(cx, managedException.Message);
             var errorObj = errorRoot.Value.AsObject;
-            var errorObjHandle = new JSHandleObject(&errorObj);
 
             var existingStackRoot = new Rooted<JS.Value>(cx);
             JSAPI.GetProperty(
-                cx, errorObjHandle, "stack", existingStackRoot
+                cx, &errorObj, "stack", existingStackRoot
             );
             var existingStackText = existingStackRoot.Value.ToManagedString(cx);
 
             JSAPI.SetProperty(
-                cx, errorObjHandle, "stack",
+                cx, &errorObj, "stack",
                 new JSString(
                     cx,
                     managedException.StackTrace +
@@ -72,7 +71,7 @@ namespace Spidermonkey.Managed {
             if (managedException.InnerException != null) {
                 var inner = ManagedToNativeException(cx, managedException.InnerException);
 
-                JSAPI.SetProperty(cx, errorObjHandle, "innerException", inner);
+                JSAPI.SetProperty(cx, &errorObj, "innerException", inner);
             }
 
             return errorRoot;

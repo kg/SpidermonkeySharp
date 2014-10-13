@@ -136,14 +136,12 @@ namespace JS {
 
         public unsafe JSType GetJSType (JSContextPtr context) {
             fixed (Value * pThis = &this)
-                return JSAPI.TypeOfValue(context, new JSHandleValue(pThis));
+                return JSAPI.TypeOfValue(context, pThis);
         }
 
         public unsafe string ToManagedString (JSContextPtr context) {
             fixed (Value * pThis = &this) {
-                var handleThis = new JSHandleValue(pThis);
-
-                var resultJsString = JSAPI.ToString(context, handleThis);
+                var resultJsString = JSAPI.ToString(context, pThis);
                 if (resultJsString.IsZero)
                     return null;
 
@@ -250,11 +248,10 @@ namespace JS {
             fixed (Value * pArgs = arguments) {
                 var argsPtr = new ValueArrayPtr((uint)arguments.Length, (IntPtr)pArgs);
                 var resultRoot = new Rooted<Value>(context, Undefined);
-                var thisVal = new JSHandleValue(pThis);
 
                 if (JSAPI.CallFunctionValue(
                     context, thisReference,
-                    thisVal,
+                    pThis,
                     ref argsPtr,
                     resultRoot
                 ))

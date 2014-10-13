@@ -91,31 +91,24 @@ namespace Spidermonkey {
             ref JS.ValueArrayPtr args
         ) {
             var errorPrototype = GetErrorPrototype(cx);
-            var errorConstructor = GetConstructor(cx, new JSHandleObject(&errorPrototype));
+            var errorConstructor = GetConstructor(cx, &errorPrototype);
 
-            return New(cx, new JSHandleObject(&errorConstructor), ref args);
+            return New(cx, &errorConstructor, ref args);
         }
 
         // HACK: Implement this algorithm by hand since the actual function is broken :/
         public static unsafe bool IsArrayObject (
             JSContextPtr context, JSObjectPtr obj
         ) {
-            var hObj = new JSHandleObject(&obj);
-
             var proto = JSObjectPtr.Zero;
-            var hProto = new JSMutableHandleObject(&proto);
-
-            if (!GetPrototype(context, hObj, hProto))
+            if (!GetPrototype(context, &obj, &proto))
                 return false;
 
-            var pConstructor = GetConstructor(context, new JSHandleObject(&proto));
+            var pConstructor = GetConstructor(context, &proto);
 
             var temp = JS.Value.Undefined;
-            var hTemp = new JSMutableHandleValue(&temp);
-
             var global = GetGlobalForObject(context, obj);
-            var hGlobal = new JSHandleObject(&global);
-            if (!GetProperty(context, hGlobal, "Array", hTemp))
+            if (!GetProperty(context, &global, "Array", &temp))
                 return false;
 
             return temp.AsObject.Equals(pConstructor);
@@ -144,9 +137,7 @@ namespace Spidermonkey {
 
         public unsafe bool SetProperty (JSContextPtr context, string name, JSUnrootedValue value) {
             JS.Value _value = value;
-            JSHandleValue handle = new JSHandleValue(&_value);
-
-            return SetProperty(context, name, handle);
+            return SetProperty(context, name, &_value);
         }
 
         public unsafe JSFunctionPtr DefineFunction (
@@ -181,12 +172,8 @@ namespace Spidermonkey {
             fixed (JSObjectPtr* pThis = &this)
             fixed (JS.Value* pArgs = arguments) {
                 var argsPtr = new JS.ValueArrayPtr((uint)arguments.Length, (IntPtr)pArgs);
-                var thisHandle = new JSHandleObject(pThis);
 
-                return JSAPI.New(
-                    context, thisHandle,
-                    ref argsPtr
-                );
+                return JSAPI.New(context, pThis, ref argsPtr);
             }
         }
 
