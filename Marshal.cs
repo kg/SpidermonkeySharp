@@ -51,8 +51,7 @@ namespace Spidermonkey.Managed {
         public static unsafe Rooted<JS.Value> ManagedToNativeException (JSContextPtr cx, Exception managedException) {
             var errorRoot = NewError(cx, managedException.Message);
             var errorObj = errorRoot.Value.AsObject;
-            var pErrorObj = &errorObj;
-            var errorObjHandle = new JSHandleObject((IntPtr)pErrorObj);
+            var errorObjHandle = new JSHandleObject(&errorObj);
 
             var existingStackRoot = new Rooted<JS.Value>(cx);
             JSAPI.GetProperty(

@@ -91,38 +91,31 @@ namespace Spidermonkey {
             ref JS.ValueArrayPtr args
         ) {
             var errorPrototype = GetErrorPrototype(cx);
-            var pPrototype = &errorPrototype;
+            var errorConstructor = GetConstructor(cx, new JSHandleObject(&errorPrototype));
 
-            var errorConstructor = GetConstructor(cx, new JSHandleObject((IntPtr)pPrototype));
-            var pConstructor = &errorConstructor;
-
-            return New(cx, new JSHandleObject((IntPtr)pConstructor), ref args);
+            return New(cx, new JSHandleObject(&errorConstructor), ref args);
         }
 
         // HACK: Implement this algorithm by hand since the actual function is broken :/
         public static unsafe bool IsArrayObject (
             JSContextPtr context, JSObjectPtr obj
         ) {
-            var pObj = &obj;
-            var hObj = new JSHandleObject((IntPtr)pObj);
+            var hObj = new JSHandleObject(&obj);
 
             var proto = JSObjectPtr.Zero;
-            var pProto = &proto;
-            var hProto = new JSMutableHandleObject((IntPtr)pProto);
+            var hProto = new JSMutableHandleObject(&proto);
 
-            if (!JSAPI.GetPrototype(context, hObj, hProto))
+            if (!GetPrototype(context, hObj, hProto))
                 return false;
 
-            var pConstructor = JSAPI.GetConstructor(context, new JSHandleObject((IntPtr)pProto));
+            var pConstructor = GetConstructor(context, new JSHandleObject(&proto));
 
             var temp = JS.Value.Undefined;
-            var pTemp = &temp;
-            var hTemp = new JSMutableHandleValue((IntPtr)pTemp);
+            var hTemp = new JSMutableHandleValue(&temp);
 
-            var global = JSAPI.GetGlobalForObject(context, obj);
-            var pGlobal = &global;
-            var hGlobal = new JSHandleObject((IntPtr)pGlobal);
-            if (!JSAPI.GetProperty(context, hGlobal, "Array", hTemp))
+            var global = GetGlobalForObject(context, obj);
+            var hGlobal = new JSHandleObject(&global);
+            if (!GetProperty(context, hGlobal, "Array", hTemp))
                 return false;
 
             return temp.AsObject.Equals(pConstructor);
@@ -132,7 +125,7 @@ namespace Spidermonkey {
     public partial struct JSObjectPtr {
         private unsafe JSHandleObject TransientSelf () {
             fixed (JSObjectPtr * pThis = &this)
-                return new JSHandleObject((IntPtr)pThis);
+                return new JSHandleObject(pThis);
         }
 
         public Rooted<JS.Value> GetProperty (JSContextPtr context, string name) {
@@ -151,8 +144,7 @@ namespace Spidermonkey {
 
         public unsafe bool SetProperty (JSContextPtr context, string name, JSUnrootedValue value) {
             JS.Value _value = value;
-            JS.Value* pValue = &_value;
-            JSHandleValue handle = new JSHandleValue((IntPtr)pValue);
+            JSHandleValue handle = new JSHandleValue(&_value);
 
             return SetProperty(context, name, handle);
         }
@@ -189,7 +181,7 @@ namespace Spidermonkey {
             fixed (JSObjectPtr* pThis = &this)
             fixed (JS.Value* pArgs = arguments) {
                 var argsPtr = new JS.ValueArrayPtr((uint)arguments.Length, (IntPtr)pArgs);
-                var thisHandle = new JSHandleObject((IntPtr)pThis);
+                var thisHandle = new JSHandleObject(pThis);
 
                 return JSAPI.New(
                     context, thisHandle,
@@ -294,7 +286,7 @@ namespace Spidermonkey {
 
         unsafe static JSHandleObject () {
             fixed (JSObjectPtr* pZero = &ZeroPtr)
-                Zero = new JSHandleObject((IntPtr)pZero);
+                Zero = new JSHandleObject(pZero);
         }
 
         public static JSHandleObject FromValue (Rooted<JS.Value> rval) {

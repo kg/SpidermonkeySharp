@@ -115,9 +115,17 @@ namespace Spidermonkey {
                 AddressOfTarget = addressOfTarget;
             }
 
+            public unsafe <#= name #> (<#= valueName #> * addressOfTarget)
+                : this((IntPtr)addressOfTarget) {
+            }
+
             public unsafe <#= valueName #> Get () {
                 <#= valueName #> * pTarget = (<#= valueName #> *)AddressOfTarget;
                 return *pTarget;
+            }
+            
+            public static unsafe implicit operator <#= name #> (<#= valueName #> * addressOfTarget) {
+                return new <#= name #>(addressOfTarget);
             }
         <#+
         if (rootable) {
