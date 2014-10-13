@@ -109,10 +109,17 @@ namespace Spidermonkey.Managed {
             try {
                 ReportUncaughtExceptions = false;
 
+                Exception.Clear();
                 var result = Evaluate(scope, scriptSource, filename, lineNumber);
 
                 if (Exception.IsPending) {
-                    error = new JSError(this, Exception.Get().Value.AsObject);
+                    var exc = Exception.Get();
+                    if (exc.Value.ValueType == JSValueType.OBJECT) {
+                        error = new JSError(this, exc.Value.AsObject);
+                    } else {
+                        exc = Exception.Get();
+                        error = null;
+                    }
                     Exception.Clear();
                 } else {
                     error = null;

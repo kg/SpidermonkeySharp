@@ -96,7 +96,7 @@ namespace Spidermonkey {
             }
 
             public override string ToString () {
-                return String.Format("<{0} 0x{1:X4}>", "<#= name #>", Pointer.ToInt64());
+                return String.Format("<{0} 0x{1:X8}>", "<#= name #>", Pointer.ToInt64());
             }
         }
         <#+
