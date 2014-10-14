@@ -282,8 +282,9 @@ namespace Spidermonkey.Managed {
                 "global", JSClassFlags.GLOBAL_FLAGS | JSClassFlags.NEW_RESOLVE
             );
 
-            DefaultClassDefinition.enumerate = (JSEnumerateOp)global_enumerate;
-            DefaultClassDefinition.resolve = (JSNewResolveOp)global_resolve;
+            // HACK: Lazy standard classes
+            // DefaultClassDefinition.enumerate = (JSEnumerateOp)global_enumerate;
+            // DefaultClassDefinition.resolve = (JSNewResolveOp)global_resolve;
 
             // We have to pin our JSClass (so everything it points to is retained)
             //  and marshal it into a manually-allocated buffer that doesn't expire.

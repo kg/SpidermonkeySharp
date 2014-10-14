@@ -115,7 +115,6 @@ namespace Spidermonkey.Managed {
                 var isAlreadyThrowing = Exception.IsPending;
 
                 var result = Evaluate(scope, scriptSource, filename, lineNumber);
-                JSAPI.GC(Runtime);
 
                 if (Exception.IsPending && !isAlreadyThrowing) {
                     var exc = Exception.Get();
@@ -130,7 +129,6 @@ namespace Spidermonkey.Managed {
                     error = null;
                 }
 
-                JSAPI.GC(Runtime);
                 return result;
             } finally {
                 ReportUncaughtExceptions = prior;

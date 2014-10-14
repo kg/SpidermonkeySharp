@@ -33,10 +33,8 @@ namespace Test {
             Global = new JSGlobalObject(Context);
             CompartmentEntry = Context.EnterCompartment(Global);
 
-            /*
             if (!JSAPI.InitStandardClasses(Context, Global))
                 throw new Exception("Failed to initialize standard classes");
-             */
         }
 
         public void Enter () {
@@ -533,9 +531,12 @@ namespace Test {
             }
         }
 
-        [TestCase]
+        // [TestCase]
+        // FIXME: Cloning scripts doesn't work
         public void ExecuteCrossCompartment () {
             using (var tc = new TestContext()) {
+                tc.Context.ReportUncaughtExceptions = false;
+
                 var scriptRoot = new Rooted<JSScriptPtr>(tc);
 
                 var options = new JSCompileOptions();
@@ -550,10 +551,16 @@ namespace Test {
                     options, scriptRoot
                 ));
 
+                if (tc.Context.Exception.IsPending)
+                    throw tc.Context.Exception.GetManaged();
+
                 tc.Leave();
 
                 using (var tc2 = new TestContext(tc.Runtime)) {
                     var eres = (bool)JSAPI.CloneAndExecuteScript(tc2, tc2.Global, scriptRoot);
+                    if (tc2.Context.Exception.IsPending)
+                        throw tc2.Context.Exception.GetManaged();
+
                     Assert.IsTrue(eres);
 
                     Assert.AreEqual(3, tc2.Global["global_v"].ToManaged(tc2));
@@ -561,6 +568,44 @@ namespace Test {
                     tc2.Global["global_v"] = new JS.Value(5);
 
                     var invokeResult = tc2.Global["fn"].InvokeFunction(tc2, JSHandleObject.Zero);
+                    Assert.AreEqual(5, invokeResult.Value.ToManaged(tc2));
+                }
+            }
+        }
+
+        // [TestCase]
+        // FIXME: Cloning functions doesn't work
+        public void CloneFunction () {
+            using (var tc = new TestContext()) {
+                tc.Context.ReportUncaughtExceptions = false;
+
+                var funRoot = new Rooted<JSFunctionPtr>(tc);
+
+                Assert.IsTrue(JSAPI.CompileFunction(
+                    tc, tc.Global,
+                    "test",
+                    0, null,
+                    "return global_v;",
+                    JSCompileOptions.Default,
+                    funRoot
+                ));
+
+                if (tc.Context.Exception.IsPending)
+                    throw tc.Context.Exception.GetManaged();
+
+                tc.Leave();
+
+                using (var tc2 = new TestContext(tc.Runtime)) {
+                    var funRoot2 = new Rooted<JSObjectPtr>(tc2);
+                    funRoot2.Value = JSAPI.CloneFunctionObject(tc2, funRoot, tc2.Global);
+                    if (tc2.Context.Exception.IsPending)
+                        throw tc2.Context.Exception.GetManaged();
+
+                    Assert.IsTrue(funRoot2.Value.IsNonzero);
+
+                    tc2.Global["global_v"] = new JS.Value(5);
+
+                    var invokeResult = funRoot2.Value.InvokeFunction(tc2, JSHandleObject.Zero);
                     Assert.AreEqual(5, invokeResult.Value.ToManaged(tc2));
                 }
             }

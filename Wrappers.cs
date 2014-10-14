@@ -391,6 +391,15 @@ namespace Spidermonkey {
         public void Clear () {
             JSAPI.ClearPendingException(Context);
         }
+
+        public Exception GetManaged () {
+            var root = new Rooted<JS.Value>(Context, JS.Value.Undefined);
+            if (!JSAPI.GetPendingException(Context, root))
+                return null;
+
+            var error = new Spidermonkey.Managed.JSError(Context, root.Value.AsObject);
+            return error.ToException();
+        }
     }
 
     public partial struct JSHandleObject {
@@ -411,6 +420,10 @@ namespace Spidermonkey {
             // HACK: Now take the value handle and turn it into an object handle.
             // This is valid because JS.Value type tagging is at the end of the 8 bytes.
             return new JSHandleObject(v.AddressOfTarget);
+        }
+
+        public static implicit operator JSHandleObject (Rooted<JSFunctionPtr> ptr) {
+            return new JSHandleObject(ptr.Root.Pointer);
         }
 
         public static explicit operator JSHandleObject (Rooted<JS.Value> rval) {

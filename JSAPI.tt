@@ -512,6 +512,11 @@ namespace Spidermonkey {
             JSMutableHandleFunction fun
         );
 
+        <# ImportFunction("?JS_CloneFunctionObject@@YAPAVJSObject@@PAUJSContext@@V?$Handle@PAVJSObject@@@JS@@1@Z"); #>
+        public static extern JSObjectPtr CloneFunctionObject(
+            JSContextPtr cx, JSHandleObject funobj, JSHandleObject parentArg
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(
