@@ -159,6 +159,39 @@ namespace Spidermonkey {
                 );
         }
 
+        public static unsafe bool CompileFunction (
+            JSContextPtr cx, JSHandleObject obj,
+            string name,
+            UInt32 nargs, string[] argnames,
+            string chars,
+            JSCompileOptions options,
+            JSMutableHandleFunction fun
+        ) {
+            if (argnames == null)
+                argnames = new string[0];
+
+            if (nargs != argnames.Length)
+                throw new ArgumentException("Wrong number of argument names", "nargs");
+            char** argNameBuffers = stackalloc char*[argnames.Length];
+
+            for (int i = 0; i < argnames.Length; i++)
+                argNameBuffers[i] = (char*)Marshal.StringToHGlobalAnsi(argnames[i]);
+
+            try {
+                fixed (char* pChars = chars)
+                    return CompileUCFunction(
+                        cx, obj,
+                        name, nargs, (IntPtr)argNameBuffers,
+                        (IntPtr)pChars, (uint)chars.Length,
+                        options,
+                        fun
+                    );
+            } finally {
+                for (int i = 0; i < argnames.Length; i++)
+                    Marshal.FreeHGlobal((IntPtr)argNameBuffers[i]);
+            }
+        }
+
         /*
         // HACK: Implement this algorithm by hand since the actual function is broken :/
         public static unsafe bool IsArrayObject (
@@ -382,6 +415,38 @@ namespace Spidermonkey {
 
         public static explicit operator JSHandleObject (Rooted<JS.Value> rval) {
             return FromValue(rval);
+        }
+    }
+
+    public partial struct JSFunctionPtr {
+        public Rooted<JS.Value> InvokeFunction (
+            JSContextPtr context,
+            JSHandleObject thisReference,
+            params JS.Value[] arguments
+        ) {
+            var thisValue = new JS.Value(this);
+            return thisValue.InvokeFunction(context, thisReference, arguments);
+        }
+
+        public unsafe JSObjectPtr InvokeConstructor (
+            JSContextPtr context,
+            params JS.Value[] arguments
+        ) {
+            fixed (JSFunctionPtr* pThis = &this)
+            fixed (JS.Value* pArgs = arguments) {
+                var argsPtr = new JS.ValueArrayPtr((uint)arguments.Length, (IntPtr)pArgs);
+
+                return JSAPI.New(context, (JSObjectPtr*)pThis, ref argsPtr);
+            }
+        }
+        
+        // FIXME: I think this is right since JSFunction derives from JSObject
+        bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {
+            return JSAPI.AddObjectRoot(context, root);
+        }
+
+        void IRootable.RemoveRoot (JSContextPtr context, JSRootPtr root) {
+            JSAPI.RemoveObjectRoot(context, root);
         }
     }
 }

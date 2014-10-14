@@ -10,7 +10,7 @@ namespace Test {
     public static class Program {
         public static void Main () {
             var tc = new Tests();
-            tc.CompileThenExecute();
+            tc.ExecuteCrossCompartment();
 
             Console.WriteLine("// Press enter");
             Console.ReadLine();

@@ -13,20 +13,40 @@ namespace Test {
         public readonly JSRuntime Runtime;
         public readonly JSContext Context;
         public readonly JSGlobalObject Global;
-        private readonly JSRequest Request;
-        private readonly JSCompartmentEntry CompartmentEntry;
+        private JSRequest Request;
+        private JSCompartmentEntry CompartmentEntry;
+        private readonly bool OwnsRuntime;
 
-        public TestContext () {
+        public TestContext (JSRuntime runtime = null) {
             Assert.IsTrue(JSAPI.IsInitialized);
 
-            Runtime = new JSRuntime();
+            if (runtime == null) {
+                Runtime = new JSRuntime();
+                OwnsRuntime = true;
+            } else {
+                Runtime = runtime;
+                OwnsRuntime = false;
+            }
+
             Context = new JSContext(Runtime);
             Request = Context.Request();
             Global = new JSGlobalObject(Context);
             CompartmentEntry = Context.EnterCompartment(Global);
 
+            /*
             if (!JSAPI.InitStandardClasses(Context, Global))
                 throw new Exception("Failed to initialize standard classes");
+             */
+        }
+
+        public void Enter () {
+            Request = Context.Request();
+            CompartmentEntry = Context.EnterCompartment(Global);
+        }
+
+        public void Leave () {
+            CompartmentEntry.Dispose();
+            Request.Dispose();
         }
 
         public static implicit operator JSRuntimePtr (TestContext self) {
@@ -38,11 +58,13 @@ namespace Test {
         }
 
         public void Dispose () {
+            Leave();
+
             Global.Dispose();
-            CompartmentEntry.Dispose();
-            Request.Dispose();
             Context.Dispose();
-            Runtime.Dispose();
+
+            if (OwnsRuntime)
+                Runtime.Dispose();
         }
     }
     
@@ -464,7 +486,7 @@ namespace Test {
         }
 
         [TestCase]
-        public void CompileThenExecute () {
+        public void CompileThenExecuteScript () {
             using (var tc = new TestContext()) {
                 var scriptRoot = new Rooted<JSScriptPtr>(tc);
 
@@ -474,19 +496,73 @@ namespace Test {
                     JSCompileOptions.Default, 
                     scriptRoot
                 ));
+                Assert.IsTrue(scriptRoot.Value.IsNonzero);
 
                 Assert.IsTrue(tc.Global["global_v"].IsNullOrUndefined);
 
-                Assert.IsTrue(scriptRoot.Value.IsNonzero);
-
                 Assert.IsTrue(JSAPI.ExecuteScript(tc, tc.Global, scriptRoot));
-
                 Assert.AreEqual(3, tc.Global["global_v"].ToManaged(tc));
 
                 tc.Global["global_v"] = new JS.Value(5);
 
                 var invokeResult = tc.Global["fn"].InvokeFunction(tc, JSHandleObject.Zero);
                 Assert.AreEqual(5, invokeResult.Value.ToManaged(tc));
+            }
+        }
+
+        [TestCase]
+        public void CompileThenExecuteFunction () {
+            using (var tc = new TestContext()) {
+                var funRoot = new Rooted<JSFunctionPtr>(tc);
+
+                Assert.IsTrue(JSAPI.CompileFunction(
+                    tc, tc.Global,
+                    "test",
+                    0, null,
+                    "return global_v;",
+                    JSCompileOptions.Default,
+                    funRoot
+                ));
+
+                Assert.IsTrue(funRoot.Value.IsNonzero);
+
+                tc.Global["global_v"] = new JS.Value(5);
+
+                var invokeResult = funRoot.Value.InvokeFunction(tc, JSHandleObject.Zero);
+                Assert.AreEqual(5, invokeResult.Value.ToManaged(tc));
+            }
+        }
+
+        [TestCase]
+        public void ExecuteCrossCompartment () {
+            using (var tc = new TestContext()) {
+                var scriptRoot = new Rooted<JSScriptPtr>(tc);
+
+                var options = new JSCompileOptions();
+                options.canLazilyParse = false;
+                options.defineOnScope = false;
+                options.sourceIsLazy = false;
+                options.noScriptRval = true;
+
+                Assert.IsTrue(JSAPI.CompileScript(
+                    tc, tc.Global,
+                    "function fn() { return global_v; }; global_v = 3;",
+                    options, scriptRoot
+                ));
+
+                tc.Leave();
+
+                using (var tc2 = new TestContext(tc.Runtime)) {
+                    var eres = (bool)JSAPI.CloneAndExecuteScript(tc2, tc2.Global, scriptRoot);
+                    Assert.IsTrue(eres);
+
+                    Assert.AreEqual(3, tc2.Global["global_v"].ToManaged(tc2));
+
+                    tc2.Global["global_v"] = new JS.Value(5);
+
+                    var invokeResult = tc2.Global["fn"].InvokeFunction(tc2, JSHandleObject.Zero);
+                    Assert.AreEqual(5, invokeResult.Value.ToManaged(tc2));
+                }
             }
         }
     }

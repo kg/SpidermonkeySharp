@@ -500,6 +500,18 @@ namespace Spidermonkey {
             JSHandleScript script
         );
 
+        <# ImportFunction("?JS_CompileUCFunction@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@PBDIPBQBDPB_WIABVCompileOptions@3@V?$MutableHandle@PAVJSFunction@@@3@@Z"); #>
+        public static extern JSBool CompileUCFunction(
+            JSContextPtr cx, JSHandleObject obj, 
+            [MarshalAs(UnmanagedType.LPStr)]
+            string name,
+            UInt32 nargs, 
+            IntPtr argnames,
+            IntPtr chars, UInt32 length,
+            JSCompileOptions options,
+            JSMutableHandleFunction fun
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

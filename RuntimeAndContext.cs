@@ -179,29 +179,42 @@ namespace Spidermonkey.Managed {
     }
 
     public struct JSRequest : IDisposable {
+        private bool IsDisposed;
+
         public readonly JSContextPtr Context;
 
         public JSRequest (JSContextPtr context) {
             Context = context;
-
+            IsDisposed = false;
             JSAPI.BeginRequest(Context);
         }
 
         public void Dispose () {
+            if (IsDisposed)
+                return;
+
+            IsDisposed = true;
             JSAPI.EndRequest(Context);
         }
     }
 
     public struct JSCompartmentEntry : IDisposable {
+        private bool IsDisposed;
+
         public readonly JSCompartmentPtr OldCompartment;
         public readonly JSContextPtr Context;
 
         public JSCompartmentEntry (JSContextPtr context, JSObjectPtr obj) {
             Context = context;
+            IsDisposed = false;
             OldCompartment = JSAPI.EnterCompartment(context, obj);
         }
 
         public void Dispose () {
+            if (IsDisposed)
+                return;
+
+            IsDisposed = true;
             JSAPI.LeaveCompartment(Context, OldCompartment);
         }
     }

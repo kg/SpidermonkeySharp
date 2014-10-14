@@ -85,6 +85,14 @@ namespace JS {
         }
 
         /// <summary>
+        /// WARNING: Make sure this object is already rooted!
+        /// </summary>
+        /// <param name="o"></param>
+        public Value (JSFunctionPtr o)
+            : this(new JSObjectPtr(o.Pointer)) {
+        }
+
+        /// <summary>
         /// WARNING: Make sure this string is already rooted!
         /// </summary>
         /// <param name="s"></param>

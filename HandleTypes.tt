@@ -13,7 +13,7 @@ namespace Spidermonkey {
     <# DefinePointerType("JSCompartmentPtr"); #>
     <# DefinePointerType("JSRootPtr"); #>
     <# DefinePointerType("JSClassPtr"); #>
-    <# DefinePointerType("JSFunctionPtr"); #>
+    <# DefinePointerType("JSFunctionPtr", "IRootable"); #>
     <# DefinePointerType("JSFunctionSpecPtr"); #>
     <# DefinePointerType("JSPropertySpecPtr"); #>
 
@@ -22,11 +22,13 @@ namespace Spidermonkey {
     <# DefineHandleType("JSHandleString", "JSStringPtr", rootable: true); #>
     <# DefineHandleType("JSHandleValue", "JS.Value", rootable: true); #>
     <# DefineHandleType("JSHandleId", "jsid", rootable: false); #>
+    <# DefineHandleType("JSHandleFunction", "JSFunctionPtr", rootable: true); #>
 
     <# DefineHandleType("JSMutableHandleObject", "JSObjectPtr", rootable: true); #>
     <# DefineHandleType("JSMutableHandleScript", "JSScriptPtr", rootable: true); #>
     <# DefineHandleType("JSMutableHandleString", "JSStringPtr", rootable: true); #>
     <# DefineHandleType("JSMutableHandleValue", "JS.Value", rootable: true); #>
+    <# DefineHandleType("JSMutableHandleFunction", "JSFunctionPtr", rootable: true); #>
 }
 
 <#+

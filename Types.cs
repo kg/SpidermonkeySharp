@@ -233,8 +233,8 @@ namespace Spidermonkey {
             filename = null;
             introducerFilename = null;
             sourceMapURL = null;
-            version = JSVersion.JSVERSION_UNKNOWN;
-            versionSet = false;
+            version = JSVersion.JSVERSION_LATEST;
+            versionSet = true;
             utf8 = false;
             lineno = 1;
             column = 0;
