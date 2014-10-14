@@ -470,10 +470,23 @@ namespace Test {
 
                 Assert.IsTrue(JSAPI.CompileScript(
                     tc, tc.Global,
-                    "function a(x) { return x * 2; }; function b() { return global_y; }; global_y = 3;",
+                    "function fn() { return global_v; }; global_v = 3;",
                     JSCompileOptions.Default, 
                     scriptRoot
                 ));
+
+                Assert.IsTrue(tc.Global["global_v"].IsNullOrUndefined);
+
+                Assert.IsTrue(scriptRoot.Value.IsNonzero);
+
+                Assert.IsTrue(JSAPI.ExecuteScript(tc, tc.Global, scriptRoot));
+
+                Assert.AreEqual(3, tc.Global["global_v"].ToManaged(tc));
+
+                tc.Global["global_v"] = new JS.Value(5);
+
+                var invokeResult = tc.Global["fn"].InvokeFunction(tc, JSHandleObject.Zero);
+                Assert.AreEqual(5, invokeResult.Value.ToManaged(tc));
             }
         }
     }
