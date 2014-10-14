@@ -97,14 +97,30 @@
     </AvailableItemName>
   </ItemGroup>
   <ItemGroup>
-    <CopyToBin Include="Spidermonkey\icudt52.dll" />
-    <CopyToBin Include="Spidermonkey\icuin52.dll" />
-    <CopyToBin Include="Spidermonkey\icuuc52.dll" />
-    <CopyToBin Include="Spidermonkey\mozglue.dll" />
-    <CopyToBin Include="Spidermonkey\mozjs.dll" />
-    <CopyToBin Include="Spidermonkey\msvcp100.dll" />
-    <CopyToBin Include="Spidermonkey\msvcr100.dll" />
-    <CopyToBin Include="Spidermonkey\nss3.dll" />
+    <EmbeddedResource Include="Spidermonkey\icudt52.dll">
+      <LogicalName>icudt52.dll</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Spidermonkey\icuin52.dll">
+      <LogicalName>icuin52.dll</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Spidermonkey\icuuc52.dll">
+      <LogicalName>icuuc52.dll</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Spidermonkey\mozglue.dll">
+      <LogicalName>mozglue.dll</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Spidermonkey\mozjs.dll">
+      <LogicalName>mozjs.dll</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Spidermonkey\msvcp100.dll">
+      <LogicalName>msvcp100.dll</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Spidermonkey\msvcr100.dll">
+      <LogicalName>msvcr100.dll</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Spidermonkey\nss3.dll">
+      <LogicalName>nss3.dll</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="HandleTypes.tt">

@@ -2,7 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -10,8 +12,53 @@ namespace Spidermonkey {
     public static partial class JSAPI {
         public static readonly bool IsInitialized;
 
+        public static readonly string DllPath;
+
+        // Unpack our embedded DLLs to a local appdata dir then load spidermonkey from there
         static JSAPI () {
-            IsInitialized = Init();
+            // FIXME: Two applications running different versions will collide this way :(
+            DllPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "SpidermonkeySharp"
+            );
+            Directory.CreateDirectory(DllPath);
+
+            var asm = Assembly.GetExecutingAssembly();
+            var expectedTimestamp = File.GetCreationTimeUtc(asm.Location);
+
+            foreach (var name in asm.GetManifestResourceNames()) {
+                var filePath = Path.Combine(DllPath, name);
+                var fi = new FileInfo(filePath);
+
+                using (var src = asm.GetManifestResourceStream(name)) {
+                    // Already unpacked
+                    if (
+                        fi.Exists &&
+                        (fi.CreationTimeUtc == expectedTimestamp) &&
+                        (fi.Length == src.Length)
+                    )
+                        continue;
+
+                    Debug.WriteLine(String.Format("Unpacking '{0}'", filePath));
+
+                    using (var dst = File.Open(filePath, FileMode.Create)) {
+                        src.CopyTo(dst);
+                    }
+                }
+
+                File.SetCreationTimeUtc(filePath, expectedTimestamp);
+            }
+
+            // HACK: Set the current directory to the folder where we unpacked our build of SpiderMonkey.
+            string priorDirectory = Environment.CurrentDirectory;
+            try {
+                Environment.CurrentDirectory = DllPath;
+
+                // This call will load the DLLs and initialize the library
+                IsInitialized = Init();
+            } finally {
+                Environment.CurrentDirectory = priorDirectory;
+            }
         }
 
         public static unsafe bool EvaluateScript(
