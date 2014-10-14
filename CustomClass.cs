@@ -6,13 +6,13 @@ using System.Text;
 
 namespace Spidermonkey.Managed {
     // FIXME: If the context outlives this instance, the JSClass might get unpinned
-    public class JSCustomClass /* : IDisposable */ {
+    public class JSCustomClass : IDisposable {
         public readonly JSContextPtr Context;
 
         private /* readonly */ JSClass ClassDefinition;
         private readonly JSClassPtr ClassPtr;
         private /* readonly */ GCHandle ClassPin;
-        private JSNative NativeConstructor;
+        private JSNativePin NativeConstructor;
         private NativeToManagedProxy ManagedConstructor;
 
         public JSObjectReference Prototype { get; private set; }
@@ -26,10 +26,9 @@ namespace Spidermonkey.Managed {
         public JSCustomClass (JSContextPtr context, string name, JSHandleObject globalObject) {
             Context = context;
             ClassDefinition = new JSClass(name);
-            ClassPtr = new JSClassPtr(ref ClassDefinition, out ClassPin);            
-            NativeConstructor = DefaultConstructor;
-            ManagedConstructor = null;
+            ClassPtr = new JSClassPtr(ClassDefinition, out ClassPin);
             GlobalObject = globalObject;
+            SetConstructor(DefaultConstructor);
         }
 
         private void AssertNotInitialized () {
@@ -55,7 +54,13 @@ namespace Spidermonkey.Managed {
 
         public void SetConstructor (JSNative constructor) {
             AssertNotInitialized();
-            NativeConstructor = constructor;
+
+            if (NativeConstructor != null)
+                NativeConstructor.Dispose();
+            if (ManagedConstructor != null)
+                ManagedConstructor.Dispose();
+
+            NativeConstructor = new JSNativePin(constructor);
             ManagedConstructor = null;
         }
 
@@ -72,9 +77,14 @@ namespace Spidermonkey.Managed {
 
             AssertNotInitialized();
 
+            if (NativeConstructor != null)
+                NativeConstructor.Dispose();
+            if (ManagedConstructor != null)
+                ManagedConstructor.Dispose();
+
             // Wrap the delegate in a proxy and retain the proxy
             ManagedConstructor = new NativeToManagedProxy(ctorDelegate);
-            NativeConstructor = ManagedConstructor.WrappedMethod;
+            NativeConstructor = null;
         }
 
         public uint NumConstructorArguments {
@@ -103,9 +113,17 @@ namespace Spidermonkey.Managed {
             // Repack in case members were changed
             ClassPtr.Pack(ref ClassDefinition);
 
+            JSNative ctorDelegate;
+
+            if (ManagedConstructor != null) {
+                ctorDelegate = ManagedConstructor.WrappedMethod;
+            } else {
+                ctorDelegate = NativeConstructor.Target;
+            }
+
             Prototype = new JSObjectReference(Context, JSAPI.InitClass(
                 Context, GlobalObject, _ParentPrototype,
-                ClassPtr, NativeConstructor, _NumConstructorArguments,
+                ClassPtr, ctorDelegate, _NumConstructorArguments,
                 JSPropertySpecPtr.Zero,
                 JSFunctionSpecPtr.Zero,
                 JSPropertySpecPtr.Zero,
@@ -138,14 +156,21 @@ namespace Spidermonkey.Managed {
         public JSBool DefaultConstructor (JSContextPtr context, uint argc, JSCallArgumentsPtr vp) {
             // We have to invoke NewObjectForConstructor in order to construct a this-reference
             //  that has our class's prototype and .constructor values.
-            vp.Result = NewObjectForConstructor(argc, vp);
+            var @this = NewObjectForConstructor(argc, vp);
+            vp.Result = @this;
             return true;
         }
 
-        /*
         public void Dispose () {
             ClassPin.Free();
+
+            if (NativeConstructor != null)
+                NativeConstructor.Dispose();
+            if (ManagedConstructor != null)
+                ManagedConstructor.Dispose();
+
+            NativeConstructor = null;
+            ManagedConstructor = null;
         }
-         */
     }
 }

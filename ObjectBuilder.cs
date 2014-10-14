@@ -288,7 +288,7 @@ namespace Spidermonkey.Managed {
             // We have to pin our JSClass (so everything it points to is retained)
             //  and marshal it into a manually-allocated buffer that doesn't expire.
             // JSClass buffer needs to live as long as the global object, or longer.
-            DefaultClass = new JSClassPtr(ref DefaultClassDefinition, out DefaultClassHandle);
+            DefaultClass = new JSClassPtr(DefaultClassDefinition, out DefaultClassHandle);
         }
 
         public static JSObjectPtr CreateInstance (JSContextPtr context) {

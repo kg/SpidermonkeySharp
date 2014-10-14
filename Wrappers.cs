@@ -350,7 +350,7 @@ namespace Spidermonkey {
     }
 
     public partial struct JSClassPtr {
-        public JSClassPtr (ref JSClass value, out GCHandle handle) {
+        public JSClassPtr (JSClass value, out GCHandle handle) {
             handle = GCHandle.Alloc(value);
             Pointer = Marshal.AllocHGlobal(Marshal.SizeOf(value));
             Pack(ref value);

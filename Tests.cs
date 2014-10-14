@@ -361,8 +361,8 @@ namespace Test {
 
         [TestCase]
         public void CustomClassTest () {
-            using (var tc = new TestContext()) {
-                var cc = new JSCustomClass(tc, "testClass", tc.Global);
+            using (var tc = new TestContext())
+            using (var cc = new JSCustomClass(tc, "testClass", tc.Global)) {
                 cc.Initialize();
 
                 cc.Prototype["a"] = new JSString(tc, "hello");

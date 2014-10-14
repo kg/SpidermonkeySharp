@@ -51,16 +51,21 @@ namespace Spidermonkey {
     }
 
     public unsafe struct JSCallArgs {
-        public readonly Value* argv;
-        public readonly UInt32 argc;
+        private readonly Value* argv;
+        private readonly UInt32 argc;
 
+        /*
         public unsafe JSCallArgs (Value* argv, UInt32 argc) {
             this.argv = argv;
             this.argc = argc;
         }
+         */
 
-        public JSCallArgs (JSCallArgumentsPtr argv, UInt32 argc) {
-            this.argv = argv;
+        public unsafe JSCallArgs (JSCallArgumentsPtr argv, UInt32 argc) {
+            Value* ptr = argv;
+            // Native spidermonkey offsets the pointer so we have to do it too.
+            ptr += 2;
+            this.argv = ptr;
             this.argc = argc;
         }
     }
