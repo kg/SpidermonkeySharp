@@ -92,10 +92,10 @@ namespace Spidermonkey {
         public static /* readonly */ JSCompartmentOptions Default;
 
         JSVersion version;
-        bool invisibleToDebugger;
-        bool mergeable;
-        bool discardSource;
-        bool cloneSingletons;
+        JSBool invisibleToDebugger;
+        JSBool mergeable;
+        JSBool discardSource;
+        JSBool cloneSingletons;
         JSOverrideMode extraWarningsOverride;
         IntPtr zone;
         /* JSTraceOp */ IntPtr traceGlobal;
@@ -103,10 +103,10 @@ namespace Spidermonkey {
         // To XDR singletons, we need to ensure that all singletons are all used as
         // templates, by making JSOP_OBJECT return a clone of the JSScript
         // singleton, instead of returning the value which is baked in the JSScript.
-        bool singletonsAsTemplates;
+        JSBool singletonsAsTemplates;
 
         IntPtr addonId;
-        bool preserveJitCode;
+        JSBool preserveJitCode;
 
         // HACK
         fixed byte reserved[1024];
@@ -127,6 +127,135 @@ namespace Spidermonkey {
     [StructLayout(LayoutKind.Sequential)]
     public struct JSContextOptions {
         public JSContextOptionFlags Options;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe class JSCompileOptions {
+        public static JSCompileOptions Default;
+
+
+        unsafe delegate JSObjectPtr GetElementDelegate();
+        unsafe delegate JSStringPtr GetStringDelegate();
+        unsafe delegate JSScriptPtr GetScriptDelegate();
+
+        // Static so the delegate instances are retained by the GC
+        static GetElementDelegate GetElement;
+        static GetStringDelegate GetElementAttributeName;
+        static GetScriptDelegate GetIntroductionScript;
+
+        private static JSObjectPtr getElement () {
+            return JSObjectPtr.Zero;
+        }
+
+        private static JSStringPtr getElementAttributeName () {
+            return JSStringPtr.Zero;
+        }
+
+        private static JSScriptPtr getIntroductionScript () {
+            return JSScriptPtr.Zero;
+        }
+
+
+        [StructLayout(LayoutKind.Sequential)]
+        unsafe struct VTable {
+            public IntPtr element;
+            public IntPtr elementAttributeName;
+            public IntPtr introductionScript;
+        }
+
+        private static VTable DefaultVTable;
+        private static IntPtr pDefaultVTable;
+
+        private IntPtr pVTable;
+
+        public JSBool mutedErrors;
+
+        [MarshalAs(UnmanagedType.LPStr)]
+        public string filename;
+
+        [MarshalAs(UnmanagedType.LPStr)]
+        public string introducerFilename;
+
+        [MarshalAs(UnmanagedType.LPWStr)]
+        public string sourceMapURL;
+
+        // POD options.
+        public JSVersion version;
+        public JSBool versionSet;
+        public JSBool utf8;
+        public UInt32 lineno;
+        public UInt32 column;
+        public JSBool compileAndGo;
+        public JSBool forEval;
+        public JSBool defineOnScope;
+        public JSBool noScriptRval;
+        public JSBool selfHostingMode;
+        public JSBool canLazilyParse;
+        public JSBool strictOption;
+        public JSBool extraWarningsOption;
+        public JSBool werrorOption;
+        public JSBool asmJSOption;
+        public JSBool forceAsync;
+        public JSBool installedFile;  // 'true' iff pre-compiling js file in packaged app
+        public JSBool sourceIsLazy;
+
+        // |introductionType| is a statically allocated C string:
+        // one of "eval", "Function", or "GeneratorFunction".
+        [MarshalAs(UnmanagedType.LPStr)]
+        string introductionType;
+
+        UInt32 introductionLineno;
+        UInt32 introductionOffset;
+        JSBool hasIntroductionInfo;
+
+
+        static JSCompileOptions () {
+            GetElement = getElement;
+            GetElementAttributeName = getElementAttributeName;
+            GetIntroductionScript = getIntroductionScript;
+
+            DefaultVTable = new VTable {
+                element = Marshal.GetFunctionPointerForDelegate(GetElement),
+                elementAttributeName = Marshal.GetFunctionPointerForDelegate(GetElementAttributeName),
+                introductionScript = Marshal.GetFunctionPointerForDelegate(GetIntroductionScript),
+            };
+
+            pDefaultVTable = Marshal.AllocHGlobal(Marshal.SizeOf(DefaultVTable));
+            Marshal.StructureToPtr(DefaultVTable, pDefaultVTable, false);
+
+            Default = new JSCompileOptions();
+        }
+
+
+        public unsafe JSCompileOptions () {
+            pVTable = pDefaultVTable;
+            mutedErrors = false;
+            filename = null;
+            introducerFilename = null;
+            sourceMapURL = null;
+            version = JSVersion.JSVERSION_UNKNOWN;
+            versionSet = false;
+            utf8 = false;
+            lineno = 1;
+            column = 0;
+            compileAndGo = false;
+            forEval = false;
+            defineOnScope = true;
+            noScriptRval = false;
+            selfHostingMode = false;
+            canLazilyParse = true;
+            strictOption = false;
+            extraWarningsOption = false;
+            werrorOption = false;
+            asmJSOption = false;
+            forceAsync = false;
+            installedFile = false;
+            sourceIsLazy = false;
+            introductionType = null;
+            introductionLineno = 0;
+            introductionOffset = 0;
+            hasIntroductionInfo = false;
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]

@@ -43,15 +43,15 @@ namespace Spidermonkey {
     }
 
     public enum JSType {
-        JSTYPE_VOID,                /* undefined */
-        JSTYPE_OBJECT,              /* object */
-        JSTYPE_FUNCTION,            /* function */
-        JSTYPE_STRING,              /* string */
-        JSTYPE_NUMBER,              /* number */
-        JSTYPE_BOOLEAN,             /* boolean */
-        JSTYPE_NULL,                /* null */
-        JSTYPE_SYMBOL,              /* symbol */
-        JSTYPE_LIMIT
+        VOID,                /* undefined */
+        OBJECT,              /* object */
+        FUNCTION,            /* function */
+        STRING,              /* string */
+        NUMBER,              /* number */
+        BOOLEAN,             /* boolean */
+        NULL,                /* null */
+        SYMBOL,              /* symbol */
+        LIMIT
     };
 
     public enum JSVersion : int {

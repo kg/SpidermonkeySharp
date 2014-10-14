@@ -460,6 +460,46 @@ namespace Spidermonkey {
             JSContextPtr cx, JSHandleObject obj, JSHandleId id, ref JSBool resolved
         );
 
+        <# ImportFunction("?AddNamedScriptRoot@JS@@YA_NPAUJSContext@@PAV?$Heap@PAVJSScript@@@1@PBD@Z"); #>
+        public static extern JSBool AddNamedScriptRoot(
+            JSContextPtr cx, JSRootPtr rp, 
+            [MarshalAs(UnmanagedType.LPStr)]
+            string name
+        );
+
+        <# ImportFunction("?RemoveScriptRoot@JS@@YAXPAUJSContext@@PAV?$Heap@PAVJSScript@@@1@@Z"); #>
+        public static extern void RemoveScriptRoot(
+            JSContextPtr cx, JSRootPtr rp
+        );
+
+        <# ImportFunction("?JS_CompileUCScript@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@PB_WIABVCompileOptions@3@V?$MutableHandle@PAVJSScript@@@3@@Z"); #>
+        public static extern JSBool CompileUCScript(
+            JSContextPtr cx, JSHandleObject obj, 
+            IntPtr chars, UInt32 length, 
+            JSCompileOptions options, 
+            JSMutableHandleScript script
+        );
+        
+        <# ImportFunction("?JS_ExecuteScript@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$Handle@PAVJSScript@@@3@@Z"); #>
+        public static extern JSBool ExecuteScript(
+            JSContextPtr cx, JSHandleObject obj, 
+            JSHandleScript scriptArg
+        );
+        
+        <# ImportFunction("?JS_ExecuteScript@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$Handle@PAVJSScript@@@3@V?$MutableHandle@VValue@JS@@@3@@Z"); #>
+        public static extern JSBool ExecuteScript(
+            JSContextPtr cx, JSHandleObject obj, 
+            JSHandleScript scriptArg, 
+            JSMutableHandleValue rval
+        );
+
+        <# ImportFunction("?CloneAndExecuteScript@JS@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@1@V?$Handle@PAVJSScript@@@1@@Z"); #>
+        public static extern JSBool CloneAndExecuteScript(
+            JSContextPtr cx, 
+            JSHandleObject obj, 
+            JSHandleScript script
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

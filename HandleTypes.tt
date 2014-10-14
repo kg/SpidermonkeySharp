@@ -7,6 +7,7 @@ using System.Collections.Generic;
 namespace Spidermonkey {
     <# DefinePointerType("JSObjectPtr", "IRootable"); #>
     <# DefinePointerType("JSStringPtr", "IRootable"); #>
+    <# DefinePointerType("JSScriptPtr", "IRootable"); #>
     <# DefinePointerType("JSRuntimePtr"); #>
     <# DefinePointerType("JSContextPtr"); #>
     <# DefinePointerType("JSCompartmentPtr"); #>
@@ -17,11 +18,14 @@ namespace Spidermonkey {
     <# DefinePointerType("JSPropertySpecPtr"); #>
 
     <# DefineHandleType("JSHandleObject", "JSObjectPtr", rootable: true); #>
+    <# DefineHandleType("JSHandleScript", "JSScriptPtr", rootable: true); #>
     <# DefineHandleType("JSHandleString", "JSStringPtr", rootable: true); #>
     <# DefineHandleType("JSHandleValue", "JS.Value", rootable: true); #>
     <# DefineHandleType("JSHandleId", "jsid", rootable: false); #>
 
     <# DefineHandleType("JSMutableHandleObject", "JSObjectPtr", rootable: true); #>
+    <# DefineHandleType("JSMutableHandleScript", "JSScriptPtr", rootable: true); #>
+    <# DefineHandleType("JSMutableHandleString", "JSStringPtr", rootable: true); #>
     <# DefineHandleType("JSMutableHandleValue", "JS.Value", rootable: true); #>
 }
 

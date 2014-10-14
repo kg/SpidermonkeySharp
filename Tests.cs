@@ -172,7 +172,7 @@ namespace Test {
 
                 {
                     var fn = tc.Global.Pointer.GetProperty(tc, "fortyTwo");
-                    Assert.AreEqual(JSType.JSTYPE_FUNCTION, fn.Value.GetJSType(tc));
+                    Assert.AreEqual(JSType.FUNCTION, fn.Value.GetJSType(tc));
 
                     var result = fn.Value.InvokeFunction(tc, tc.Global);
                     Assert.AreEqual(42, result.Value.ToManaged(tc));
@@ -180,7 +180,7 @@ namespace Test {
 
                 {
                     var fn = tc.Global.Pointer.GetProperty(tc, "double");
-                    Assert.AreEqual(JSType.JSTYPE_FUNCTION, fn.Value.GetJSType(tc));
+                    Assert.AreEqual(JSType.FUNCTION, fn.Value.GetJSType(tc));
 
                     var result = fn.Value.InvokeFunction(tc, tc.Global, new JS.Value(16));
                     Assert.AreEqual(32, result.Value.ToManaged(tc));
@@ -460,6 +460,20 @@ namespace Test {
 
                 Assert.AreEqual("1,1.5,a", jsArray.Value.ToManagedString(tc));
                 Assert.AreEqual(clrArray, roundTripArray);
+            }
+        }
+
+        [TestCase]
+        public void CompileThenExecute () {
+            using (var tc = new TestContext()) {
+                var scriptRoot = new Rooted<JSScriptPtr>(tc);
+
+                Assert.IsTrue(JSAPI.CompileScript(
+                    tc, tc.Global,
+                    "function a(x) { return x * 2; }; function b() { return global_y; }; global_y = 3;",
+                    JSCompileOptions.Default, 
+                    scriptRoot
+                ));
             }
         }
     }

@@ -143,6 +143,22 @@ namespace Spidermonkey {
             return New(cx, &errorConstructor, ref args);
         }
 
+        public static unsafe bool CompileScript (
+            JSContextPtr cx,
+            JSHandleObject obj,
+            string chars,
+            JSCompileOptions options,
+            JSMutableHandleScript script
+        ) {
+            fixed (char* pChars = chars)
+                return CompileUCScript(
+                    cx, obj, 
+                    (IntPtr)pChars, (uint)chars.Length,
+                    options, 
+                    script
+                );
+        }
+
         /*
         // HACK: Implement this algorithm by hand since the actual function is broken :/
         public static unsafe bool IsArrayObject (
@@ -287,6 +303,16 @@ namespace Spidermonkey {
 
         void IRootable.RemoveRoot (JSContextPtr context, JSRootPtr root) {
             JSAPI.RemoveStringRoot(context, root);
+        }
+    }
+
+    public partial struct JSScriptPtr {
+        bool IRootable.AddRoot (JSContextPtr context, JSRootPtr root) {
+            return JSAPI.AddNamedScriptRoot(context, root, null);
+        }
+
+        void IRootable.RemoveRoot (JSContextPtr context, JSRootPtr root) {
+            JSAPI.RemoveScriptRoot(context, root);
         }
     }
 
