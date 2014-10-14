@@ -279,8 +279,11 @@ namespace Spidermonkey.Managed {
 
         static JSGlobalObject () {
             DefaultClassDefinition = new JSClass(
-                "global", JSClassFlags.GLOBAL_FLAGS
+                "global", JSClassFlags.GLOBAL_FLAGS | JSClassFlags.NEW_RESOLVE
             );
+
+            DefaultClassDefinition.enumerate = (JSEnumerateOp)global_enumerate;
+            DefaultClassDefinition.resolve = (JSNewResolveOp)global_resolve;
 
             // We have to pin our JSClass (so everything it points to is retained)
             //  and marshal it into a manually-allocated buffer that doesn't expire.
@@ -299,6 +302,30 @@ namespace Spidermonkey.Managed {
 
         public JSGlobalObject (JSContextPtr context)
             : base (context, CreateInstance(context)) {
+        }
+
+        static unsafe JSBool global_enumerate (JSContextPtr cx, JSHandleObject obj) {
+            return JSAPI.EnumerateStandardClasses(cx, obj);
+        }
+
+        static unsafe JSBool global_resolve (
+            JSContextPtr cx,
+            JSHandleObject obj,
+            JSHandleId id,
+            ref JSObjectPtr objp
+        ) {
+            JSBool resolved = false;
+            objp = JSObjectPtr.Zero;
+
+            if (!JSAPI.ResolveStandardClass(cx, obj, id, ref resolved))
+                return false;
+
+            if (resolved) {
+                objp = obj.Get();
+                return true;
+            }
+
+            return true;
         }
     }
 }

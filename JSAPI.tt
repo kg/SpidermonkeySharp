@@ -450,6 +450,16 @@ namespace Spidermonkey {
             JSRuntimePtr runtime
         );
 
+        <# ImportFunction("?JS_EnumerateStandardClasses@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@@Z"); #>
+        public static extern JSBool EnumerateStandardClasses(
+            JSContextPtr cx, JSHandleObject obj
+        );
+
+        <# ImportFunction("?JS_ResolveStandardClass@@YA_NPAUJSContext@@V?$Handle@PAVJSObject@@@JS@@V?$Handle@Ujsid@@@3@PA_N@Z"); #>
+        public static extern JSBool ResolveStandardClass(
+            JSContextPtr cx, JSHandleObject obj, JSHandleId id, ref JSBool resolved
+        );
+
         /*
         <# ImportFunction(""); #>
         public static extern void X(

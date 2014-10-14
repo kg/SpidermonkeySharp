@@ -51,9 +51,10 @@ namespace Spidermonkey {
         public JSDeletePropertyOp delProperty;
         public JSPropertyOp getProperty;         
         public JSStrictPropertyOp setProperty;         
-        public JSEnumerateOp enumerate;           
-        public JSResolveOp resolve;             
-        public JSConvertOp convert;             
+        public Delegate enumerate;           
+        // JSResolveOp or JSNewResolveOp
+        public Delegate resolve;
+        public JSConvertOp convert;
 
         // Optional members (may be null).
         public JSFinalizeOp finalize;            
@@ -75,8 +76,8 @@ namespace Spidermonkey {
             delProperty = JSAPI.DeletePropertyStub;
             getProperty = JSAPI.PropertyStub;
             setProperty = JSAPI.StrictPropertyStub;
-            enumerate = JSAPI.EnumerateStub;
-            resolve = JSAPI.ResolveStub;
+            enumerate = (JSEnumerateOp)JSAPI.EnumerateStub;
+            resolve = (JSResolveOp)JSAPI.ResolveStub;
             convert = JSAPI.ConvertStub;
             trace = JSAPI.GlobalObjectTraceHook;
         }
